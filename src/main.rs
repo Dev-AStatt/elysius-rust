@@ -48,6 +48,16 @@ impl olc::Application for ElysiusProgram {
 }
 
 impl ElysiusProgram {
+    pub fn new() -> Self {
+        ElysiusProgram {
+            sun: solar_object::SolarObject::new(),
+            tick_update: false,
+            accumulated_time: 0.0,
+            game_tick: 0,
+        }
+    }
+
+
     //We will run the game at a fixed 60 ticks per second
     fn update_current_tick(&mut self, e_time: &f32) {
             self.tick_update = false;
@@ -63,13 +73,10 @@ impl ElysiusProgram {
 
 
 fn main() {
-  let mut s_elysius = ElysiusProgram {
-      sun: solar_object::SolarObject::new(),
-      tick_update: false,
-      accumulated_time: 0.0,
-      game_tick: 0,
-  };
-  // Launches the program in 200x100 "pixels" screen, where each "pixel" is 4x4 pixel square,
-  // and starts the main game loop.
-  olc::start("Elysius", &mut s_elysius, 200, 100, 4, 4).unwrap();
+
+    let mut s_elysius = ElysiusProgram::new();
+        
+    // Launches the program in 200x100 "pixels" screen, where each "pixel" is 4x4 pixel square,
+    // and starts the main game loop.
+    olc::start("Elysius", &mut s_elysius, 200, 100, 4, 4).unwrap();
 }
