@@ -3,7 +3,6 @@ use crate::olc_pixel_game_engine as olc;
 
 mod solar_objects;
 
-
 pub struct ElysiusProgram {
     sun: solar_objects::SolarObject,
     tick_update: bool,
@@ -32,9 +31,8 @@ impl olc::Application for ElysiusProgram {
             self.sun.update_body_pos();
         }
 
-        //prints the solar object to the screen
-        olc::fill_circle(self.sun.solar_pos.0, self.sun.solar_pos.1, 4, olc::WHITE);
-        
+        //self.draw_solar_object();        
+        self.draw_solar_object_by_ref(&self.sun);
         olc::draw_string(0, 0, &self.game_tick.to_string(), olc::WHITE);
         Ok(())
     }
@@ -67,6 +65,17 @@ impl ElysiusProgram {
                 self.game_tick += 1;
                 self.tick_update = true;
             }
+    }
+
+
+//  0---------------------------0
+//  | Drawing Functions         |
+//  0---------------------------0
+    //function takes in the solar object to draw and then prints it into olc
+    pub fn draw_solar_object_by_ref(self: &Self, obj: &solar_objects::SolarObject) {
+        //prints the solar object to the screen
+        olc::fill_circle(obj.solar_pos.0, obj.solar_pos.1, 4, olc::WHITE);
+        
     }
 }
 
