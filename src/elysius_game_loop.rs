@@ -1,25 +1,11 @@
-extern crate olc_pixel_game_engine;
 use crate::olc_pixel_game_engine as olc;
 
 
-pub struct SolarObject {
-    pub solar_pos: (i32, i32),
-}
-
-impl SolarObject {
-    pub fn new() -> Self {
-        SolarObject {
-            solar_pos: (20,20),
-        }
-    }
-    pub fn update_body_pos(&mut self) {
-        self.solar_pos.0 += 1;
-    }
-}
+mod solar_objects;
 
 
 pub struct ElysiusProgram {
-    sun: SolarObject,
+    sun: solar_objects::SolarObject,
     tick_update: bool,
     accumulated_time: f32,
     game_tick: i32,
@@ -63,7 +49,7 @@ impl olc::Application for ElysiusProgram {
 impl ElysiusProgram {
     pub fn new() -> Self {
         ElysiusProgram {
-            sun: SolarObject::new(),
+            sun: solar_objects::SolarObject::new(),
             tick_update: false,
             accumulated_time: 0.0,
             game_tick: 0,
