@@ -2,26 +2,11 @@ extern crate olc_pixel_game_engine;
 
 use crate::olc_pixel_game_engine as olc;
 
-struct SolarObject {
-    solar_pos: olc::Vi2d,
-
-
-}
-
-impl SolarObject {
-    fn new() -> Self {
-        SolarObject {
-            solar_pos: olc::Vi2d::new(20,20),
-        }
-    }
-    fn update_body_pos(&mut self) {
-        self.solar_pos.x += 1;
-    }
-}
+mod solar_object;
 
 
 struct ElysiusProgram {
-    sun: SolarObject,
+    sun: solar_object::SolarObject,
     tick_update: bool,
     accumulated_time: f32,
     game_tick: i32,
@@ -49,7 +34,7 @@ impl olc::Application for ElysiusProgram {
         }
 
         //prints the solar object to the screen
-        olc::fill_circle(self.sun.solar_pos.x, self.sun.solar_pos.y, 4, olc::WHITE);
+        olc::fill_circle(self.sun.solar_pos.0, self.sun.solar_pos.1, 4, olc::WHITE);
         
         olc::draw_string(0, 0, &self.game_tick.to_string(), olc::WHITE);
         Ok(())
@@ -79,7 +64,7 @@ impl ElysiusProgram {
 
 fn main() {
   let mut s_elysius = ElysiusProgram {
-      sun: SolarObject::new(),
+      sun: solar_object::SolarObject::new(),
       tick_update: false,
       accumulated_time: 0.0,
       game_tick: 0,
