@@ -4,7 +4,7 @@ use crate::olc_pixel_game_engine as olc;
 mod solar_objects;
 
 pub struct ElysiusProgram {
-    sun: solar_objects::SolarObject,
+    system_1: solar_objects::SolarSystem,
     tick_update: bool,
     accumulated_time: f32,
     game_tick: i32,
@@ -28,11 +28,19 @@ impl olc::Application for ElysiusProgram {
         self.update_current_tick(&_elapsed_time);
 
         if self.tick_update {
-            self.sun.update_body_pos();
+            //Use this to update the solar system positions 
+            //self.sun.update_body_pos();
         }
 
-        //self.draw_solar_object();        
-        self.draw_solar_object_by_ref(&self.sun);
+        //Draw Solar System
+        self.draw_solar_object_by_ref(&self.system_1.sun);
+        for n in 0..self.system_1.numb_of_bodies() {
+            self.draw_solar_object_by_ref(&self.system_1.orbiting_bodies[n as usize])
+        }
+        
+        
+
+        //self.draw_solar_object_by_ref(&self.system_1);
         olc::draw_string(0, 0, &self.game_tick.to_string(), olc::WHITE);
         Ok(())
     }
@@ -47,7 +55,7 @@ impl olc::Application for ElysiusProgram {
 impl ElysiusProgram {
     pub fn new() -> Self {
         ElysiusProgram {
-            sun: solar_objects::SolarObject::new(),
+            system_1: solar_objects::SolarSystem::new((5,5)),
             tick_update: false,
             accumulated_time: 0.0,
             game_tick: 0,
@@ -72,10 +80,10 @@ impl ElysiusProgram {
 //  | Drawing Functions         |
 //  0---------------------------0
     //function takes in the solar object to draw and then prints it into olc
-    pub fn draw_solar_object_by_ref(self: &Self, obj: &solar_objects::SolarObject) {
-        //prints the solar object to the screen
-        olc::fill_circle(obj.solar_pos.0, obj.solar_pos.1, 4, olc::WHITE);
-        
+    fn draw_solar_object_by_ref(self: &Self, obj: &solar_objects::SolarObject) {
+        //create a olc::Pixel from the rgb touple stored in solar object
+        let col = olc::Pixel::rgb(obj.color.0, obj.color.1, obj.color.2);  
+        olc::fill_circle(obj.solar_pos.0, obj.solar_pos.1, obj.size, col);
     }
 }
 
