@@ -29,7 +29,7 @@ impl olc::Application for ElysiusProgram {
 
         if self.tick_update {
             //Use this to update the solar system positions 
-            //self.sun.update_body_pos();
+            self.system_1.update_bodies();
         }
 
         //Draw Solar System
