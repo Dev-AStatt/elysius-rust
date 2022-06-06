@@ -41,14 +41,17 @@ pub struct SolarObject {
 impl SolarObject {
     //Function input (r,g,b)
     pub fn new(orb_rad: i32,new_size: i32, col: (u8,u8,u8)) -> Self {
+        //calculate origin position, if sun fix position
+        let mut new_pos: (i32,i32);
+        if orb_rad == 0 {new_pos = (100, 50);}
+        else {new_pos = (100, orb_rad);}
         SolarObject {
             size: new_size,
             color: col,
             orbit_angle: 0,
             orbit_radius: orb_rad,
             moons: Vec::new(),
-            //Calculate position
-            solar_pos: (0,0),
+            solar_pos: new_pos,
         }
     }
     pub fn update_body_pos(&mut self) {
