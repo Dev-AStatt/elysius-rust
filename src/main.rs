@@ -6,6 +6,7 @@ type EntityIndex = usize;
 
 
 struct OrbitComponent {
+    orbiting_ent_id: usize,
     radius: i32,
     angle: i32,
 }
@@ -31,7 +32,7 @@ pub struct ElysiusProgram {
 
     //ECS
     entities: Vec<Option<Entity>>,
-    entities_ID: Vec<EntityIndex>,
+    entities_id: Vec<EntityIndex>,
 
 
     tick_update: bool,
@@ -47,8 +48,9 @@ impl olc::Application for ElysiusProgram {
     fn on_user_create(&mut self) -> Result<(), olc::Error> {
         // Mirrors `olcPixelGameEngine::onUserCreate`. Your code goes here.
         
-        self.make_new_planet(0, (100,50), 0, 4, (255,255,0));
-        self.make_new_planet(0, (100,25), 0, 2, (0,0,255));
+        self.make_new_sun(0, (100,50), 4, (255,255,0));
+        //in the future get orbiting id automatically
+        self.make_new_planet(0, 0,(100,25), 0, 2, (0,0,255));
         
         Ok(())
     }
@@ -63,7 +65,7 @@ impl olc::Application for ElysiusProgram {
            
         }
         //Draw ECS Ent
-        for i in 0..self.entities_ID.len() {
+        for i in 0..self.entities_id.len() {
             self.draw_solar_object_ecs(i);
         }
         
@@ -89,7 +91,7 @@ impl ElysiusProgram {
             accumulated_time: 0.0,
             game_tick: 0,
             entities: Vec::new(),
-            entities_ID: Vec::new(),
+            entities_id: Vec::new(),
         }
     }
 
@@ -106,10 +108,11 @@ impl ElysiusProgram {
     }
 
     //pass in all the setup to add a new orbital body into the data structure
-    fn make_new_planet(&mut self, n_sol_sys_id: i32, n_sol_pos: (i32,i32), n_orb_rad: i32, n_size: i32, n_color: (u8, u8, u8) ) {
-        //make our fist ECS thing
-        let new_ent = Entity {
+    //IF GIVEN NO ORBITAL RADIOUS IT IS SET AS NONE
+    fn make_new_planet(&mut self, n_sol_sys_id: i32, n_orbiting_id: usize, n_sol_pos: (i32,i32), n_orb_rad: i32, n_size: i32, n_color: (u8, u8, u8) ) {
+       let new_ent = Entity {
             orbit: Some(OrbitComponent {
+                orbiting_ent_id: n_orbiting_id,
                 radius: n_orb_rad,
                 angle: 0 }),
             draw_info: DrawingComponents {
@@ -119,12 +122,23 @@ impl ElysiusProgram {
             solar_system_id: n_sol_sys_id,
         };
         self.entities.push(Some(new_ent));
-        self.entities_ID.push(self.entities_ID.len());
-
-        //end of ecs thing
-
+        self.entities_id.push(self.entities_id.len());
     }
-    
+
+    fn make_new_sun(&mut self, n_sol_sys_id: i32, n_sol_pos: (i32,i32), n_size: i32, n_color: (u8, u8, u8) ) {
+        let new_ent = Entity {
+             orbit: None,
+             draw_info: DrawingComponents {
+                 circle_size: n_size, 
+                 color: n_color},
+             solar_pos: n_sol_pos,
+             solar_system_id: n_sol_sys_id,
+         };
+         self.entities.push(Some(new_ent));
+         self.entities_id.push(self.entities_id.len());
+     }
+
+
 //  0---------------------------0
 //  | Drawing Functions         |
 //  0---------------------------0
