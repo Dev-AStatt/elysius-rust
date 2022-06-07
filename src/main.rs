@@ -19,6 +19,7 @@ struct Entity {
     orbit: Option<OrbitComponent>,
     draw_info: DrawingComponents,
     solar_pos: (i32,i32),
+    solar_system_id: i32,
 }
 
 // 0------------End of ECS System---------------0
@@ -46,45 +47,25 @@ impl olc::Application for ElysiusProgram {
     fn on_user_create(&mut self) -> Result<(), olc::Error> {
         // Mirrors `olcPixelGameEngine::onUserCreate`. Your code goes here.
         
-
-        //make our fist ECS thing
-        let new_ent = Entity {
-            orbit: Some(OrbitComponent {
-                radius: 5,
-                 angle: 0 }),
-            draw_info: DrawingComponents {
-                circle_size: 5, 
-                color: (255,255,0)},
-            solar_pos: (100,50),
-        };
-        self.entities.push(Some(new_ent));
-        self.entities_ID.push(0);
-
-        //end of ecs thing
-
-
+        self.make_new_planet(0, (100,50), 0, 4, (255,255,0));
+        self.make_new_planet(0, (100,25), 0, 2, (0,0,255));
+        
         Ok(())
     }
 
     fn on_user_update(&mut self, _elapsed_time: f32) -> Result<(), olc::Error> {
-        // Mirrors `olcPixelGameEngine::onUserUpdate`. Your code goes here.
-
         // Clears screen and sets black colour.
         olc::clear(olc::BLACK);
         
         self.update_current_tick(&_elapsed_time);
-
         if self.tick_update {
             //Use this to update the solar system positions 
-            //self.system_1.update_bodies();
+           
         }
-
-   
-
         //Draw ECS Ent
-        self.draw_solar_object_ecs(0);
-
-        
+        for i in 0..self.entities_ID.len() {
+            self.draw_solar_object_ecs(i);
+        }
         
 
         //self.draw_solar_object_by_ref(&self.system_1);
@@ -124,6 +105,26 @@ impl ElysiusProgram {
             }
     }
 
+    //pass in all the setup to add a new orbital body into the data structure
+    fn make_new_planet(&mut self, n_sol_sys_id: i32, n_sol_pos: (i32,i32), n_orb_rad: i32, n_size: i32, n_color: (u8, u8, u8) ) {
+        //make our fist ECS thing
+        let new_ent = Entity {
+            orbit: Some(OrbitComponent {
+                radius: n_orb_rad,
+                angle: 0 }),
+            draw_info: DrawingComponents {
+                circle_size: n_size, 
+                color: n_color},
+            solar_pos: n_sol_pos,
+            solar_system_id: n_sol_sys_id,
+        };
+        self.entities.push(Some(new_ent));
+        self.entities_ID.push(self.entities_ID.len());
+
+        //end of ecs thing
+
+    }
+    
 //  0---------------------------0
 //  | Drawing Functions         |
 //  0---------------------------0
