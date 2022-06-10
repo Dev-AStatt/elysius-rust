@@ -8,3 +8,6 @@ edition = "2021"
 [dependencies]
 ggez = "0.8.0-rc0"
 glam = "0.20"
+
+[profile.dev]
+opt-level = 1
