@@ -1,173 +1,114 @@
-extern crate olc_pixel_game_engine;
-use crate::olc_pixel_game_engine as olc;
+//! The simplest possible example that does something.
+#![allow(clippy::unnecessary_wraps)]
 
-// 0------------Start of ECS System---------------0
-type EntityIndex = usize;
+use ggez::{
+    event,
+    graphics::{self, Color},
+    Context, GameResult,
+};
+use glam::*;
+use std::{env, path};
 
-
-struct OrbitComponent {
-    orbiting_ent_id: usize,
-    radius: i32,
-    angle: i32,
-}
-struct DrawingComponents {
-    circle_size: i32,
-    color: (u8,u8,u8),
-}
+//GLOBAL VALUE for screen size
+const SCREEN_SIZE: (f32, f32) = (1024 as f32,1024 as f32);
 
 
-struct Entity {
-    orbit: Option<OrbitComponent>,
-    draw_info: DrawingComponents,
-    solar_pos: (i32,i32),
-    solar_system_id: i32,
+struct sprite_info {
+    sprite: graphics::Image,
+    image_size: (i32, i32),
 }
 
-// 0------------End of ECS System---------------0
+//
+//  To add a sprite, add a new item into MainState Struct pointing to graphics::Image
+//  Then load the texture in the new() impl of MainState. Call it with the draw function. 
+//
 
-
-pub struct ElysiusProgram {
-    //Old stuff for OOP Solar System
-    //system_1: solar_objects::SolarSystem,
-
-    //ECS
-    entities: Vec<Option<Entity>>,
-    entities_id: Vec<EntityIndex>,
-
-
-    tick_update: bool,
-    accumulated_time: f32,
-    game_tick: i32,
-
+struct MainState {
+    pos_x: f32,
+    sun_image: graphics::Image,
+    sun_image_1: sprite_info,
+    
 }
 
-impl olc::Application for ElysiusProgram {
+impl MainState {
+    fn new(ctx: &mut Context) -> GameResult<MainState> {
 
-// 0------------ONE LONE CODER IMPLIMENTATION---------------0
-
-    fn on_user_create(&mut self) -> Result<(), olc::Error> {
-        // Mirrors `olcPixelGameEngine::onUserCreate`. Your code goes here.
+        //Loading Sprites
         
-        self.make_new_sun(0, (100,50), 4, (255,255,0));
-        //in the future get orbiting id automatically
-        self.make_new_planet(0, 0,(100,25), 0, 2, (0,0,255));
-        
+        let sun_image = graphics::Image::from_path(ctx, "/Sprite-SUN_01.png", true)?;
+        let sun_image_1 = sprite_info {
+            sprite: graphics::Image::from_path(ctx, "/Sprite-SUN_01.png", true)?,
+            image_size: (128,128) };
+
+    
+
+        Ok(MainState {
+            sun_image,
+            sun_image_1,
+            pos_x: 0.0,
+            })
+    }
+}
+
+impl event::EventHandler<ggez::GameError> for MainState {
+    fn update(&mut self, _ctx: &mut Context) -> GameResult {
+        self.pos_x = self.pos_x % 800.0 + 1.0;
         Ok(())
     }
 
-    fn on_user_update(&mut self, _elapsed_time: f32) -> Result<(), olc::Error> {
-        // Clears screen and sets black colour.
-        olc::clear(olc::BLACK);
-        
-        self.update_current_tick(&_elapsed_time);
-        if self.tick_update {
-            //Use this to update the solar system positions 
-           
-        }
-        //Draw ECS Ent
-        for i in 0..self.entities_id.len() {
-            self.draw_solar_object_ecs(i);
-        }
-        
+    fn draw(&mut self, ctx: &mut Context) -> GameResult {
+        let mut canvas = graphics::Canvas::from_frame(
+            ctx,
+            graphics::CanvasLoadOp::Clear([0.2, 0.2, 0.2, 1.0].into()),
+        );
 
-        //self.draw_solar_object_by_ref(&self.system_1);
-        olc::draw_string(0, 0, &self.game_tick.to_string(), olc::WHITE);
+        //Drawing Sprite
+        let dst = glam::Vec2::new(20.0, 20.0);
+        let scale = glam::Vec2::new(0.5, 0.5);
+        canvas.draw(&self.sun_image,
+            graphics::DrawParam::new()
+                .dest(dst)
+                .scale(scale)
+            );
+
+        let dst = glam::Vec2::new(400.0, 400.0);
+        let scale = glam::Vec2::new(1.0, 1.0);
+        canvas.draw(&self.sun_image_1.sprite,
+            graphics::DrawParam::new()
+                .dest(dst)
+                .scale(scale)
+            );
+
+
+        canvas.finish(ctx)?;
+
         Ok(())
     }
-
-    fn on_user_destroy(&mut self) -> Result<(), olc::Error> {
-        // Mirrors `olcPixelGameEngine::onUserDestroy`. Your code goes here.
-        Ok(())
-    }
-
 }
 
-// 0------------ELYSIUS FUNCTIONS---------------0
-impl ElysiusProgram {
-    pub fn new() -> Self {
-        ElysiusProgram {
-            //system_1: solar_objects::SolarSystem::new((5,5)),
-            tick_update: false,
-            accumulated_time: 0.0,
-            game_tick: 0,
-            entities: Vec::new(),
-            entities_id: Vec::new(),
-        }
-    }
-
-    //We will run the game at a fixed 60 ticks per second
-    fn update_current_tick(&mut self, e_time: &f32) {
-            self.tick_update = false;
-            self.accumulated_time += e_time; 
-            //if we have accumulated 1/60th of a second, increase the tick
-            if self.accumulated_time > 0.016 {
-                self.accumulated_time = 0.0;
-                self.game_tick += 1;
-                self.tick_update = true;
-            }
-    }
-
-    //pass in all the setup to add a new orbital body into the data structure
-    //IF GIVEN NO ORBITAL RADIOUS IT IS SET AS NONE
-    fn make_new_planet(&mut self, n_sol_sys_id: i32, n_orbiting_id: usize, n_sol_pos: (i32,i32), n_orb_rad: i32, n_size: i32, n_color: (u8, u8, u8) ) {
-       let new_ent = Entity {
-            orbit: Some(OrbitComponent {
-                orbiting_ent_id: n_orbiting_id,
-                radius: n_orb_rad,
-                angle: 0 }),
-            draw_info: DrawingComponents {
-                circle_size: n_size, 
-                color: n_color},
-            solar_pos: n_sol_pos,
-            solar_system_id: n_sol_sys_id,
-        };
-        self.entities.push(Some(new_ent));
-        self.entities_id.push(self.entities_id.len());
-    }
-
-    fn make_new_sun(&mut self, n_sol_sys_id: i32, n_sol_pos: (i32,i32), n_size: i32, n_color: (u8, u8, u8) ) {
-        let new_ent = Entity {
-             orbit: None,
-             draw_info: DrawingComponents {
-                 circle_size: n_size, 
-                 color: n_color},
-             solar_pos: n_sol_pos,
-             solar_system_id: n_sol_sys_id,
-         };
-         self.entities.push(Some(new_ent));
-         self.entities_id.push(self.entities_id.len());
-     }
+pub fn main() -> GameResult {
+    //added in to add resources dir
+    let resource_dir = if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
+        let mut path = path::PathBuf::from(manifest_dir);
+        path.push("resources");
+        path
+    } else {
+        path::PathBuf::from("./resources")
+    };
+    //End of Resource Directory Stuff
 
 
-//  0---------------------------0
-//  | Drawing Functions         |
-//  0---------------------------0
- 
-    //Clunky way of trying to figure out drawing with this model
-    fn draw_solar_object_ecs(self: &Self, ent_id: usize) {
-        //Check if entities at given id is not None
-        match self.entities[ent_id]  {
-            None => return,
-            Some(ref ent) => {      //if valid, set ent to a reference to self.entities[ent_id]
-                //Set col to be an OLC pixel color of 
-                let col = olc::Pixel::rgb(ent.draw_info.color.0, ent.draw_info.color.1,ent.draw_info.color.2);
-                olc::fill_circle(ent.solar_pos.0, ent.solar_pos.1, ent.draw_info.circle_size, col)
-                    
-            }
-        }
-    }  
-}
+    let cb = ggez::ContextBuilder::new("super_simple", "ggez")
+        //Tell context builder where to find the resources for our game
+        .add_resource_path(resource_dir)
+        // Next we set up the window. This title will be displayed in the title bar of the window.
+        .window_setup(ggez::conf::WindowSetup::default().title("super_simple"))
+        // Now we get to set the size of the window, which we use our SCREEN_SIZE constant from earlier to help with
+        .window_mode(ggez::conf::WindowMode::default().dimensions(SCREEN_SIZE.0, SCREEN_SIZE.1));
 
-
-//  0---------------------------------------------------------------------------------0
-//  | MAIN FUNCTION                                                                   |
-//  0---------------------------------------------------------------------------------0
-
-fn main() {
-
-    let mut s_elysius = ElysiusProgram::new();
-        
-    // Launches the program in 200x100 "pixels" screen, where each "pixel" is 4x4 pixel square,
-    // and starts the main game loop.
-    olc::start("Elysius", &mut s_elysius, 200, 100, 4, 4).unwrap();
+    // And finally we attempt to build the context and create the window. If it fails, we panic with the message
+    // "Failed to build ggez context"
+    let (mut ctx, event_loop) = cb.build()?;
+    let state = MainState::new(&mut ctx)?;
+    event::run(ctx, event_loop, state)
 }
