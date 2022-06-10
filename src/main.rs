@@ -28,6 +28,7 @@ struct ElysiusMainState {
     entities_id: Vec<ecs::EntityIndex>,
     first_time: bool,
     game_scale: glam::Vec2,
+    active_solar_system: i32,
  
 }
 
@@ -40,9 +41,9 @@ impl ElysiusMainState {
         //     sprite: graphics::Image::from_path(ctx, "/Sprite-SUN_01.png", true)?,
         //     image_size: (128,128) };
         let init_ent = ecs::Entities{
-            orbit: Vec::new(),
-            draw_info: Vec::new(),
-            solar_pos: Vec::new(),
+            orbit_comp: Vec::new(),
+            draw_comp: Vec::new(),
+            solar_pos_comp: Vec::new(),
             solar_system_id: Vec::new(),
         };
 
@@ -52,6 +53,7 @@ impl ElysiusMainState {
             entities_id: Vec::new(),
             first_time: true,
             game_scale: glam::Vec2::new(1.0,1.0),
+            active_solar_system: 0,
             })
     }
     
@@ -60,12 +62,12 @@ impl ElysiusMainState {
         self: &Self,
         canvas: &mut graphics::Canvas,
         ent_id: usize) {
-            let pos = glam::Vec2::new(self.entities.solar_pos[ent_id].0,
-                                      self.entities.solar_pos[ent_id].1
+            let pos = glam::Vec2::new(self.entities.solar_pos_comp[ent_id].0,
+                                      self.entities.solar_pos_comp[ent_id].1
             );
             //Draw Sprite
             canvas.draw(
-                &self.entities.draw_info[ent_id].sprite,
+                &self.entities.draw_comp[ent_id].sprite,
                 graphics::DrawParam::new().dest(pos).scale(self.game_scale)
             );
     }
@@ -87,14 +89,14 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                 &mut self.entities,
                 &mut self.entities_id,
                 sun_image,
-                0,                  //solar system ID
+                self.active_solar_system,                  //solar system ID
                 screen_center,      //solar position
             );
             ecs::make_new_planet(
                 &mut self.entities,
                 &mut self.entities_id,
                 planet_image,
-                0,                  //solar system ID
+                self.active_solar_system,                  //solar system ID
                 0,                  //orbiting ent ID
                 (100.0,200.0),          //solar position
                 300                 //orbiting radius
@@ -103,10 +105,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             self.first_time = false;
         }
 
-        ecs::update_orbital_body_positions(
-            &mut self.entities,
-            &mut self.entities_id,
-            0);
+        ecs::inc_orbital_body_pos(&mut self.entities, self.active_solar_system);
         
 
         Ok(())
