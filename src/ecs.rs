@@ -10,6 +10,7 @@ pub struct OrbitalComponent {
     pub orbiting_ent_id: usize,
     pub radius: i32,
     pub angle: f32,
+    
 }
 
 pub struct DrawingComponent {
@@ -91,6 +92,7 @@ pub fn make_new_planet(
         orbiting_ent_id: n_orbiting_ent_id,
         radius: n_orb_rad,
         angle: 25.0,
+        
     };
     //Push everything to ents
     ents.draw_comp.push(new_draw_comp);

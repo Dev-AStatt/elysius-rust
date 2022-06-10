@@ -52,7 +52,7 @@ impl ElysiusMainState {
             entities: init_ent,
             entities_id: Vec::new(),
             first_time: true,
-            game_scale: glam::Vec2::new(1.0,1.0),
+            game_scale: glam::Vec2::new(0.5,0.5),
             active_solar_system: 0,
             })
     }
