@@ -15,8 +15,6 @@ const SCREEN_SIZE: (f32, f32) = (1024.0 ,1024.0);
 
 mod ecs;
 
-
-
 //
 //  To add a sprite, add a new item into MainState Struct pointing to graphics::Image
 //  Then load the texture in the new() impl of MainState. Call it with the draw function. 
@@ -70,26 +68,6 @@ impl ElysiusMainState {
                 &self.entities.draw_info[ent_id].sprite,
                 graphics::DrawParam::new().dest(pos).scale(self.game_scale)
             );
-            
-
-
-        // //Check if entities at given id is not None
-        // match self.entities[ent_id]  {
-        //     None => return,
-        //     Some(ref ent) => {      //if valid, set ent to a reference to self.entities[ent_id]
-        //       //Calculate Position and Scale
-        //         let dst = glam::Vec2::new(ent.solar_pos.0, ent.solar_pos.1,);
-        //         
-        //         //Draw Sprite
-        //         canvas.draw(&ent.draw_info.sprite,
-        //             graphics::DrawParam::new()
-        //                 .dest(dst)
-        //                 .scale(scale)
-        //             ); 
-              
-                    
-        //     }
-        // }
     }
 
 }
@@ -119,11 +97,16 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                 0,                  //solar system ID
                 0,                  //orbiting ent ID
                 (100.0,200.0),          //solar position
-                100                 //orbiting radius
+                300                 //orbiting radius
             );
             //set the flag to not run this every tick.
             self.first_time = false;
         }
+
+        ecs::update_orbital_body_positions(
+            &mut self.entities,
+            &mut self.entities_id,
+            0);
         
 
         Ok(())
