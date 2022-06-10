@@ -1,5 +1,5 @@
 [package]
-name = "elysius-v01"
+name = "elysius-rust"
 version = "0.1.0"
 edition = "2021"
 
