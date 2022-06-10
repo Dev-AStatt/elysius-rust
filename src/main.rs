@@ -10,34 +10,11 @@ use glam::*;
 use std::{env, path};
 
 //GLOBAL VALUE for screen size
-const SCREEN_SIZE: (f32, f32) = (1024 as f32,1024 as f32);
+const SCREEN_SIZE: (f32, f32) = (1024.0 ,1024.0);
 
 
+mod ecs;
 
-// 0------------------Start of ECS Sstem---------------------------------------0
-type EntityIndex = usize;
-
-struct OrbitalComponent {
-    orbiting_ent_id: usize,
-    radius: i32,
-    angle: f32,
-}
-
-struct DrawingComponent {
-    sprite: graphics::Image,
-    image_size: (i32, i32),
-    
-}
-
-struct Entity {
-    orbit: Option<OrbitalComponent>,
-    draw_info: DrawingComponent,
-    solar_pos: (i32, i32),
-    solar_system_id: i32,
-}
-
-
-// 0--------------------End of ECS Sstem---------------------------------------0
 
 
 //
@@ -49,9 +26,10 @@ struct Entity {
 struct ElysiusMainState {
     
     //ECS
-    entities: Vec<Option<Entity>>,
-    entities_id: Vec<EntityIndex>,
+    entities: ecs::Entities,
+    entities_id: Vec<ecs::EntityIndex>,
     first_time: bool,
+    game_scale: glam::Vec2,
  
 }
 
@@ -63,70 +41,55 @@ impl ElysiusMainState {
         // let test_sun_image = DrawingComponent {
         //     sprite: graphics::Image::from_path(ctx, "/Sprite-SUN_01.png", true)?,
         //     image_size: (128,128) };
+        let init_ent = ecs::Entities{
+            orbit: Vec::new(),
+            draw_info: Vec::new(),
+            solar_pos: Vec::new(),
+            solar_system_id: Vec::new(),
+        };
+
+
         Ok(ElysiusMainState {
-            entities: Vec::new(),
+            entities: init_ent,
             entities_id: Vec::new(),
             first_time: true,
+            game_scale: glam::Vec2::new(1.0,1.0),
             })
     }
     
-    fn make_new_sun(&mut self, n_sol_sys_id: i32, n_sol_pos: (i32 ,i32), 
-    n_sprite: graphics::Image) {
-    
-        let new_ent = Entity {
-            orbit: None,
-            draw_info: DrawingComponent {
-                sprite: n_sprite,
-                image_size: (128,128)  },
-            solar_pos: n_sol_pos,
-            solar_system_id: n_sol_sys_id,
-        };
-        self.entities.push(Some(new_ent));
-        self.entities_id.push(self.entities_id.len());
-    }
-
-    //pass in all the setup to add a new orbital body into the data structure
-    //IF GIVEN NO ORBITAL RADIOUS IT IS SET AS NONE
-    fn make_new_planet(&mut self, n_sol_sys_id: i32, n_orbiting_id: usize,
-        n_sol_pos: (i32,i32), n_orb_rad: i32, n_sprite: graphics::Image) {
-       //make a new entity
-       let new_ent = Entity {
-            orbit: Some(OrbitalComponent {
-                orbiting_ent_id: n_orbiting_id,
-                radius: n_orb_rad,
-                angle: 0.0             }),
-            draw_info: DrawingComponent {
-                sprite: n_sprite,
-                image_size: (128,128)  },
-            solar_pos: n_sol_pos,
-            solar_system_id: n_sol_sys_id,
-        };
-        //push into entities vector
-        self.entities.push(Some(new_ent));
-        self.entities_id.push(self.entities_id.len());
-    }
-
+    //Draw function for solar objects
     fn draw_solar_object_ecs(
         self: &Self,
         canvas: &mut graphics::Canvas,
         ent_id: usize) {
-        //Check if entities at given id is not None
-        match self.entities[ent_id]  {
-            None => return,
-            Some(ref ent) => {      //if valid, set ent to a reference to self.entities[ent_id]
-              //Calculate Position and Scale
-                let dst = glam::Vec2::new(ent.solar_pos.0 as f32, ent.solar_pos.1 as f32);
-                let scale = glam::Vec2::new(1.0, 1.0);
-                //Draw Sprite
-                canvas.draw(&ent.draw_info.sprite,
-                    graphics::DrawParam::new()
-                        .dest(dst)
-                        .scale(scale)
-                    ); 
+            let pos = glam::Vec2::new(self.entities.solar_pos[ent_id].0,
+                                      self.entities.solar_pos[ent_id].1
+            );
+            //Draw Sprite
+            canvas.draw(
+                &self.entities.draw_info[ent_id].sprite,
+                graphics::DrawParam::new().dest(pos).scale(self.game_scale)
+            );
+            
+
+
+        // //Check if entities at given id is not None
+        // match self.entities[ent_id]  {
+        //     None => return,
+        //     Some(ref ent) => {      //if valid, set ent to a reference to self.entities[ent_id]
+        //       //Calculate Position and Scale
+        //         let dst = glam::Vec2::new(ent.solar_pos.0, ent.solar_pos.1,);
+        //         
+        //         //Draw Sprite
+        //         canvas.draw(&ent.draw_info.sprite,
+        //             graphics::DrawParam::new()
+        //                 .dest(dst)
+        //                 .scale(scale)
+        //             ); 
               
                     
-            }
-        }
+        //     }
+        // }
     }
 
 }
@@ -140,10 +103,24 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             let sun_image = graphics::Image::from_path(_ctx, "/Sprite-SUN_01.png", true)?;
             let planet_image = graphics::Image::from_path(_ctx, "/Sprite-Planet_01.png", true)?;
             //Calc the center of the screen
-            let screen_center = (SCREEN_SIZE.0 as i32 / 2, SCREEN_SIZE.1 as i32 / 2);
+            let screen_center = (SCREEN_SIZE.0 / 2.0, SCREEN_SIZE.1 / 2.0);
 
-            self.make_new_sun(0, screen_center, sun_image);
-            self.make_new_planet(0, 0, (100,25), 100, planet_image);
+            ecs::make_new_sun(
+                &mut self.entities,
+                &mut self.entities_id,
+                sun_image,
+                0,                  //solar system ID
+                screen_center,      //solar position
+            );
+            ecs::make_new_planet(
+                &mut self.entities,
+                &mut self.entities_id,
+                planet_image,
+                0,                  //solar system ID
+                0,                  //orbiting ent ID
+                (100.0,200.0),          //solar position
+                100                 //orbiting radius
+            );
             //set the flag to not run this every tick.
             self.first_time = false;
         }
