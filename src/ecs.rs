@@ -90,7 +90,7 @@ pub fn make_new_planet(
     let new_orbit = OrbitalComponent {
         orbiting_ent_id: n_orbiting_ent_id,
         radius: n_orb_rad,
-        angle: 0.0,
+        angle: 25.0,
     };
     //Push everything to ents
     entities.draw_info.push(new_draw_comp);
@@ -98,6 +98,39 @@ pub fn make_new_planet(
     entities.solar_pos.push(n_sol_pos);
     entities.solar_system_id.push(n_sol_sys_id);
     //Create a new entity ID
-    entities_id.push(entities_id.len());
-     
+    entities_id.push(entities_id.len());    
+}
+//Function will itterate through the active entities in solar system
+//and update position
+pub fn update_orbital_body_positions(
+    ents: &mut Entities,
+    ents_id: &mut Vec<EntityIndex>,
+    system_id: i32,
+) {
+    for i in 0..ents.solar_system_id.len() {
+        if ents.solar_system_id[i] == system_id {
+            match ents.orbit[i] {
+                None => {}
+                Some(ref mut orb) => {
+                    //increment angle
+                    let adjustment = 0.1;
+                    let mut new_angle = orb.angle + adjustment;
+                    if new_angle > 360.0 {new_angle = new_angle - 360.0;}
+                    orb.angle = new_angle;
+
+
+                    //calculate new position
+                    let unitx = (orb.angle * 3.14 / 180.0).sin();
+                    let unity = (orb.angle * 3.14 / 180.0).cos();
+                    let x = unitx * orb.radius as f32;
+                    let y = unity * orb.radius as f32;
+                    //give new position to ent
+                    ents.solar_pos[i].0 = x + ents.solar_pos[orb.orbiting_ent_id].0;
+                    ents.solar_pos[i].1 = y + ents.solar_pos[orb.orbiting_ent_id].1;
+                    
+                }
+            }
+            //update position of body
+        }
+    }
 }
