@@ -103,18 +103,17 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                 &mut self.entities,
                 &mut self.entities_id,
                 sun_image,
-                self.active_solar_system,                  //solar system ID
-                (0.0,0.0),      //solar position
+                self.active_solar_system,                   //solar system ID
+                (0.0,0.0),                                  //solar position
             );
             ecs::make_new_orbiting_body(
                 &mut self.entities,
                 &mut self.entities_id,
                 &_ctx,
                 planet_image,
-                self.active_solar_system,                  //solar system ID
-                0,                  //orbiting ent ID
-                (100.0,200.0),          //solar position
-                300                 //orbiting radius
+                self.active_solar_system,                   //solar system ID
+                0,                                          //orbiting ent ID
+                300                                         //orbiting radius
             );
             //set the flag to not run this every tick.
             self.first_time = false;
