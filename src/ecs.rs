@@ -82,31 +82,31 @@ pub fn make_new_orbiting_body(
     n_sprite: graphics::Image,
     n_sol_sys_id: i32,
     n_orbiting_ent_id: usize,
-    n_sol_pos: (f32,f32),
     n_orb_rad: i32,
     ) {
 
     //Verify that we are pushing the right numbers
     if ents.verify_vector_lengths() != entities_id.len() { return; }  
     
-    //calc destination of orbital ring
-    let dest = ents.solar_pos_comp[n_orbiting_ent_id];
     //get a new meshbuilder to make our circle
     let mb = &mut graphics::MeshBuilder::new();
     //get our new circle
     mb.circle(graphics::DrawMode::stroke(1.0),
-        vec2(dest.0,dest.1),
+        vec2(0.0,0.0), //dest.0,dest.1
         n_orb_rad as f32,
         2.0,
         graphics::Color::WHITE).expect("ecs new planet mesh error");
 
     let orbit_circle = graphics::Mesh::from_data(current_ctx, mb.build());
 
+    let sprite_width = n_sprite.width().try_into().unwrap();
+    let sprite_height = n_sprite.height().try_into().unwrap();
     //Drawing
     let new_draw_comp = DrawingComponent{
         sprite: n_sprite,
-        image_size: (128,128),
-        sprite_offset: (64.0,64.0), };
+        image_size: (sprite_width,sprite_height),
+        sprite_offset: (sprite_width as f32 / 2.0, sprite_height as f32 / 2.0)
+    };
     //Orbit
     let new_orbit = OrbitalComponent {
         orbiting_ent_id: n_orbiting_ent_id,
@@ -114,6 +114,11 @@ pub fn make_new_orbiting_body(
         angle: 25.0,
         orbit_circle,
     };
+    let n_sol_pos = (
+        ents.solar_pos_comp[n_orbiting_ent_id].0,
+        ents.solar_pos_comp[n_orbiting_ent_id].1 + n_orb_rad as f32
+    );
+
     //Push everything to ents
     ents.draw_comp.push(new_draw_comp);
     ents.orbit_comp.push(Some(new_orbit));
