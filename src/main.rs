@@ -10,14 +10,10 @@ use std::{env, path};
 
 //GLOBAL VALUE for screen size
 const SCREEN_SIZE: (f32, f32) = (1024.0 ,1024.0);
+const SCREEN_OFFSET: (f32, f32) = (512.0, 512.0);
 
 
 mod ecs;
-
-//
-//  To add a sprite, add a new item into MainState Struct pointing to graphics::Image
-//  Then load the texture in the new() impl of MainState. Call it with the draw function. 
-//
 
 //MAIN GAME STRUCT
 struct ElysiusMainState {
@@ -29,23 +25,16 @@ struct ElysiusMainState {
     active_solar_system: i32,
 }
 
-
 impl ElysiusMainState {
     fn new(_ctx: &mut Context) -> GameResult<ElysiusMainState> {
         //This is where you can put stuff that needs to be pre-calculated
-        // //Loading Sprites
-        // let test_sun_image = DrawingComponent {
-        //     sprite: graphics::Image::from_path(ctx, "/Sprite-SUN_01.png", true)?,
-        //     image_size: (128,128) };
+
         let init_ent = ecs::Entities{
             orbit_comp: Vec::new(),
             draw_comp: Vec::new(),
             solar_pos_comp: Vec::new(),
             solar_system_id: Vec::new(),
         };
-
-        
-
 
         Ok(ElysiusMainState {
             entities: init_ent,
@@ -60,27 +49,41 @@ impl ElysiusMainState {
     fn draw_solar_object_ecs(
         self: &Self,
         canvas: &mut graphics::Canvas,
-        ent_id: usize) {
-            
-            //Draw Orbit Circle 
-            match &self.entities.orbit_comp[ent_id] {
-                None => {}
-                Some(ref orb) => { 
-                    //Vec::new(0.0) is an offset that you can do on draw.
-                    canvas.draw(&orb.orbit_circle, Vec2::new(0.0,0.0));    
-                }
+        ent_id: usize
+    ) {
+
+        //Orbit Circle Component
+        match &self.entities.orbit_comp[ent_id] {
+            None => {}
+            Some(ref orb) => { 
+                let circle_pos = glam::Vec2::new(
+                    self.entities.solar_pos_comp[orb.orbiting_ent_id].0 + SCREEN_OFFSET.0,
+                    self.entities.solar_pos_comp[orb.orbiting_ent_id].1 + SCREEN_OFFSET.1 
+                );
+                canvas.draw(&orb.orbit_circle, 
+                    graphics::DrawParam::new()
+                        .scale(self.game_scale)
+                        .dest(circle_pos)
+                );    
             }
-            //Draw Sprite
-            let final_sprite_pos = glam::Vec2::new(
-                self.entities.solar_pos_comp[ent_id].0 - self.entities.draw_comp[ent_id].sprite_offset.0,
-                self.entities.solar_pos_comp[ent_id].1 - self.entities.draw_comp[ent_id].sprite_offset.1
-            );
-            canvas.draw(
-                &self.entities.draw_comp[ent_id].sprite,
-                graphics::DrawParam::new()
-                    .dest(final_sprite_pos)
-                    .scale(self.game_scale)
-            );
+        }
+        //Object Sprite Component
+        let sprite_pos = glam::Vec2::new(
+            self.entities.solar_pos_comp[ent_id].0 * self.game_scale.x,
+            self.entities.solar_pos_comp[ent_id].1 * self.game_scale.y
+        );
+        let disp_adj = glam::Vec2::new(
+            SCREEN_OFFSET.0 - (self.entities.draw_comp[ent_id].sprite_offset.0 * self.game_scale.y),
+            SCREEN_OFFSET.1 - (self.entities.draw_comp[ent_id].sprite_offset.1 * self.game_scale.y),
+        );
+        let final_pos = sprite_pos + disp_adj;
+        //Draw the sprite
+        canvas.draw(
+            &self.entities.draw_comp[ent_id].sprite,
+            graphics::DrawParam::new()
+                .dest(final_pos)
+                .scale(self.game_scale)
+        );
     }
 
 }
@@ -94,14 +97,14 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             let sun_image = graphics::Image::from_path(_ctx, "/Sprite-SUN_01.png", true)?;
             let planet_image = graphics::Image::from_path(_ctx, "/Sprite-Planet_01.png", true)?;
             //Calc the center of the screen
-            let screen_center = (SCREEN_SIZE.0 / 2.0, SCREEN_SIZE.1 / 2.0);
+            
 
             ecs::make_new_sun(
                 &mut self.entities,
                 &mut self.entities_id,
                 sun_image,
                 self.active_solar_system,                  //solar system ID
-                screen_center,      //solar position
+                (0.0,0.0),      //solar position
             );
             ecs::make_new_planet(
                 &mut self.entities,
