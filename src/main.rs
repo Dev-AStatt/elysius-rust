@@ -1,9 +1,8 @@
-//! The simplest possible example that does something.
 #![allow(clippy::unnecessary_wraps)]
 
 use ggez::{
     event,
-    graphics::{self, Color},
+    graphics::{self},
     Context, GameResult,
 };
 use glam::*;
@@ -22,19 +21,17 @@ mod ecs;
 
 //MAIN GAME STRUCT
 struct ElysiusMainState {
-    
     //ECS
     entities: ecs::Entities,
     entities_id: Vec<ecs::EntityIndex>,
     first_time: bool,
     game_scale: glam::Vec2,
     active_solar_system: i32,
- 
 }
 
 
 impl ElysiusMainState {
-    fn new(ctx: &mut Context) -> GameResult<ElysiusMainState> {
+    fn new(_ctx: &mut Context) -> GameResult<ElysiusMainState> {
         //This is where you can put stuff that needs to be pre-calculated
         // //Loading Sprites
         // let test_sun_image = DrawingComponent {
@@ -47,6 +44,8 @@ impl ElysiusMainState {
             solar_system_id: Vec::new(),
         };
 
+        
+
 
         Ok(ElysiusMainState {
             entities: init_ent,
@@ -57,18 +56,30 @@ impl ElysiusMainState {
             })
     }
     
-    //Draw function for solar objects
+    //Draw function for solar objects and their rings
     fn draw_solar_object_ecs(
         self: &Self,
         canvas: &mut graphics::Canvas,
         ent_id: usize) {
-            let pos = glam::Vec2::new(self.entities.solar_pos_comp[ent_id].0,
-                                      self.entities.solar_pos_comp[ent_id].1
-            );
+            
+            //Draw Orbit Circle 
+            match &self.entities.orbit_comp[ent_id] {
+                None => {}
+                Some(ref orb) => { 
+                    //Vec::new(0.0) is an offset that you can do on draw.
+                    canvas.draw(&orb.orbit_circle, Vec2::new(0.0,0.0));    
+                }
+            }
             //Draw Sprite
+            let final_sprite_pos = glam::Vec2::new(
+                self.entities.solar_pos_comp[ent_id].0 - self.entities.draw_comp[ent_id].sprite_offset.0,
+                self.entities.solar_pos_comp[ent_id].1 - self.entities.draw_comp[ent_id].sprite_offset.1
+            );
             canvas.draw(
                 &self.entities.draw_comp[ent_id].sprite,
-                graphics::DrawParam::new().dest(pos).scale(self.game_scale)
+                graphics::DrawParam::new()
+                    .dest(final_sprite_pos)
+                    .scale(self.game_scale)
             );
     }
 
@@ -95,6 +106,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             ecs::make_new_planet(
                 &mut self.entities,
                 &mut self.entities_id,
+                &_ctx,
                 planet_image,
                 self.active_solar_system,                  //solar system ID
                 0,                  //orbiting ent ID
@@ -119,6 +131,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
 
          //Draw ECS Ent
          for i in 0..self.entities_id.len() {
+
             self.draw_solar_object_ecs(&mut canvas, i);
         }
         
