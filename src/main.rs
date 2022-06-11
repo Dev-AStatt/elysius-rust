@@ -56,10 +56,12 @@ impl ElysiusMainState {
         match &self.entities.orbit_comp[ent_id] {
             None => {}
             Some(ref orb) => { 
+                //get the final position of the circle
                 let circle_pos = glam::Vec2::new(
-                    self.entities.solar_pos_comp[orb.orbiting_ent_id].0 + SCREEN_OFFSET.0,
-                    self.entities.solar_pos_comp[orb.orbiting_ent_id].1 + SCREEN_OFFSET.1 
+                    (self.entities.solar_pos_comp[orb.orbiting_ent_id].0 * self.game_scale.x) + SCREEN_OFFSET.0,
+                    (self.entities.solar_pos_comp[orb.orbiting_ent_id].1 * self.game_scale.y) + SCREEN_OFFSET.1 
                 );
+                //Draw the circle
                 canvas.draw(&orb.orbit_circle, 
                     graphics::DrawParam::new()
                         .scale(self.game_scale)
@@ -73,7 +75,7 @@ impl ElysiusMainState {
             self.entities.solar_pos_comp[ent_id].1 * self.game_scale.y
         );
         let disp_adj = glam::Vec2::new(
-            SCREEN_OFFSET.0 - (self.entities.draw_comp[ent_id].sprite_offset.0 * self.game_scale.y),
+            SCREEN_OFFSET.0 - (self.entities.draw_comp[ent_id].sprite_offset.0 * self.game_scale.x),
             SCREEN_OFFSET.1 - (self.entities.draw_comp[ent_id].sprite_offset.1 * self.game_scale.y),
         );
         let final_pos = sprite_pos + disp_adj;
@@ -96,9 +98,10 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             //Load Textures
             let sun_image = graphics::Image::from_path(_ctx, "/Sprite-SUN_01.png", true)?;
             let planet_image = graphics::Image::from_path(_ctx, "/Sprite-Planet_01.png", true)?;
+            let moon_image = graphics::Image::from_path(_ctx, "/Sprite-Moon_01.png", true)?;
             //Calc the center of the screen
             
-
+            //First Sun
             ecs::make_new_sun(
                 &mut self.entities,
                 &mut self.entities_id,
@@ -106,6 +109,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                 self.active_solar_system,                   //solar system ID
                 (0.0,0.0),                                  //solar position
             );
+            //First Planet
             ecs::make_new_orbiting_body(
                 &mut self.entities,
                 &mut self.entities_id,
@@ -114,6 +118,16 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                 self.active_solar_system,                   //solar system ID
                 0,                                          //orbiting ent ID
                 300                                         //orbiting radius
+            );
+            //First Planet
+            ecs::make_new_orbiting_body(
+                &mut self.entities,
+                &mut self.entities_id,
+                &_ctx,
+                moon_image,
+                self.active_solar_system,                   //solar system ID
+                1,                                          //orbiting ent ID
+                100                                         //orbiting radius
             );
             //set the flag to not run this every tick.
             self.first_time = false;
@@ -133,10 +147,11 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
 
          //Draw ECS Ent
          for i in 0..self.entities_id.len() {
-
             self.draw_solar_object_ecs(&mut canvas, i);
         }
         
+
+
         //Concatinating strings is dumb
         let mut str = String::from("Tick: ");
         str.push_str(&ctx.time.ticks().to_string());
@@ -144,8 +159,6 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         canvas.draw(graphics::Text::new(str)
                     .set_scale(10.0),
                     glam::Vec2::new(0.0,0.0));
-
-
         //Draw the FPS counter
         ctx.gfx.set_window_title(&format!(
             "Elysius - {:.0} FPS", ctx.time.fps()));
