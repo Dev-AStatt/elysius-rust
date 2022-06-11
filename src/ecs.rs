@@ -75,7 +75,7 @@ pub fn make_new_sun(
 }
     
 //Function creates a new planet into the ECS system
-pub fn make_new_planet(
+pub fn make_new_orbiting_body(
     ents: &mut Entities,
     entities_id: &mut Vec<EntityIndex>,
     current_ctx: &Context,
@@ -113,8 +113,6 @@ pub fn make_new_planet(
         radius: n_orb_rad,
         angle: 25.0,
         orbit_circle,
-        
-        
     };
     //Push everything to ents
     ents.draw_comp.push(new_draw_comp);
@@ -124,6 +122,8 @@ pub fn make_new_planet(
     //Create a new entity ID
     entities_id.push(entities_id.len());    
 }
+
+
 //Function will itterate through the active entities in solar system
 //and update position
 pub fn inc_orbital_body_pos(

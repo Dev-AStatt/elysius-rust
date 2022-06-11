@@ -106,7 +106,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                 self.active_solar_system,                  //solar system ID
                 (0.0,0.0),      //solar position
             );
-            ecs::make_new_planet(
+            ecs::make_new_orbiting_body(
                 &mut self.entities,
                 &mut self.entities_id,
                 &_ctx,
