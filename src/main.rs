@@ -4,6 +4,7 @@ use ggez::{
     event,
     graphics::{self},
     Context, GameResult,
+    input::keyboard::{KeyCode, KeyInput},
 };
 use glam::*;
 use std::{env, path};
@@ -12,6 +13,12 @@ use std::{env, path};
 const SCREEN_SIZE: (f32, f32) = (1024.0 ,1024.0);
 const SCREEN_OFFSET: (f32, f32) = (512.0, 512.0);
 
+#[derive(PartialEq)]
+enum GameState {
+    running,
+    paused,
+    menu,
+}
 
 mod ecs;
 
@@ -23,6 +30,7 @@ struct ElysiusMainState {
     first_time: bool,
     game_scale: glam::Vec2,
     active_solar_system: i32,
+    current_game_state: GameState,
 }
 
 impl ElysiusMainState {
@@ -42,6 +50,7 @@ impl ElysiusMainState {
             first_time: true,
             game_scale: glam::Vec2::new(0.5,0.5),
             active_solar_system: 0,
+            current_game_state: GameState::running,
             })
     }
     
@@ -87,7 +96,6 @@ impl ElysiusMainState {
                 .scale(self.game_scale)
         );
     }
-
 }
 
 impl event::EventHandler<ggez::GameError> for ElysiusMainState {
@@ -133,7 +141,10 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             self.first_time = false;
         }
 
-        ecs::inc_orbital_body_pos(&mut self.entities, self.active_solar_system);
+        //GameState Running
+        if self.current_game_state == GameState::running {
+            ecs::inc_orbital_body_pos(&mut self.entities, self.active_solar_system);
+        }
         
 
         Ok(())
@@ -149,8 +160,6 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
          for i in 0..self.entities_id.len() {
             self.draw_solar_object_ecs(&mut canvas, i);
         }
-        
-
 
         //Concatinating strings is dumb
         let mut str = String::from("Tick: ");
@@ -164,13 +173,53 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             "Elysius - {:.0} FPS", ctx.time.fps()));
         
 
+
+
+
+
         //Nothing after this, pushes all the draws to the graphics card
         canvas.finish(ctx)?;
         Ok(())
     }
 
-    
+// 0---------------------INPUT EVENTS------------------------------------------0
+
+    //The ggez will call events automatically for key and mouse events. 
+    fn mouse_wheel_event(&mut self, _ctx: &mut Context, x: f32, y: f32) -> GameResult {
+        //test to make sure the game is not being zoomed out too far. 
+        if self.game_scale.x < 0.2 && y == -1.0 {}
+        else {
+            let new_scale = self.game_scale + (y * 0.1);
+            self.game_scale = new_scale;
+            //println!("GameScale: {}", self.game_scale);
+        }
+        Ok(())
+    }
+    //The ggez will call this automatically to capture key_up events
+    fn key_up_event(&mut self, _ctx: &mut Context, input: KeyInput) -> GameResult {
+        println!(
+            "Key released: scancode {}, keycode {:?}, modifier {:?}",
+            input.scancode, input.keycode, input.mods
+        );
+        //add keys in here for what we want to look for. 
+        match input.keycode {
+            Some(KeyCode::Space) => {
+                //If space, toggle the game state from play to pause
+                if self.current_game_state == GameState::paused {
+                        self.current_game_state = GameState::running;}
+                else if self.current_game_state == GameState::running {
+                    self.current_game_state = GameState::paused;}
+            }
+            _ => (), // Do nothing
+        }
+        Ok(())
+
+        
+
+        
+    }
 }
+
 
 
 
