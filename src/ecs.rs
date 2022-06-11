@@ -1,8 +1,8 @@
 use ggez::{
-    event,
-    graphics::{self, Color},
-    Context, GameResult,
+    graphics::{self},
+    Context,
 };
+use glam::{f32, i32, vec2};
 // 0------------------Start of ECS Sstem---------------------------------------0
 pub type EntityIndex = usize;
 
@@ -10,12 +10,14 @@ pub struct OrbitalComponent {
     pub orbiting_ent_id: usize,
     pub radius: i32,
     pub angle: f32,
+    pub orbit_circle: graphics::Mesh,
     
 }
 
 pub struct DrawingComponent {
     pub sprite: graphics::Image,
     pub image_size: (i32, i32),
+    pub sprite_offset: (f32, f32),
     
 }
 
@@ -57,8 +59,10 @@ pub fn make_new_sun(
     if ents.verify_vector_lengths() != entities_id.len() { return; }    
     //Drawing
     let new_draw_comp = DrawingComponent{
-                            sprite: n_sprite,
-                            image_size: (128,128), };
+                        sprite: n_sprite,
+                        image_size: (128,128),
+                        sprite_offset: (64.0,64.0),    
+                    };
     //Push everything to ents
     ents.draw_comp.push(new_draw_comp);
     ents.solar_pos_comp.push(n_sol_pos);
@@ -74,6 +78,7 @@ pub fn make_new_sun(
 pub fn make_new_planet(
     ents: &mut Entities,
     entities_id: &mut Vec<EntityIndex>,
+    current_ctx: &Context,
     n_sprite: graphics::Image,
     n_sol_sys_id: i32,
     n_orbiting_ent_id: usize,
@@ -82,16 +87,33 @@ pub fn make_new_planet(
     ) {
 
     //Verify that we are pushing the right numbers
-    if ents.verify_vector_lengths() != entities_id.len() { return; }    
+    if ents.verify_vector_lengths() != entities_id.len() { return; }  
+    
+    //calc destination of orbital ring
+    let dest = ents.solar_pos_comp[n_orbiting_ent_id];
+    //get a new meshbuilder to make our circle
+    let mb = &mut graphics::MeshBuilder::new();
+    //get our new circle
+    mb.circle(graphics::DrawMode::stroke(1.0),
+        vec2(dest.0,dest.1),
+        n_orb_rad as f32,
+        2.0,
+        graphics::Color::WHITE).expect("ecs new planet mesh error");
+
+    let orbit_circle = graphics::Mesh::from_data(current_ctx, mb.build());
+
     //Drawing
     let new_draw_comp = DrawingComponent{
         sprite: n_sprite,
-        image_size: (128,128), };
+        image_size: (128,128),
+        sprite_offset: (64.0,64.0), };
     //Orbit
     let new_orbit = OrbitalComponent {
         orbiting_ent_id: n_orbiting_ent_id,
         radius: n_orb_rad,
         angle: 25.0,
+        orbit_circle,
+        
         
     };
     //Push everything to ents
