@@ -167,7 +167,7 @@ pub fn inc_orbital_body_pos(
 }
 
 
-fn point_in_object(point: &(f32,f32), center: &(f32,f32), r: i32) -> bool {
+pub fn point_in_object(point: &(f32,f32), center: (f32, f32), r: f32) -> bool {
     let dx = (point.0-center.0).abs();
     let dy = (point.1-center.1).abs();
     //test points
