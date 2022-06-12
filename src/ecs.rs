@@ -18,6 +18,7 @@ pub struct DrawingComponent {
     pub sprite: graphics::Image,
     pub image_size: (i32, i32),
     pub sprite_offset: (f32, f32),
+    pub screen_pos: glam::Vec2,
     
 }
 
@@ -61,7 +62,8 @@ pub fn make_new_sun(
     let new_draw_comp = DrawingComponent{
                         sprite: n_sprite,
                         image_size: (128,128),
-                        sprite_offset: (64.0,64.0),    
+                        sprite_offset: (64.0,64.0), 
+                        screen_pos: glam::Vec2::new(0.0,0.0),   
                     };
     //Push everything to ents
     ents.draw_comp.push(new_draw_comp);
@@ -105,7 +107,8 @@ pub fn make_new_orbiting_body(
     let new_draw_comp = DrawingComponent{
         sprite: n_sprite,
         image_size: (sprite_width,sprite_height),
-        sprite_offset: (sprite_width as f32 / 2.0, sprite_height as f32 / 2.0)
+        sprite_offset: (sprite_width as f32 / 2.0, sprite_height as f32 / 2.0),
+        screen_pos: glam::Vec2::new(0.0,0.0),
     };
     //Orbit
     let new_orbit = OrbitalComponent {
@@ -161,4 +164,16 @@ pub fn inc_orbital_body_pos(
             //update position of body
         }
     }
+}
+
+
+fn point_in_object(point: &(f32,f32), center: &(f32,f32), r: i32) -> bool {
+    let dx = (point.0-center.0).abs();
+    let dy = (point.1-center.1).abs();
+    //test points
+    if dx > r as f32 {return false;}
+    if dy > r as f32 {return false;}
+    if dx + dx <= r as f32 {return true;}
+    if (dx*dx) + (dy*dy) <= (r * r) as f32 {return true;}
+    else {return false;}
 }
