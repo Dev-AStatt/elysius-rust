@@ -28,6 +28,7 @@ enum MouseFocus {
 
 mod ecs;
 mod globs;
+mod menus;
 
 //MAIN GAME STRUCT
 struct ElysiusMainState {
@@ -43,6 +44,7 @@ struct ElysiusMainState {
     current_mouse_pos: (f32, f32),
     mouse_click_pos: (f32, f32),
     mouse_click_down: bool,
+    game_menus: menus::Menus,
 }
 
 impl ElysiusMainState {
@@ -67,6 +69,7 @@ impl ElysiusMainState {
             current_mouse_pos: (0.0, 0.0),
             mouse_click_pos: (0.0, 0.0),
             mouse_click_down: false,
+            game_menus: menus::Menus::new(_ctx),
             })
     }
     
@@ -153,16 +156,19 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             //For all entities that are on screen
             if self.entities.solar_system_id[i] == self.active_solar_system {
                 //update the final positions of entites
-                self.entities.draw_comp[i].screen_pos = self.entities.get_orbit_final_pos(i, self.game_scale);
+                self.entities.draw_comp[i].screen_pos = 
+                    self.entities.get_orbit_final_pos(i, self.game_scale);
                 //update mouse focus
-                let offset = (self.entities.draw_comp[i].sprite_offset.0 as f32 * self.game_scale.x,
-                              self.entities.draw_comp[i].sprite_offset.1 as f32 * self.game_scale.y); 
-                let for_mouse_pos = (
+                let offset = (self.entities.draw_comp[i].sprite_offset.0 as f32
+                                * self.game_scale.x,
+                              self.entities.draw_comp[i].sprite_offset.1 as f32
+                                * self.game_scale.y); 
+                let adj_pos_for_input = (
                     self.entities.draw_comp[i].screen_pos.x + offset.0, 
                     self.entities.draw_comp[i].screen_pos.y + offset.1
                 );
                 if ecs::point_in_object(&self.current_mouse_pos,
-                    for_mouse_pos, 
+                    adj_pos_for_input, 
                 self.entities.draw_comp[i].sprite_offset.0 as f32 * self.game_scale.x,
                 ) {
                     // print!("mouse: `{{` {}, {} `}}` ",
@@ -173,6 +179,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                     // println!("With Radius: {}", self.entities.draw_comp[i].sprite_offset.0 as f32 * self.game_scale.x);
                     self.current_mouse_focus = MouseFocus::body(i);
                 }
+            
             }
         }
 
@@ -193,8 +200,13 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
 
          //Draw ECS Ent
          for i in 0..self.entities_id.len() {
-             //add an if in active system
-            self.draw_solar_object_ecs(&mut canvas, i);
+            if self.entities.solar_system_id[i] == self.active_solar_system {
+                self.draw_solar_object_ecs(&mut canvas, i);
+                if self.current_mouse_focus == MouseFocus::body(i) {
+                    canvas.draw(&self.game_menus.menu_outline, glam::Vec2::new(0.0,0.0));
+                }
+            }
+            
         }
 
         //Concatinating strings is dumb
@@ -222,6 +234,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                     .set_scale(10.0),
                     glam::Vec2::new(0.0,10.0));
 
+   
         //Draw the FPS counter
         ctx.gfx.set_window_title(&format!(
             "Elysius - {:.0} FPS", ctx.time.fps()));
