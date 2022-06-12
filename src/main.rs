@@ -61,7 +61,7 @@ impl ElysiusMainState {
             entities: init_ent,
             entities_id: Vec::new(),
             first_time: true,
-            game_scale: glam::Vec2::new(0.5,0.5),
+            game_scale: glam::Vec2::new(1.0,1.0),
             active_solar_system: 0,
             current_game_state: GameState::running,
             current_mouse_focus: MouseFocus::background,
@@ -95,10 +95,8 @@ impl ElysiusMainState {
                 );    
             }
         }
-        
         //Draw the sprite
-        canvas.draw(
-            &self.entities.draw_comp[ent_id].sprite,
+        canvas.draw(&self.entities.draw_comp[ent_id].sprite,
             graphics::DrawParam::new()
                 .dest(self.entities.draw_comp[ent_id].screen_pos)
                 .scale(self.game_scale)
@@ -116,6 +114,13 @@ impl ElysiusMainState {
         );
         return sprite_pos + disp_adj;
     }
+
+    fn mouse_in_circle(self: &Self, ent_id: usize) -> bool {
+        
+        return false;
+    }
+
+
 }
 
 impl event::EventHandler<ggez::GameError> for ElysiusMainState {
@@ -124,7 +129,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         //Create Inital test scene
         if self.first_time {
             //Load Textures
-            let sun_image = graphics::Image::from_path(_ctx, "/Sprite-SUN_01.png", true)?;
+            let sun_image = graphics::Image::from_path(_ctx, "/Sprite-SUN_02.png", true)?;
             let planet_image = graphics::Image::from_path(_ctx, "/Sprite-Planet_01.png", true)?;
             let moon_image = graphics::Image::from_path(_ctx, "/Sprite-Moon_01.png", true)?;
             //Calc the center of the screen
@@ -161,11 +166,33 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             self.first_time = false;
         }
         //0----------------------GAME UPDATES----------------------------------0
+        //Reset the mouse focus
+        self.current_mouse_focus = MouseFocus::background;
+
         for i in 0..self.entities_id.len() {
             //For all entities that are on screen
             if self.entities.solar_system_id[i] == self.active_solar_system {
                 //update the final positions of entites
                 self.entities.draw_comp[i].screen_pos = self.get_orbit_final_pos(i);
+                //update mouse focus
+                let offset = (self.entities.draw_comp[i].sprite_offset.0 as f32 * self.game_scale.x,
+                              self.entities.draw_comp[i].sprite_offset.1 as f32 * self.game_scale.y); 
+                let for_mouse_pos = (
+                    self.entities.draw_comp[i].screen_pos.x + offset.0, 
+                    self.entities.draw_comp[i].screen_pos.y + offset.1
+                );
+                if ecs::point_in_object(&self.current_mouse_pos,
+                    for_mouse_pos, 
+                self.entities.draw_comp[i].sprite_offset.0 as f32 * self.game_scale.x,
+                ) {
+                    // print!("mouse: `{{` {}, {} `}}` ",
+                    //     self.current_mouse_pos.0,
+                    //     self.current_mouse_pos.1
+                    // );
+                    // print!("Withn point: `{{` {}, {} `}}`", for_mouse_pos.0,for_mouse_pos.1 );
+                    // println!("With Radius: {}", self.entities.draw_comp[i].sprite_offset.0 as f32 * self.game_scale.x);
+                    self.current_mouse_focus = MouseFocus::body(i);
+                }
             }
         }
 
