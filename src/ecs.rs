@@ -3,6 +3,7 @@ use ggez::{
     Context,
 };
 use glam::{f32, i32, vec2};
+use crate::globs;
 // 0------------------Start of ECS Sstem---------------------------------------0
 pub type EntityIndex = usize;
 
@@ -40,6 +41,21 @@ impl Entities {
         if vec_len != self.solar_system_id.len() {println!("Your ECS system has mismatched vectors");}   
         
         return vec_len;
+    }
+
+    pub fn get_orbit_final_pos(&self,
+        ent_id: usize,
+        scale: glam::Vec2,
+    ) -> glam::Vec2 {
+        let sprite_pos = glam::Vec2::new(
+            self.solar_pos_comp[ent_id].0 * scale.x,
+            self.solar_pos_comp[ent_id].1 * scale.y
+        );
+        let disp_adj = glam::Vec2::new(
+            globs::SCREEN_OFFSET.0 - (self.draw_comp[ent_id].sprite_offset.0 * scale.x),
+            globs::SCREEN_OFFSET.1 - (self.draw_comp[ent_id].sprite_offset.1 * scale.y),
+        );
+        return sprite_pos + disp_adj;
     }
 }
 

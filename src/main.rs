@@ -9,9 +9,7 @@ use ggez::{
 use glam::*;
 use std::{env, path};
 
-//GLOBAL VALUE for screen size
-const SCREEN_SIZE: (f32, f32) = (1024.0 ,1024.0);
-const SCREEN_OFFSET: (f32, f32) = (512.0, 512.0);
+
 
 #[derive(PartialEq)]
 enum GameState {
@@ -29,6 +27,7 @@ enum MouseFocus {
 
 
 mod ecs;
+mod globs;
 
 //MAIN GAME STRUCT
 struct ElysiusMainState {
@@ -84,8 +83,8 @@ impl ElysiusMainState {
             Some(ref orb) => { 
                 //get the final position of the circle
                 let circle_pos = glam::Vec2::new(
-                    (self.entities.solar_pos_comp[orb.orbiting_ent_id].0 * self.game_scale.x) + SCREEN_OFFSET.0,
-                    (self.entities.solar_pos_comp[orb.orbiting_ent_id].1 * self.game_scale.y) + SCREEN_OFFSET.1 
+                    (self.entities.solar_pos_comp[orb.orbiting_ent_id].0 * self.game_scale.x) + globs::SCREEN_OFFSET.0,
+                    (self.entities.solar_pos_comp[orb.orbiting_ent_id].1 * self.game_scale.y) + globs::SCREEN_OFFSET.1 
                 );
                 //Draw the circle
                 canvas.draw(&orb.orbit_circle, 
@@ -102,25 +101,6 @@ impl ElysiusMainState {
                 .scale(self.game_scale)
         );
     }
-
-    fn get_orbit_final_pos(self: &Self, ent_id: usize) -> glam::Vec2 {
-        let sprite_pos = glam::Vec2::new(
-            self.entities.solar_pos_comp[ent_id].0 * self.game_scale.x,
-            self.entities.solar_pos_comp[ent_id].1 * self.game_scale.y
-        );
-        let disp_adj = glam::Vec2::new(
-            SCREEN_OFFSET.0 - (self.entities.draw_comp[ent_id].sprite_offset.0 * self.game_scale.x),
-            SCREEN_OFFSET.1 - (self.entities.draw_comp[ent_id].sprite_offset.1 * self.game_scale.y),
-        );
-        return sprite_pos + disp_adj;
-    }
-
-    fn mouse_in_circle(self: &Self, ent_id: usize) -> bool {
-        
-        return false;
-    }
-
-
 }
 
 impl event::EventHandler<ggez::GameError> for ElysiusMainState {
@@ -173,7 +153,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             //For all entities that are on screen
             if self.entities.solar_system_id[i] == self.active_solar_system {
                 //update the final positions of entites
-                self.entities.draw_comp[i].screen_pos = self.get_orbit_final_pos(i);
+                self.entities.draw_comp[i].screen_pos = self.entities.get_orbit_final_pos(i, self.game_scale);
                 //update mouse focus
                 let offset = (self.entities.draw_comp[i].sprite_offset.0 as f32 * self.game_scale.x,
                               self.entities.draw_comp[i].sprite_offset.1 as f32 * self.game_scale.y); 
@@ -330,7 +310,7 @@ pub fn main() -> GameResult {
         // Next we set up the window. This title will be displayed in the title bar of the window.
         .window_setup(ggez::conf::WindowSetup::default().title("super_simple"))
         // Now we get to set the size of the window, which we use our SCREEN_SIZE constant from earlier to help with
-        .window_mode(ggez::conf::WindowMode::default().dimensions(SCREEN_SIZE.0, SCREEN_SIZE.1));
+        .window_mode(ggez::conf::WindowMode::default().dimensions(globs::SCREEN_SIZE.0, globs::SCREEN_SIZE.1));
 
     // And finally we attempt to build the context and create the window. If it fails, we panic with the message
     // "Failed to build ggez context"
