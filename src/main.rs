@@ -1,7 +1,7 @@
 #![allow(clippy::unnecessary_wraps)]
 
 use ggez::{
-    event,
+    event::{self, MouseButton},
     graphics::{self},
     Context, GameResult,
     input::keyboard::{KeyCode, KeyInput},
@@ -20,6 +20,14 @@ enum GameState {
     menu,
 }
 
+#[derive(PartialEq)]
+enum MouseFocus {
+    background,
+    body(usize),
+    menu,
+}
+
+
 mod ecs;
 
 //MAIN GAME STRUCT
@@ -31,6 +39,11 @@ struct ElysiusMainState {
     game_scale: glam::Vec2,
     active_solar_system: i32,
     current_game_state: GameState,
+    //mouse stuff
+    current_mouse_focus: MouseFocus,
+    current_mouse_pos: (f32, f32),
+    mouse_click_pos: (f32, f32),
+    mouse_click_down: bool,
 }
 
 impl ElysiusMainState {
@@ -51,6 +64,10 @@ impl ElysiusMainState {
             game_scale: glam::Vec2::new(0.5,0.5),
             active_solar_system: 0,
             current_game_state: GameState::running,
+            current_mouse_focus: MouseFocus::background,
+            current_mouse_pos: (0.0, 0.0),
+            mouse_click_pos: (0.0, 0.0),
+            mouse_click_down: false,
             })
     }
     
@@ -78,7 +95,17 @@ impl ElysiusMainState {
                 );    
             }
         }
-        //Object Sprite Component
+        
+        //Draw the sprite
+        canvas.draw(
+            &self.entities.draw_comp[ent_id].sprite,
+            graphics::DrawParam::new()
+                .dest(self.entities.draw_comp[ent_id].screen_pos)
+                .scale(self.game_scale)
+        );
+    }
+
+    fn get_orbit_final_pos(self: &Self, ent_id: usize) -> glam::Vec2 {
         let sprite_pos = glam::Vec2::new(
             self.entities.solar_pos_comp[ent_id].0 * self.game_scale.x,
             self.entities.solar_pos_comp[ent_id].1 * self.game_scale.y
@@ -87,14 +114,7 @@ impl ElysiusMainState {
             SCREEN_OFFSET.0 - (self.entities.draw_comp[ent_id].sprite_offset.0 * self.game_scale.x),
             SCREEN_OFFSET.1 - (self.entities.draw_comp[ent_id].sprite_offset.1 * self.game_scale.y),
         );
-        let final_pos = sprite_pos + disp_adj;
-        //Draw the sprite
-        canvas.draw(
-            &self.entities.draw_comp[ent_id].sprite,
-            graphics::DrawParam::new()
-                .dest(final_pos)
-                .scale(self.game_scale)
-        );
+        return sprite_pos + disp_adj;
     }
 }
 
@@ -140,6 +160,14 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             //set the flag to not run this every tick.
             self.first_time = false;
         }
+        //0----------------------GAME UPDATES----------------------------------0
+        for i in 0..self.entities_id.len() {
+            //For all entities that are on screen
+            if self.entities.solar_system_id[i] == self.active_solar_system {
+                //update the final positions of entites
+                self.entities.draw_comp[i].screen_pos = self.get_orbit_final_pos(i);
+            }
+        }
 
         //GameState Running
         if self.current_game_state == GameState::running {
@@ -158,6 +186,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
 
          //Draw ECS Ent
          for i in 0..self.entities_id.len() {
+             //add an if in active system
             self.draw_solar_object_ecs(&mut canvas, i);
         }
 
@@ -168,14 +197,27 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         canvas.draw(graphics::Text::new(str)
                     .set_scale(10.0),
                     glam::Vec2::new(0.0,0.0));
+
+        //Draw the focus mode
+        let mut focus_str = String::from("Mouse Focus: ");
+        match self.current_mouse_focus {
+            MouseFocus::background => {
+                focus_str.push_str("Background");
+            }
+            MouseFocus::body(id) => {
+                focus_str.push_str(&("Entity ".to_owned()+ &id.to_string()));
+            }
+            MouseFocus::menu => {
+                focus_str.push_str("Menu");
+            }
+        }
+        canvas.draw(graphics::Text::new(focus_str)
+                    .set_scale(10.0),
+                    glam::Vec2::new(0.0,10.0));
+
         //Draw the FPS counter
         ctx.gfx.set_window_title(&format!(
             "Elysius - {:.0} FPS", ctx.time.fps()));
-        
-
-
-
-
 
         //Nothing after this, pushes all the draws to the graphics card
         canvas.finish(ctx)?;
@@ -197,10 +239,6 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
     }
     //The ggez will call this automatically to capture key_up events
     fn key_up_event(&mut self, _ctx: &mut Context, input: KeyInput) -> GameResult {
-        println!(
-            "Key released: scancode {}, keycode {:?}, modifier {:?}",
-            input.scancode, input.keycode, input.mods
-        );
         //add keys in here for what we want to look for. 
         match input.keycode {
             Some(KeyCode::Space) => {
@@ -213,10 +251,31 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             _ => (), // Do nothing
         }
         Ok(())
+    }
+    fn mouse_button_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        button: MouseButton,
+        x: f32,
+        y: f32,
+    ) -> GameResult {
+        self.mouse_click_down = true;
+        println!("Mouse button pressed: {:?}, x: {}, y: {}", button, x, y);
+        Ok(())
+    }
 
-        
-
-        
+    //This gets the mouse position
+    fn mouse_motion_event(
+        &mut self,
+        _ctx: &mut Context,
+        x: f32,
+        y: f32,
+        xrel: f32,
+        yrel: f32,
+    ) -> GameResult {
+        if self.mouse_click_down { self.mouse_click_pos = (x, y); }
+        self.current_mouse_pos = (x,y);
+        Ok(())
     }
 }
 
