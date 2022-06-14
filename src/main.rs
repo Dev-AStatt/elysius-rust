@@ -57,6 +57,7 @@ impl ElysiusMainState {
             solar_pos_comp: Vec::new(),
             solar_system_id: Vec::new(),
         };
+        let new_body_texture = graphics::Image::from_path(_ctx, "/menu_01.png", true)?;
 
         Ok(ElysiusMainState {
             entities: init_ent,
@@ -69,7 +70,7 @@ impl ElysiusMainState {
             current_mouse_pos: (0.0, 0.0),
             mouse_click_pos: (0.0, 0.0),
             mouse_click_down: false,
-            game_menus: menus::Menus::new(_ctx),
+            game_menus: menus::Menus::new(new_body_texture),
             })
     }
     
@@ -202,12 +203,19 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
          for i in 0..self.entities_id.len() {
             if self.entities.solar_system_id[i] == self.active_solar_system {
                 self.draw_solar_object_ecs(&mut canvas, i);
-                if self.current_mouse_focus == MouseFocus::body(i) {
-                    canvas.draw(&self.game_menus.menu_outline, glam::Vec2::new(0.0,0.0));
-                }
+                
             }
             
         }
+        match self.current_mouse_focus {
+            MouseFocus::background => {}
+            MouseFocus::menu => {}
+            MouseFocus::body(_) => {
+                canvas.draw(&self.game_menus.body_texture, glam::Vec2::new(30.0,30.0));
+            }
+        }
+        
+
 
         //Concatinating strings is dumb
         let mut str = String::from("Tick: ");
@@ -215,7 +223,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         //Draw the current tick to the screen
         canvas.draw(graphics::Text::new(str)
                     .set_scale(10.0),
-                    glam::Vec2::new(0.0,0.0));
+                    glam::Vec2::new(0.0,990.0));
 
         //Draw the focus mode
         let mut focus_str = String::from("Mouse Focus: ");
@@ -232,7 +240,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         }
         canvas.draw(graphics::Text::new(focus_str)
                     .set_scale(10.0),
-                    glam::Vec2::new(0.0,10.0));
+                    glam::Vec2::new(0.0,1000.0));
 
    
         //Draw the FPS counter
