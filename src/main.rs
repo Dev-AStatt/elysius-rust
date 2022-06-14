@@ -1,5 +1,6 @@
 #![allow(clippy::unnecessary_wraps)]
 
+use crate::MouseFocus::body;
 use ggez::{
     event::{self, MouseButton},
     graphics::{self},
@@ -56,6 +57,7 @@ impl ElysiusMainState {
             draw_comp: Vec::new(),
             solar_pos_comp: Vec::new(),
             solar_system_id: Vec::new(),
+            ent_name: Vec::new(),
         };
         let new_body_texture = graphics::Image::from_path(_ctx, "/menu_01.png", true)?;
 
@@ -210,8 +212,13 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         match self.current_mouse_focus {
             MouseFocus::background => {}
             MouseFocus::menu => {}
-            MouseFocus::body(_) => {
-                canvas.draw(&self.game_menus.body_texture, glam::Vec2::new(30.0,30.0));
+            MouseFocus::body(id) => {
+                self.game_menus.draw_body_info_menu(
+                    ctx,
+                    &mut canvas,
+                    &self.entities,
+                    id,
+                );
             }
         }
         

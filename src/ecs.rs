@@ -7,6 +7,8 @@ use crate::globs;
 // 0------------------Start of ECS Sstem---------------------------------------0
 pub type EntityIndex = usize;
 
+
+
 pub struct OrbitalComponent {
     pub orbiting_ent_id: usize,
     pub radius: i32,
@@ -28,10 +30,15 @@ pub struct Entities {
     pub draw_comp: Vec<DrawingComponent>,
     pub solar_pos_comp: Vec<(f32, f32)>,
     pub solar_system_id: Vec<i32>,
-    //add a verify function to make sure all vectors stay the same length
+    pub ent_name: Vec<String>,
+
+   
+   
+
 }
 
 impl Entities {
+ 
     //function will check that all vectors in the entities struct have the
     //same length and will return that length
     pub fn verify_vector_lengths(&self) -> usize {
@@ -87,6 +94,7 @@ pub fn make_new_sun(
     ents.solar_system_id.push(n_sol_sys_id);
     //its a sun so no orbital info
     ents.orbit_comp.push(None);
+    ents.ent_name.push("Sun".to_string());
 
     //Create a new entity ID
     entities_id.push(entities_id.len());
@@ -143,6 +151,7 @@ pub fn make_new_orbiting_body(
     ents.orbit_comp.push(Some(new_orbit));
     ents.solar_pos_comp.push(n_sol_pos);
     ents.solar_system_id.push(n_sol_sys_id);
+    ents.ent_name.push("Earth".to_string());
     //Create a new entity ID
     entities_id.push(entities_id.len());    
 }
