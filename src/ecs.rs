@@ -1,3 +1,9 @@
+use rand::Rng;
+
+
+
+
+
 use ggez::{
     graphics::{self},
     Context,
@@ -64,6 +70,26 @@ impl Entities {
         );
         return sprite_pos + disp_adj;
     }
+
+    pub fn get_new_name(&self) -> String {
+        let mut rng = rand::thread_rng();
+        let names = vec![
+            "Lodania Minor",
+            "Paumi",
+            "Padikar 230",
+            "Roshar",
+            "Dune",
+            "Arrakis",
+            "Helios",
+            "Dimos",
+            "Perseus",
+            "Ares",
+        ];
+        
+        let i = rng.gen_range(0..names.len());
+        return names[i].to_string();
+
+    }
 }
 
 
@@ -94,7 +120,7 @@ pub fn make_new_sun(
     ents.solar_system_id.push(n_sol_sys_id);
     //its a sun so no orbital info
     ents.orbit_comp.push(None);
-    ents.ent_name.push("Sun".to_string());
+    ents.ent_name.push(ents.get_new_name());
 
     //Create a new entity ID
     entities_id.push(entities_id.len());
@@ -151,7 +177,7 @@ pub fn make_new_orbiting_body(
     ents.orbit_comp.push(Some(new_orbit));
     ents.solar_pos_comp.push(n_sol_pos);
     ents.solar_system_id.push(n_sol_sys_id);
-    ents.ent_name.push("Earth".to_string());
+    ents.ent_name.push(ents.get_new_name());
     //Create a new entity ID
     entities_id.push(entities_id.len());    
 }
