@@ -55,6 +55,7 @@ impl ElysiusMainState {
         let init_ent = ecs::Entities{
             orbit_comp: Vec::new(),
             draw_comp: Vec::new(),
+            energy_comp: Vec::new(),
             solar_pos_comp: Vec::new(),
             solar_system_id: Vec::new(),
             ent_name: Vec::new(),
@@ -121,16 +122,16 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             //Calc the center of the screen
             
             //First Sun
-            ecs::make_new_sun(
-                &mut self.entities,
+            self.entities.make_new_sun(
                 &mut self.entities_id,
                 sun_image,
                 self.active_solar_system,                   //solar system ID
                 (0.0,0.0),                                  //solar position
             );
+
+               
             //First Planet
-            ecs::make_new_orbiting_body(
-                &mut self.entities,
+            self.entities.make_new_orbiting_body(
                 &mut self.entities_id,
                 &_ctx,
                 planet_image,
@@ -139,8 +140,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                 300                                         //orbiting radius
             );
             //First Planet
-            ecs::make_new_orbiting_body(
-                &mut self.entities,
+            self.entities.make_new_orbiting_body(
                 &mut self.entities_id,
                 &_ctx,
                 moon_image,
@@ -188,7 +188,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
 
         //GameState Running
         if self.current_game_state == GameState::running {
-            ecs::inc_orbital_body_pos(&mut self.entities, self.active_solar_system);
+            self.entities.inc_orbital_body_pos(self.active_solar_system);
         }
         
 
