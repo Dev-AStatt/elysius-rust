@@ -1,6 +1,7 @@
 #![allow(clippy::unnecessary_wraps)]
 
 use crate::MouseFocus::body;
+use ecs::sprite_get;
 use ggez::{
     event::{self, MouseButton},
     graphics::{self},
@@ -9,8 +10,6 @@ use ggez::{
 };
 use glam::*;
 use std::{env, path};
-
-
 
 #[derive(PartialEq)]
 enum GameState {
@@ -60,7 +59,6 @@ impl ElysiusMainState {
             solar_system_id: Vec::new(),
             ent_name: Vec::new(),
         };
-        let new_body_texture = graphics::Image::from_path(_ctx, "/menu_01.png", true)?;
 
         Ok(ElysiusMainState {
             entities: init_ent,
@@ -115,18 +113,13 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
     fn update(&mut self, _ctx: &mut Context) -> GameResult {
         //Create Inital test scene
         if self.first_time {
-            //Load Textures
-            let sun_image = graphics::Image::from_path(_ctx, "/Sprite-SUN_02.png", true)?;
-            let planet_image = graphics::Image::from_path(_ctx, "/Sprite-Planet_01.png", true)?;
-            let moon_image = graphics::Image::from_path(_ctx, "/Sprite-Moon_01.png", true)?;
-            //Calc the center of the screen
-            
+
             //First Sun
             self.entities.make_new_sun(
                 &mut self.entities_id,
-                sun_image,
-                self.active_solar_system,                   //solar system ID
-                (0.0,0.0),                                  //solar position
+                sprite_get(_ctx, "/Sprite-SUN_02.png"),
+                self.active_solar_system,                       
+                (0.0,0.0),                                              
             );
 
                
@@ -134,19 +127,19 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             self.entities.make_new_orbiting_body(
                 &mut self.entities_id,
                 &_ctx,
-                planet_image,
-                self.active_solar_system,                   //solar system ID
-                0,                                          //orbiting ent ID
-                300                                         //orbiting radius
+                sprite_get(_ctx, "/Sprite-Planet_01.png"),
+                self.active_solar_system,                   
+                0,                                     
+                300                                         
             );
             //First Planet
             self.entities.make_new_orbiting_body(
                 &mut self.entities_id,
                 &_ctx,
-                moon_image,
-                self.active_solar_system,                   //solar system ID
-                1,                                          //orbiting ent ID
-                100                                         //orbiting radius
+                sprite_get(_ctx, "/Sprite-Moon_01.png"),
+                self.active_solar_system,                
+                1,                                  
+                100                                         
             );
             //set the flag to not run this every tick.
             self.first_time = false;

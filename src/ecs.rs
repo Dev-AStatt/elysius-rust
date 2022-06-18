@@ -248,7 +248,7 @@ pub fn point_in_object(point: &(f32,f32), center: (f32, f32), r: f32) -> bool {
 //Function will take a path to the sprite that wants to load and return either
 //that sprite or a red cube of 5x5 if there was an error
 pub fn sprite_get(ctx: &Context, path: &str) -> graphics::Image {
-    let new_body_texture: graphics::Image = match graphics::Image::from_path(ctx, path, true) {
+    match graphics::Image::from_path(ctx, path, true) {
         Ok(it) => return it,
         Err(err) => {
             println!("Pub fn sprite_get: Error on loading path: {}", path);
