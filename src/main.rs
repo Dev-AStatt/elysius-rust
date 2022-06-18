@@ -1,6 +1,6 @@
 #![allow(clippy::unnecessary_wraps)]
 
-use crate::MouseFocus::body;
+//use crate::MouseFocus::body;
 use ecs::sprite_get;
 use ggez::{
     event::{self, MouseButton},
@@ -13,16 +13,16 @@ use std::{env, path};
 
 #[derive(PartialEq)]
 enum GameState {
-    running,
-    paused,
-    menu,
+    Running,
+    Paused,
+    Menu,
 }
 
 #[derive(PartialEq)]
 enum MouseFocus {
-    background,
-    body(usize),
-    menu,
+    Background,
+    Body(usize),
+    Menu,
 }
 
 
@@ -66,8 +66,8 @@ impl ElysiusMainState {
             first_time: true,
             game_scale: glam::Vec2::new(1.0,1.0),
             active_solar_system: 0,
-            current_game_state: GameState::running,
-            current_mouse_focus: MouseFocus::background,
+            current_game_state: GameState::Running,
+            current_mouse_focus: MouseFocus::Background,
             current_mouse_pos: (0.0, 0.0),
             mouse_click_pos: (0.0, 0.0),
             mouse_click_down: false,
@@ -146,7 +146,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         }
         //0----------------------GAME UPDATES----------------------------------0
         //Reset the mouse focus
-        self.current_mouse_focus = MouseFocus::background;
+        self.current_mouse_focus = MouseFocus::Background;
 
         for i in 0..self.entities_id.len() {
             //For all entities that are on screen
@@ -173,14 +173,14 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                     // );
                     // print!("Withn point: `{{` {}, {} `}}`", for_mouse_pos.0,for_mouse_pos.1 );
                     // println!("With Radius: {}", self.entities.draw_comp[i].sprite_offset.0 as f32 * self.game_scale.x);
-                    self.current_mouse_focus = MouseFocus::body(i);
+                    self.current_mouse_focus = MouseFocus::Body(i);
                 }
             
             }
         }
 
         //GameState Running
-        if self.current_game_state == GameState::running {
+        if self.current_game_state == GameState::Running {
             self.entities.inc_orbital_body_pos(self.active_solar_system);
         }
         
@@ -203,11 +203,10 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             
         }
         match self.current_mouse_focus {
-            MouseFocus::background => {}
-            MouseFocus::menu => {}
-            MouseFocus::body(id) => {
+            MouseFocus::Background => {}
+            MouseFocus::Menu => {}
+            MouseFocus::Body(id) => {
                 self.game_menus.draw_body_info_menu(
-                    ctx,
                     &mut canvas,
                     &self.entities,
                     id,
@@ -228,13 +227,13 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         //Draw the focus mode
         let mut focus_str = String::from("Mouse Focus: ");
         match self.current_mouse_focus {
-            MouseFocus::background => {
+            MouseFocus::Background => {
                 focus_str.push_str("Background");
             }
-            MouseFocus::body(id) => {
+            MouseFocus::Body(id) => {
                 focus_str.push_str(&("Entity ".to_owned()+ &id.to_string()));
             }
-            MouseFocus::menu => {
+            MouseFocus::Menu => {
                 focus_str.push_str("Menu");
             }
         }
@@ -254,32 +253,6 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
 
 // 0---------------------INPUT EVENTS------------------------------------------0
 
-    //The ggez will call events automatically for key and mouse events. 
-    fn mouse_wheel_event(&mut self, _ctx: &mut Context, x: f32, y: f32) -> GameResult {
-        //test to make sure the game is not being zoomed out too far. 
-        if self.game_scale.x < 0.2 && y == -1.0 {}
-        else {
-            let new_scale = self.game_scale + (y * 0.1);
-            self.game_scale = new_scale;
-            //println!("GameScale: {}", self.game_scale);
-        }
-        Ok(())
-    }
-    //The ggez will call this automatically to capture key_up events
-    fn key_up_event(&mut self, _ctx: &mut Context, input: KeyInput) -> GameResult {
-        //add keys in here for what we want to look for. 
-        match input.keycode {
-            Some(KeyCode::Space) => {
-                //If space, toggle the game state from play to pause
-                if self.current_game_state == GameState::paused {
-                        self.current_game_state = GameState::running;}
-                else if self.current_game_state == GameState::running {
-                    self.current_game_state = GameState::paused;}
-            }
-            _ => (), // Do nothing
-        }
-        Ok(())
-    }
     fn mouse_button_down_event(
         &mut self,
         _ctx: &mut Context,
@@ -291,18 +264,44 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         println!("Mouse button pressed: {:?}, x: {}, y: {}", button, x, y);
         Ok(())
     }
-
     //This gets the mouse position
     fn mouse_motion_event(
         &mut self,
         _ctx: &mut Context,
         x: f32,
         y: f32,
-        xrel: f32,
-        yrel: f32,
+        _xrel: f32,
+        _yrel: f32,
     ) -> GameResult {
         if self.mouse_click_down { self.mouse_click_pos = (x, y); }
         self.current_mouse_pos = (x,y);
+        Ok(())
+    }
+    //The ggez will call events automatically for key and mouse events. 
+    fn mouse_wheel_event(&mut self, _ctx: &mut Context, _x: f32, y: f32) -> GameResult {
+        //test to make sure the game is not being zoomed out too far. 
+        if self.game_scale.x < 0.2 && y == -1.0 {}
+        else {
+            let new_scale = self.game_scale + (y * 0.1);
+            self.game_scale = new_scale;
+            //println!("GameScale: {}", self.game_scale);
+        }
+        Ok(())
+    }
+
+    //The ggez will call this automatically to capture key_up events
+    fn key_up_event(&mut self, _ctx: &mut Context, input: KeyInput) -> GameResult {
+        //add keys in here for what we want to look for. 
+        match input.keycode {
+            Some(KeyCode::Space) => {
+                //If space, toggle the game state from play to pause
+                if self.current_game_state == GameState::Paused {
+                        self.current_game_state = GameState::Running;}
+                else if self.current_game_state == GameState::Running {
+                    self.current_game_state = GameState::Paused;}
+            }
+            _ => (), // Do nothing
+        }
         Ok(())
     }
 }
