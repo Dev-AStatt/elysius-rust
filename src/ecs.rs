@@ -80,7 +80,7 @@ impl Entities {
     
     pub fn get_orbit_final_pos(&self,
         ent_id: usize,
-        scale: glam::Vec2,self.menu_body_pos.pos_energy_sprite
+        scale: glam::Vec2,
     ) -> glam::Vec2 {
         let sprite_pos = glam::Vec2::new(
             self.solar_pos_comp[ent_id].0 * scale.x,
@@ -114,7 +114,7 @@ impl Entities {
 
                         //calculate new position
                         let unitx = (orb.angle * 3.14 / 180.0).sin();
-                        let unityself.menu_body_pos.pos_energy_sprite = (orb.angle * 3.14 / 180.0).cos();
+                        let unity = (orb.angle * 3.14 / 180.0).cos();
                         let x = unitx * orb.radius as f32;
                         let y = unity * orb.radius as f32;
                         //give new position to ent
