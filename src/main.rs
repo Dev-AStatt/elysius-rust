@@ -73,7 +73,7 @@ impl ElysiusMainState {
             current_mouse_pos: (0.0, 0.0),
             mouse_click_pos: (0.0, 0.0),
             mouse_click_down: false,
-            game_menus: menus::Menus::new(new_body_texture),
+            game_menus: menus::Menus::new(&_ctx),
             })
     }
     

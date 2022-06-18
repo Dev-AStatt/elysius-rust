@@ -1,4 +1,4 @@
-use crate::ecs::Entities;
+use crate::ecs::{Entities, self};
 use ggez::{
     graphics::{self},
     Context,
@@ -28,16 +28,22 @@ struct MenuBodyPositions {
         }
     }
 
+impl Default for MenuBodyPositions {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 pub struct Menus {
     pub body_texture: graphics::Image,
     menu_body_pos: MenuBodyPositions,
 }
 
 impl Menus {
-    pub fn new(texture: graphics::Image) -> Self {
-        
+    pub fn new(ctx: &Context) -> Self {
+
         Menus {
-            body_texture: texture,
+            body_texture: ecs::sprite_get(ctx, "/menu_01.png"),
             menu_body_pos: MenuBodyPositions::new(),
         }
     }
@@ -52,11 +58,12 @@ impl Menus {
         //Draw Menu
         canvas.draw(&self.body_texture, self.menu_body_pos.pos);
         //Draw Name
-        let str = &ents.ent_name[ent_id];
-        canvas.draw(graphics::Text::new(str)
+        canvas.draw(graphics::Text::new(&ents.ent_name[ent_id])
                     .set_scale(20.0),
                     self.menu_body_pos.name_pos);
 
     }
 
 }
+
+

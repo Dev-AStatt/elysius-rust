@@ -25,6 +25,17 @@ pub struct EnergyComponent {
     pub radioactive: i32,
 }
 
+impl EnergyComponent {
+    pub fn new() -> Self {
+        let fossil = 100;
+        let radioactive = 50;
+        EnergyComponent {
+            fossil,
+            radioactive, 
+        }
+    }
+}
+
 pub struct DrawingComponent {
     pub sprite: graphics::Image,
     pub image_size: (i32, i32),
@@ -78,12 +89,14 @@ impl Entities {
                             sprite_offset: (64.0,64.0), 
                             screen_pos: glam::Vec2::new(0.0,0.0),   
                         };
+        let new_energy_comp = EnergyComponent::new();
         //Push everything to ents
         self.draw_comp.push(new_draw_comp);
         self.solar_pos_comp.push(n_sol_pos);
         self.solar_system_id.push(n_sol_sys_id);
         //its a sun so no orbital info
         self.orbit_comp.push(None);
+        self.energy_comp.push(Some(new_energy_comp));
         self.ent_name.push(self.get_new_name());
 
         //Create a new entity ID
@@ -140,6 +153,7 @@ impl Entities {
         //Push everything to ents
         self.draw_comp.push(new_draw_comp);
         self.orbit_comp.push(Some(new_orbit));
+        self.energy_comp.push(Some(EnergyComponent::new()));
         self.solar_pos_comp.push(n_sol_pos);
         self.solar_system_id.push(n_sol_sys_id);
         self.ent_name.push(self.get_new_name());
@@ -229,4 +243,17 @@ pub fn point_in_object(point: &(f32,f32), center: (f32, f32), r: f32) -> bool {
     if dx + dx <= r as f32 {return true;}
     if (dx*dx) + (dy*dy) <= (r * r) as f32 {return true;}
     else {return false;}
+}
+
+//Function will take a path to the sprite that wants to load and return either
+//that sprite or a red cube of 5x5 if there was an error
+pub fn sprite_get(ctx: &Context, path: &str) -> graphics::Image {
+    let new_body_texture: graphics::Image = match graphics::Image::from_path(ctx, path, true) {
+        Ok(it) => return it,
+        Err(err) => {
+            println!("Pub fn sprite_get: Error on loading path: {}", path);
+            println!("Error: {}", err);
+            return graphics::Image::from_solid(ctx, 5, graphics::Color::RED);
+        }
+    };
 }
