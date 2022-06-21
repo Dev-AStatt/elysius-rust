@@ -106,6 +106,50 @@ impl ElysiusMainState {
                 .scale(self.game_scale)
         );
     }
+
+    fn gen_new_system(self: &mut Self, _ctx: &mut Context) {
+
+        //First Sun
+        self.entities.make_new_sun(
+            &mut self.entities_id,
+            sprite_get(_ctx, "/Sprite-SUN_02.png"),
+            self.active_solar_system,                       
+            (0.0,0.0),                                              
+        );
+
+            
+        //First Planet
+        self.entities.make_new_orbiting_body(
+            &mut self.entities_id,
+            &_ctx,
+            sprite_get(_ctx, "/Sprite-Planet_01.png"),
+            self.active_solar_system,                   
+            0,                                     
+            300                                         
+        );
+        //First Planet
+        self.entities.make_new_orbiting_body(
+            &mut self.entities_id,
+            &_ctx,
+            sprite_get(_ctx, "/Sprite-Moon_01.png"),
+            self.active_solar_system,                
+            1,                                  
+            100                                         
+        );
+        //First Ship
+        self.entities.make_new_orbiting_body(
+            &mut self.entities_id,
+            &_ctx,
+            sprite_get(_ctx, "/Sprite-Ship_01.png"),
+            self.active_solar_system,                
+            1,                                  
+            50,                                         
+        );
+
+
+        //set the flag to not run this every tick.
+        self.first_time = false;
+    }
 }
 
 impl event::EventHandler<ggez::GameError> for ElysiusMainState {
@@ -113,36 +157,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
     fn update(&mut self, _ctx: &mut Context) -> GameResult {
         //Create Inital test scene
         if self.first_time {
-
-            //First Sun
-            self.entities.make_new_sun(
-                &mut self.entities_id,
-                sprite_get(_ctx, "/Sprite-SUN_02.png"),
-                self.active_solar_system,                       
-                (0.0,0.0),                                              
-            );
-
-               
-            //First Planet
-            self.entities.make_new_orbiting_body(
-                &mut self.entities_id,
-                &_ctx,
-                sprite_get(_ctx, "/Sprite-Planet_01.png"),
-                self.active_solar_system,                   
-                0,                                     
-                300                                         
-            );
-            //First Planet
-            self.entities.make_new_orbiting_body(
-                &mut self.entities_id,
-                &_ctx,
-                sprite_get(_ctx, "/Sprite-Moon_01.png"),
-                self.active_solar_system,                
-                1,                                  
-                100                                         
-            );
-            //set the flag to not run this every tick.
-            self.first_time = false;
+           self.gen_new_system(_ctx); 
         }
         //0----------------------GAME UPDATES----------------------------------0
         //Reset the mouse focus

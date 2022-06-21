@@ -73,7 +73,7 @@ impl Menus {
             graphics::Text::new(
                 &ents.ent_name[ent_id]).set_scale(20.0),
                 self.menu_body_pos.name_pos);
-        //Draw Coal Amount
+        //Check if there are energy components to display
         match &ents.energy_comp[ent_id] {
             None => {},
             Some(ref e_comp) => {

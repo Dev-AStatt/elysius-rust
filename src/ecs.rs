@@ -93,7 +93,8 @@ impl Entities {
         return sprite_pos + disp_adj;
     }
 
-        
+// 0-------------------------MAKE THINGS---------------------------------------0    
+
     //Function will itterate through the active entities in solar system
     //and update position
     pub fn inc_orbital_body_pos(
@@ -111,8 +112,7 @@ impl Entities {
                         if new_angle > 360.0 {new_angle = new_angle - 360.0;}
                         orb.angle = new_angle;
 
-
-                        //calculate new position
+                       //calculate new position
                         let unitx = (orb.angle * 3.14 / 180.0).sin();
                         let unity = (orb.angle * 3.14 / 180.0).cos();
                         let x = unitx * orb.radius as f32;
