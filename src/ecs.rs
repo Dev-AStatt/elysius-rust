@@ -81,16 +81,17 @@ impl Entities {
     pub fn get_orbit_final_pos(&self,
         ent_id: usize,
         scale: glam::Vec2,
+        player_offset: glam::Vec2,
     ) -> glam::Vec2 {
         let sprite_pos = glam::Vec2::new(
             self.solar_pos_comp[ent_id].0 * scale.x,
             self.solar_pos_comp[ent_id].1 * scale.y
         );
         let disp_adj = glam::Vec2::new(
-            globs::SCREEN_OFFSET.0 - (self.draw_comp[ent_id].sprite_offset.0 * scale.x),
-            globs::SCREEN_OFFSET.1 - (self.draw_comp[ent_id].sprite_offset.1 * scale.y),
+            self.draw_comp[ent_id].sprite_offset.0 * scale.x,
+            self.draw_comp[ent_id].sprite_offset.1 * scale.y
         );
-        return sprite_pos + disp_adj;
+        return sprite_pos - disp_adj + player_offset;
     }
 
 // 0-------------------------MAKE THINGS---------------------------------------0    

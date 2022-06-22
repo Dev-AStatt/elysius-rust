@@ -37,13 +37,15 @@ struct ElysiusMainState {
     entities_id: Vec<ecs::EntityIndex>,
     first_time: bool,
     game_scale: glam::Vec2,
+    player_screen_move: glam::Vec2,
     active_solar_system: i32,
     current_game_state: GameState,
     //mouse stuff
     current_mouse_focus: MouseFocus,
     current_mouse_pos: (f32, f32),
-    mouse_click_pos: (f32, f32),
     mouse_click_down: bool,
+
+    //Menu Items
     game_menus: menus::Menus,
 }
 
@@ -65,12 +67,14 @@ impl ElysiusMainState {
             entities_id: Vec::new(),
             first_time: true,
             game_scale: glam::Vec2::new(1.0,1.0),
+            player_screen_move: glam::Vec2::new(globs::SCREEN_OFFSET.0,globs::SCREEN_OFFSET.1),
             active_solar_system: 0,
             current_game_state: GameState::Running,
+            //Mouse Stuff
             current_mouse_focus: MouseFocus::Background,
             current_mouse_pos: (0.0, 0.0),
-            mouse_click_pos: (0.0, 0.0),
             mouse_click_down: false,
+
             game_menus: menus::Menus::new(&_ctx),
             })
     }
@@ -88,8 +92,8 @@ impl ElysiusMainState {
             Some(ref orb) => { 
                 //get the final position of the circle
                 let circle_pos = glam::Vec2::new(
-                    (self.entities.solar_pos_comp[orb.orbiting_ent_id].0 * self.game_scale.x) + globs::SCREEN_OFFSET.0,
-                    (self.entities.solar_pos_comp[orb.orbiting_ent_id].1 * self.game_scale.y) + globs::SCREEN_OFFSET.1 
+                    (self.entities.solar_pos_comp[orb.orbiting_ent_id].0 * self.game_scale.x) + self.player_screen_move.x,
+                    (self.entities.solar_pos_comp[orb.orbiting_ent_id].1 * self.game_scale.y) + self.player_screen_move.y 
                 );
                 //Draw the circle
                 canvas.draw(&orb.orbit_circle, 
@@ -168,7 +172,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             if self.entities.solar_system_id[i] == self.active_solar_system {
                 //update the final positions of entites
                 self.entities.draw_comp[i].screen_pos = 
-                    self.entities.get_orbit_final_pos(i, self.game_scale);
+                    self.entities.get_orbit_final_pos(i, self.game_scale, self.player_screen_move);
                 //update mouse focus
                 let offset = (self.entities.draw_comp[i].sprite_offset.0 as f32
                                 * self.game_scale.x,
@@ -193,6 +197,8 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             
             }
         }
+
+       
 
         //GameState Running
         if self.current_game_state == GameState::Running {
@@ -268,6 +274,21 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
 
 // 0---------------------INPUT EVENTS------------------------------------------0
 
+    fn mouse_button_up_event(
+        &mut self,
+        _ctx: &mut Context,
+        button: MouseButton,
+        x: f32,
+        y: f32,
+    ) -> GameResult {
+    
+
+        self.mouse_click_down = false;
+       
+       
+        Ok(())
+    }  
+
     fn mouse_button_down_event(
         &mut self,
         _ctx: &mut Context,
@@ -276,7 +297,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         y: f32,
     ) -> GameResult {
         self.mouse_click_down = true;
-        println!("Mouse button pressed: {:?}, x: {}, y: {}", button, x, y);
+
         Ok(())
     }
     //This gets the mouse position
@@ -285,13 +306,27 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         _ctx: &mut Context,
         x: f32,
         y: f32,
-        _xrel: f32,
-        _yrel: f32,
+        xrel: f32,
+        yrel: f32,
     ) -> GameResult {
-        if self.mouse_click_down { self.mouse_click_pos = (x, y); }
+        if self.mouse_click_down { 
+            
+        
+            self.player_screen_move.x += xrel;
+            self.player_screen_move.y += yrel;
+        }
         self.current_mouse_pos = (x,y);
+
+
+
         Ok(())
     }
+
+/*
+
+*/
+
+
     //The ggez will call events automatically for key and mouse events. 
     fn mouse_wheel_event(&mut self, _ctx: &mut Context, _x: f32, y: f32) -> GameResult {
         //test to make sure the game is not being zoomed out too far. 
@@ -315,6 +350,11 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                 else if self.current_game_state == GameState::Running {
                     self.current_game_state = GameState::Paused;}
             }
+            Some(KeyCode::Z) => {
+                self.player_screen_move = glam::Vec2::new(globs::SCREEN_OFFSET.0,globs::SCREEN_OFFSET.1);
+            }
+
+
             _ => (), // Do nothing
         }
         Ok(())
