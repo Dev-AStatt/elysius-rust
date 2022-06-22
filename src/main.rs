@@ -277,27 +277,22 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
     fn mouse_button_up_event(
         &mut self,
         _ctx: &mut Context,
-        button: MouseButton,
-        x: f32,
-        y: f32,
+        _button: MouseButton,
+        _x: f32,
+        _y: f32,
     ) -> GameResult {
-    
-
         self.mouse_click_down = false;
-       
-       
         Ok(())
     }  
 
     fn mouse_button_down_event(
         &mut self,
         _ctx: &mut Context,
-        button: MouseButton,
-        x: f32,
-        y: f32,
+        _button: MouseButton,
+        _x: f32,
+        _y: f32,
     ) -> GameResult {
         self.mouse_click_down = true;
-
         Ok(())
     }
     //This gets the mouse position
@@ -309,23 +304,15 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         xrel: f32,
         yrel: f32,
     ) -> GameResult {
-        if self.mouse_click_down { 
-            
-        
+        if self.mouse_click_down && 
+        self.current_mouse_focus == MouseFocus::Background { 
+            //adjust the relative screen position
             self.player_screen_move.x += xrel;
             self.player_screen_move.y += yrel;
         }
         self.current_mouse_pos = (x,y);
-
-
-
         Ok(())
     }
-
-/*
-
-*/
-
 
     //The ggez will call events automatically for key and mouse events. 
     fn mouse_wheel_event(&mut self, _ctx: &mut Context, _x: f32, y: f32) -> GameResult {

@@ -5,7 +5,7 @@ use ggez::{
     Context,
 };
 use glam::{f32, i32, vec2};
-use crate::globs;
+
 // 0------------------Start of ECS Sstem---------------------------------------0
 pub type EntityIndex = usize;
 
