@@ -118,21 +118,19 @@ impl ElysiusMainState {
         self.entities.make_new_sun(
             &mut self.entities_id,
             sprite_get(_ctx, "/Sprite-SUN_02.png"),
-            self.active_solar_system,                       
-            (0.0,0.0),                                              
-        );
-
+            self.active_solar_system                       
+        );            
             
         //First Planet
-        self.entities.make_new_orbiting_body(
+        self.entities.make_new_planet(
             &mut self.entities_id,
-            &_ctx,
             sprite_get(_ctx, "/Sprite-Planet_01.png"),
             self.active_solar_system,                   
+            &_ctx,
             0,                                     
             300                                         
         );
-        //First Planet
+/*         //First Planet
         self.entities.make_new_orbiting_body(
             &mut self.entities_id,
             &_ctx,
@@ -149,7 +147,7 @@ impl ElysiusMainState {
             self.active_solar_system,                
             1,                                  
             50,                                         
-        );
+        ); */
 
 
         //set the flag to not run this every tick.

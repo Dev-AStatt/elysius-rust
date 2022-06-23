@@ -21,8 +21,17 @@ pub struct OrbitalComponent {
     pub radius: i32,
     pub angle: f32,
     pub orbit_circle: graphics::Mesh,
-    
 }
+
+pub struct OptionalOrbitalInputs<'a> {
+    ctx: &'a Context,
+    orb_ent_id: usize,
+    orb_rad: i32,
+}
+
+
+
+
 
 pub struct EnergyComponent {
     //units of energy
@@ -57,11 +66,11 @@ pub struct Entities {
     pub solar_system_id: Vec<i32>,
     pub ent_name: Vec<String>,
     pub ent_type: Vec<ObjectType>,
-}
+
+  }
 
 impl Entities {
- 
-    fn get_new_name(&self) -> String {
+     fn get_new_name(&self) -> String {
         let mut rng = rand::thread_rng();
         let names = vec![
             "Lodania Minor",
@@ -131,21 +140,130 @@ impl Entities {
         }
     }
 
+    pub fn make_new_sun(
+        self: &mut Self,
+        entities_id: &mut Vec<EntityIndex>,
+        n_sprite: graphics::Image,
+        n_sol_sys_id: i32,
+       
+    ) {
+        self.make_new_orbiting_body(
+            ObjectType::Sun,
+            entities_id,
+            n_sprite,
+            n_sol_sys_id,
+            None
+        );
+    }
+
+    pub fn make_new_planet(
+        self: &mut Self,
+        entities_id: &mut Vec<EntityIndex>,
+        n_sprite: graphics::Image,
+        n_sol_sys_id: i32,
+        ctx: &Context,
+        n_orbiting_ent_id: usize,
+        n_orb_rad: i32,
+    ) {
+        let orbit_input = OptionalOrbitalInputs {
+            ctx,
+            orb_ent_id: n_orbiting_ent_id,
+            orb_rad: n_orb_rad,
+        };
+        self.make_new_orbiting_body(
+            ObjectType::Planet,
+            entities_id,
+            n_sprite,
+            n_sol_sys_id,
+            Some(orbit_input)
+        );
+    }
+
+
+
 
     //Function creates a new planet into the ECS system
     pub fn make_new_orbiting_body(
         self: &mut Self,
+        b_type: ObjectType,
         entities_id: &mut Vec<EntityIndex>,
-        current_ctx: &Context,
         n_sprite: graphics::Image,
         n_sol_sys_id: i32,
-        n_orbiting_ent_id: usize,
-        n_orb_rad: i32,
+        orbit_inputs: Option<OptionalOrbitalInputs>,
         ) {
 
-        //Verify that we are pushing the right numbers
-        if self.verify_vector_lengths() != entities_id.len() { return; }  
-        
+        //STEP 1 DRAWING COMPONENT 
+        let sprite_width = n_sprite.width().try_into().unwrap();
+        let sprite_height = n_sprite.height().try_into().unwrap();
+        //Drawing
+        let new_draw_comp = DrawingComponent{
+            sprite: n_sprite,
+            image_size: (sprite_width,sprite_height),
+            sprite_offset: (sprite_width as f32 / 2.0, sprite_height as f32 / 2.0),
+            screen_pos: glam::Vec2::new(0.0,0.0),
+        };
+
+        //STEP 2 OPTIONAL ORBITS
+        //Opperations specific to the body type
+        match b_type {
+            ObjectType::Sun => {
+                self.ent_type.push(ObjectType::Sun);
+            } 
+            ObjectType::Planet => {
+
+                self.ent_type.push(ObjectType::Planet);
+            }
+            ObjectType::Moon => {
+
+                self.ent_type.push(ObjectType::Moon);
+            }
+            ObjectType::Ship => {
+
+                self.ent_type.push(ObjectType::Ship);
+            }
+        }    
+        //if there is an orbital component passed in, we should make a 
+        //orbital component for the ECS system.
+        match orbit_inputs {
+            Some(orb_inp) => {
+                //Solar Position
+                let n_sol_pos = (
+                    self.solar_pos_comp[orb_inp.orb_ent_id].0,
+                    self.solar_pos_comp[orb_inp.orb_ent_id].1 + orb_inp.orb_rad as f32
+                );
+                self.solar_pos_comp.push(n_sol_pos);
+                //Push to ECS orbital component the OrbitalComponent Struct
+                //Returned by get_orbit and add as Some(). Sorry its so complicated
+                self.orbit_comp.push(
+                    //get orbital struct from get_orbit function
+                    Some(self.get_orbit(
+                        orb_inp.ctx,
+                        orb_inp.orb_rad,
+                        orb_inp.orb_ent_id))
+                );
+            }
+            None => {
+                //Solar Position if no Orbit Comp
+                self.solar_pos_comp.push((0.0,0.0));
+                self.orbit_comp.push(None);
+            }
+        }
+        //Push everything to ents
+        self.draw_comp.push(new_draw_comp);
+        self.energy_comp.push(Some(EnergyComponent::new()));
+        self.solar_system_id.push(n_sol_sys_id);
+        self.ent_name.push(self.get_new_name());
+        //Create a new entity ID
+        entities_id.push(entities_id.len());    
+    }
+
+
+    fn get_orbit(self: &Self,
+        current_ctx: &Context,
+        n_orb_rad: i32,
+        n_orbiting_ent_id: usize, 
+    ) -> OrbitalComponent {
+
         //get a new meshbuilder to make our circle
         let mb = &mut graphics::MeshBuilder::new();
         //get our new circle
@@ -157,15 +275,6 @@ impl Entities {
 
         let orbit_circle = graphics::Mesh::from_data(current_ctx, mb.build());
 
-        let sprite_width = n_sprite.width().try_into().unwrap();
-        let sprite_height = n_sprite.height().try_into().unwrap();
-        //Drawing
-        let new_draw_comp = DrawingComponent{
-            sprite: n_sprite,
-            image_size: (sprite_width,sprite_height),
-            sprite_offset: (sprite_width as f32 / 2.0, sprite_height as f32 / 2.0),
-            screen_pos: glam::Vec2::new(0.0,0.0),
-        };
         //Orbit
         let new_orbit = OrbitalComponent {
             orbiting_ent_id: n_orbiting_ent_id,
@@ -173,69 +282,15 @@ impl Entities {
             angle: 25.0,
             orbit_circle,
         };
-        let n_sol_pos = (
-            self.solar_pos_comp[n_orbiting_ent_id].0,
-            self.solar_pos_comp[n_orbiting_ent_id].1 + n_orb_rad as f32
-        );
+        return new_orbit;
 
-        //Push everything to ents
-        self.draw_comp.push(new_draw_comp);
-        self.orbit_comp.push(Some(new_orbit));
-        self.energy_comp.push(Some(EnergyComponent::new()));
-        self.solar_pos_comp.push(n_sol_pos);
-        self.solar_system_id.push(n_sol_sys_id);
-        self.ent_name.push(self.get_new_name());
-        //Create a new entity ID
-        entities_id.push(entities_id.len());    
-    }
-
-    //Function creates a new sun into the ECS system
-    pub fn make_new_sun(
-        self: &mut Self,
-        entities_id: &mut Vec<EntityIndex>,
-        n_sprite: graphics::Image,
-        n_sol_sys_id: i32,
-        n_sol_pos: (f32 ,f32) 
-        ) {
-
-        //Verify that we are pushing the right numbers
-        if self.verify_vector_lengths() != entities_id.len() { return; }    
-        //Drawing
-        let new_draw_comp = DrawingComponent{
-                            sprite: n_sprite,
-                            image_size: (128,128),
-                            sprite_offset: (64.0,64.0), 
-                            screen_pos: glam::Vec2::new(0.0,0.0),   
-                        };
-        let new_energy_comp = EnergyComponent::new();
-        //Push everything to ents
-        self.draw_comp.push(new_draw_comp);
-        self.solar_pos_comp.push(n_sol_pos);
-        self.solar_system_id.push(n_sol_sys_id);
-        //its a sun so no orbital info
-        self.orbit_comp.push(None);
-        self.energy_comp.push(Some(new_energy_comp));
-        self.ent_name.push(self.get_new_name());
-
-        //Create a new entity ID
-        entities_id.push(entities_id.len());
-    }
-
-    //function will check that all vectors in the entities struct have the
-    //same length and will return that length
-    fn verify_vector_lengths(&self) -> usize {
-        let vec_len = self.orbit_comp.len();
-        if vec_len != self.draw_comp.len() {println!("Your ECS system has mismatched vectors");}
-        if vec_len != self.solar_pos_comp.len() {println!("Your ECS system has mismatched vectors");}
-        if vec_len != self.solar_system_id.len() {println!("Your ECS system has mismatched vectors");}   
-        
-        return vec_len;
     }
 }
 
 
 
 // 0--------------------End of ECS System---------------------------------------0
+
 
 pub fn point_in_object(point: &(f32,f32), center: (f32, f32), r: f32) -> bool {
     let dx = (point.0-center.0).abs();
