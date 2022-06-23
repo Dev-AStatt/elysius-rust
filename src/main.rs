@@ -44,7 +44,7 @@ struct ElysiusMainState {
     current_mouse_focus: MouseFocus,
     current_mouse_pos: (f32, f32),
     mouse_click_down: bool,
-
+    menu_trigger: (bool, usize),
     //Menu Items
     game_menus: menus::Menus,
 }
@@ -74,7 +74,7 @@ impl ElysiusMainState {
             current_mouse_focus: MouseFocus::Background,
             current_mouse_pos: (0.0, 0.0),
             mouse_click_down: false,
-
+            menu_trigger: (false, 0),
             game_menus: menus::Menus::new(&_ctx),
             })
     }
@@ -198,7 +198,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             }
         }
 
-       
+        
 
         //GameState Running
         if self.current_game_state == GameState::Running {
@@ -223,18 +223,14 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             }
             
         }
-        match self.current_mouse_focus {
-            MouseFocus::Background => {}
-            MouseFocus::Menu => {}
-            MouseFocus::Body(id) => {
-                self.game_menus.draw_body_info_menu(
-                    &mut canvas,
-                    &self.entities,
-                    id,
-                );
-            }
-        }
-        
+       
+        if self.menu_trigger.0 {
+            self.game_menus.draw_body_info_menu(
+                &mut canvas,
+                &self.entities,
+                self.menu_trigger.1
+            );
+        } 
 
 
         //Concatinating strings is dumb
@@ -293,6 +289,19 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         _y: f32,
     ) -> GameResult {
         self.mouse_click_down = true;
+        
+        match self.current_mouse_focus {
+            MouseFocus::Body(id) => {
+                //Set bool trigger for the menu popup
+                self.menu_trigger = (true, id);
+            }
+            MouseFocus::Background => {
+                //Reset bool trigger for menu popup
+                self.menu_trigger.0 = false;
+            }
+            MouseFocus::Menu => {}
+        }
+
         Ok(())
     }
     //This gets the mouse position
@@ -303,16 +312,22 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         y: f32,
         xrel: f32,
         yrel: f32,
-    ) -> GameResult {
-        if self.mouse_click_down && 
-        self.current_mouse_focus == MouseFocus::Background { 
-            //adjust the relative screen position
-            self.player_screen_move.x += xrel;
-            self.player_screen_move.y += yrel;
+    ) -> GameResult { 
+        if self.mouse_click_down {
+            match self.current_mouse_focus {
+                MouseFocus::Background => {
+                    //self.current_mouse_pos = (x,y);
+                    self.player_screen_move.x += xrel;
+                    self.player_screen_move.y += yrel;
+                }
+                MouseFocus::Menu => {}
+                MouseFocus::Body(id) => {}
+            }
         }
         self.current_mouse_pos = (x,y);
-        Ok(())
+        Ok(()) 
     }
+
 
     //The ggez will call events automatically for key and mouse events. 
     fn mouse_wheel_event(&mut self, _ctx: &mut Context, _x: f32, y: f32) -> GameResult {
