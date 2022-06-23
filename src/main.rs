@@ -60,6 +60,7 @@ impl ElysiusMainState {
             solar_pos_comp: Vec::new(),
             solar_system_id: Vec::new(),
             ent_name: Vec::new(),
+            ent_type: Vec::new()
         };
 
         Ok(ElysiusMainState {
@@ -172,26 +173,23 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             if self.entities.solar_system_id[i] == self.active_solar_system {
                 //update the final positions of entites
                 self.entities.draw_comp[i].screen_pos = 
-                    self.entities.get_orbit_final_pos(i, self.game_scale, self.player_screen_move);
+                    self.entities.get_orbit_final_pos(
+                        i,
+                        self.game_scale,
+                        self.player_screen_move
+                    );
                 //update mouse focus
-                let offset = (self.entities.draw_comp[i].sprite_offset.0 as f32
-                                * self.game_scale.x,
-                              self.entities.draw_comp[i].sprite_offset.1 as f32
-                                * self.game_scale.y); 
+                let sprite_offset_scaled = (
+                    self.entities.draw_comp[i].sprite_offset.0 as f32 * self.game_scale.x,
+                    self.entities.draw_comp[i].sprite_offset.1 as f32 * self.game_scale.y); 
                 let adj_pos_for_input = (
-                    self.entities.draw_comp[i].screen_pos.x + offset.0, 
-                    self.entities.draw_comp[i].screen_pos.y + offset.1
+                    self.entities.draw_comp[i].screen_pos.x + sprite_offset_scaled.0, 
+                    self.entities.draw_comp[i].screen_pos.y + sprite_offset_scaled.1
                 );
                 if ecs::point_in_object(&self.current_mouse_pos,
                     adj_pos_for_input, 
                 self.entities.draw_comp[i].sprite_offset.0 as f32 * self.game_scale.x,
                 ) {
-                    // print!("mouse: `{{` {}, {} `}}` ",
-                    //     self.current_mouse_pos.0,
-                    //     self.current_mouse_pos.1
-                    // );
-                    // print!("Withn point: `{{` {}, {} `}}`", for_mouse_pos.0,for_mouse_pos.1 );
-                    // println!("With Radius: {}", self.entities.draw_comp[i].sprite_offset.0 as f32 * self.game_scale.x);
                     self.current_mouse_focus = MouseFocus::Body(i);
                 }
             
@@ -281,6 +279,8 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         Ok(())
     }  
 
+    //Mouse button down triggers when the mouse button is pressed down, called by
+    //ggez as an update function. no need to call it yourself. 
     fn mouse_button_down_event(
         &mut self,
         _ctx: &mut Context,
@@ -313,6 +313,9 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         xrel: f32,
         yrel: f32,
     ) -> GameResult { 
+        //set the current mouse position for the game
+        self.current_mouse_pos = (x,y);
+        //this is all for a check to see if the background is dragged to move things
         if self.mouse_click_down {
             match self.current_mouse_focus {
                 MouseFocus::Background => {
@@ -324,7 +327,6 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                 MouseFocus::Body(id) => {}
             }
         }
-        self.current_mouse_pos = (x,y);
         Ok(()) 
     }
 

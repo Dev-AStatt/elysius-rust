@@ -6,10 +6,15 @@ use ggez::{
 };
 use glam::{f32, i32, vec2};
 
+
+pub enum ObjectType {
+    Sun,
+    Planet,
+    Moon,
+    Ship,
+}
 // 0------------------Start of ECS Sstem---------------------------------------0
 pub type EntityIndex = usize;
-
-
 
 pub struct OrbitalComponent {
     pub orbiting_ent_id: usize,
@@ -51,10 +56,7 @@ pub struct Entities {
     pub solar_pos_comp: Vec<(f32, f32)>,
     pub solar_system_id: Vec<i32>,
     pub ent_name: Vec<String>,
-
-   
-   
-
+    pub ent_type: Vec<ObjectType>,
 }
 
 impl Entities {
