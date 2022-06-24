@@ -11,6 +11,7 @@ struct MenuBodyPositions {
     name_pos: glam::Vec2,
     pos_coal_text: glam::Vec2,
     pos_radioactive_text: glam::Vec2,
+    pos_body_sprite: glam::Vec2,
 }
     impl MenuBodyPositions {
         pub fn new() -> Self {
@@ -24,12 +25,16 @@ struct MenuBodyPositions {
             let pos_radioactive_text = glam::Vec2::new(
                 pos.x + 305.0,
                 pos.y + 112.0);
+            let pos_body_sprite = glam::Vec2::new(
+                pos.x + 40.0,
+                pos.y + 70.0);
 
             MenuBodyPositions {
                 pos,
                 name_pos,
                 pos_coal_text,
                 pos_radioactive_text,
+                pos_body_sprite,
             }
         }
     }
@@ -67,6 +72,10 @@ impl Menus {
         canvas.draw(
             &self.body_texture,
             self.menu_body_pos.pos);
+        
+        //Draw The Sprite of the Planet or Sun
+        canvas.draw(&ents.draw_comp[ent_id].sprite,
+        self.menu_body_pos.pos_body_sprite);
 
         //Draw Name
         canvas.draw(
