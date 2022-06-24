@@ -138,7 +138,7 @@ impl ElysiusMainState {
             self.active_solar_system,                   
             &_ctx,
             1,                                     
-            300                                         
+            75                                         
         );
 /*         //First Planet
         self.entities.make_new_orbiting_body(
@@ -221,14 +221,36 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             }
             
         }
-       
         if self.menu_trigger.0 {
-            self.game_menus.draw_body_info_menu(
-                &mut canvas,
-                &self.entities,
-                self.menu_trigger.1
-            );
-        } 
+            match self.entities.ent_type[self.menu_trigger.1] {
+                ecs::ObjectType::Planet => {
+                    self.game_menus.draw_body_info_menu(
+                        &mut canvas,
+                        &self.entities,
+                        self.menu_trigger.1
+                    );
+                }
+                ecs::ObjectType::Sun => {
+                    self.game_menus.draw_body_info_menu(
+                        &mut canvas,
+                        &self.entities,
+                        self.menu_trigger.1
+                    );
+                }
+                ecs::ObjectType::Moon => {
+                    self.game_menus.draw_body_info_menu(
+                        &mut canvas,
+                        &self.entities,
+                        self.menu_trigger.1
+                    );
+                }
+                ecs::ObjectType::Ship => {}
+            }
+        }
+
+        
+            
+         
 
 
         //Concatinating strings is dumb
