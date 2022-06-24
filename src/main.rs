@@ -130,6 +130,16 @@ impl ElysiusMainState {
             0,                                     
             300                                         
         );
+
+        //First Ship
+        self.entities.make_new_ship(
+            &mut self.entities_id,
+            sprite_get(_ctx, "/Sprite-Ship_01.png"),
+            self.active_solar_system,                   
+            &_ctx,
+            1,                                     
+            300                                         
+        );
 /*         //First Planet
         self.entities.make_new_orbiting_body(
             &mut self.entities_id,
@@ -139,15 +149,7 @@ impl ElysiusMainState {
             1,                                  
             100                                         
         );
-        //First Ship
-        self.entities.make_new_orbiting_body(
-            &mut self.entities_id,
-            &_ctx,
-            sprite_get(_ctx, "/Sprite-Ship_01.png"),
-            self.active_solar_system,                
-            1,                                  
-            50,                                         
-        ); */
+*/
 
 
         //set the flag to not run this every tick.

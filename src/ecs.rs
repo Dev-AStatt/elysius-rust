@@ -179,7 +179,28 @@ impl Entities {
         );
     }
 
-
+    pub fn make_new_ship(
+        self: &mut Self,
+        entities_id: &mut Vec<EntityIndex>,
+        n_sprite: graphics::Image,
+        n_sol_sys_id: i32,
+        ctx: &Context,
+        n_orbiting_ent_id: usize,
+        n_orb_rad: i32,
+    ) {
+        let orbit_input = OptionalOrbitalInputs {
+            ctx,
+            orb_ent_id: n_orbiting_ent_id,
+            orb_rad: n_orb_rad,
+        };
+        self.make_new_orbiting_body(
+            ObjectType::Ship,
+            entities_id,
+            n_sprite,
+            n_sol_sys_id,
+            Some(orbit_input)
+        );
+    }
 
 
     //Function creates a new planet into the ECS system
