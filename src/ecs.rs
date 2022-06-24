@@ -229,18 +229,22 @@ impl Entities {
         match b_type {
             ObjectType::Sun => {
                 self.ent_type.push(ObjectType::Sun);
+                self.energy_comp.push(Some(EnergyComponent::new()));
             } 
             ObjectType::Planet => {
 
                 self.ent_type.push(ObjectType::Planet);
+                self.energy_comp.push(Some(EnergyComponent::new()));
             }
             ObjectType::Moon => {
 
                 self.ent_type.push(ObjectType::Moon);
+                self.energy_comp.push(Some(EnergyComponent::new()));
             }
             ObjectType::Ship => {
 
                 self.ent_type.push(ObjectType::Ship);
+                self.energy_comp.push(None);
             }
         }    
         //if there is an orbital component passed in, we should make a 
@@ -271,7 +275,7 @@ impl Entities {
         }
         //Push everything to ents
         self.draw_comp.push(new_draw_comp);
-        self.energy_comp.push(Some(EnergyComponent::new()));
+        
         self.solar_system_id.push(n_sol_sys_id);
         self.ent_name.push(self.get_new_name());
         //Create a new entity ID
