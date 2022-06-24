@@ -6,13 +6,23 @@ use ggez::{
 };
 use glam::{f32, i32, vec2};
 
-
+#[derive(PartialEq)]
 pub enum ObjectType {
     Sun,
     Planet,
     Moon,
     Ship,
 }
+
+
+/* 
+impl PartialEq for Book {
+    fn eq(&self, other: &Self) -> bool {
+        self.isbn == other.isbn
+    }
+}
+*/
+
 // 0------------------Start of ECS Sstem---------------------------------------0
 pub type EntityIndex = usize;
 
