@@ -11,6 +11,10 @@ use ggez::{
 use glam::*;
 use std::{env, path};
 
+mod ecs;
+mod globs;
+mod menus;
+
 #[derive(PartialEq)]
 enum GameState {
     Running,
@@ -24,11 +28,6 @@ enum MouseFocus {
     Body(usize),
     Menu,
 }
-
-
-mod ecs;
-mod globs;
-mod menus;
 
 //MAIN GAME STRUCT
 struct ElysiusMainState {
@@ -140,17 +139,6 @@ impl ElysiusMainState {
             1,                                     
             75                                         
         );
-/*         //First Planet
-        self.entities.make_new_orbiting_body(
-            &mut self.entities_id,
-            &_ctx,
-            sprite_get(_ctx, "/Sprite-Moon_01.png"),
-            self.active_solar_system,                
-            1,                                  
-            100                                         
-        );
-*/
-
 
         //set the flag to not run this every tick.
         self.first_time = false;
@@ -192,18 +180,14 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                 ) {
                     self.current_mouse_focus = MouseFocus::Body(i);
                 }
-            
             }
         }
-
         
 
         //GameState Running
         if self.current_game_state == GameState::Running {
             self.entities.inc_orbital_body_pos(self.active_solar_system);
         }
-        
-
         Ok(())
     }
 
@@ -216,11 +200,11 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
          //Draw ECS Ent
          for i in 0..self.entities_id.len() {
             if self.entities.solar_system_id[i] == self.active_solar_system {
-                self.draw_solar_object_ecs(&mut canvas, i);
-                
+                self.draw_solar_object_ecs(&mut canvas, i); 
             }
-            
         }
+
+        //Check if a menu is triggered then search what object it is to display
         if self.menu_trigger.0 {
             match self.entities.ent_type[self.menu_trigger.1] {
                 ecs::ObjectType::Planet => {
