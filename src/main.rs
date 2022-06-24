@@ -14,6 +14,7 @@ use std::{env, path};
 mod ecs;
 mod globs;
 mod menus;
+mod user;
 
 #[derive(PartialEq)]
 enum GameState {
@@ -41,14 +42,17 @@ struct ElysiusMainState {
     //ECS
     entities: ecs::Entities,
     entities_id: Vec<ecs::EntityIndex>,
+    //Structures
+    mouse: MouseState,
+    player: user::Player,
+    //Game State Values
     first_time: bool,
     game_scale: glam::Vec2,
     player_screen_move: glam::Vec2,
     active_solar_system: i32,
     current_game_state: GameState,
-    mouse: MouseState,
-    menu_trigger: (bool, usize),
     //Menu Items
+    menu_trigger: (bool, usize),
     game_menus: menus::Menus,
 }
 
@@ -74,12 +78,14 @@ impl ElysiusMainState {
         Ok(ElysiusMainState {
             entities: init_ent,
             entities_id: Vec::new(),
+            mouse,
+            player: user::Player::new(),
             first_time: true,
             game_scale: glam::Vec2::new(1.0,1.0),
             player_screen_move: glam::Vec2::new(globs::SCREEN_OFFSET.0,globs::SCREEN_OFFSET.1),
             active_solar_system: 0,
             current_game_state: GameState::Running,
-            mouse,
+            
             menu_trigger: (false, 0),
             game_menus: menus::Menus::new(&_ctx),
             })
@@ -296,7 +302,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         _y: f32,
     ) -> GameResult {
         self.mouse.click_down = true;
-        
+        //Match what the mose is focused on
         match self.mouse.focus {
             MouseFocus::Body(id) => {
                 if self.entities.ent_type[id] == ecs::ObjectType::Ship {
