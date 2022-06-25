@@ -17,6 +17,7 @@ struct OrbMenuPos {
     bkgr_h: f32,
     bkgr_sec2_percent: f32,
     spr_corner: (f32,f32),
+    spr_pos: glam::Vec2,
     bkgr_sec2_pos_x: f32,
     bkgr_sec2_w: f32,
     spr_w: f32,
@@ -40,12 +41,15 @@ impl OrbMenuPos {
         let spr_h = bkgr_h * 0.50;
         let button_pos = (bkgr_sec2_pos_x + (bkgr_w * 0.05), spr_corner.1);
 
+        let spr_pos = glam::Vec2::new(spr_corner.0 + 75.0,spr_corner.1 + 75.0);
+
         OrbMenuPos {
             bkgr_pos,
             bkgr_w,
             bkgr_h,
             bkgr_sec2_percent,
             spr_corner,
+            spr_pos,
             bkgr_sec2_pos_x,
             bkgr_sec2_w,
             spr_w,
@@ -111,12 +115,27 @@ impl UIComponent {
         canvas: &mut graphics::Canvas,
         ents: &Entities,
     ) {
+        //Draw the background
         canvas.draw(
             &self.mesh,
             graphics::DrawParam::new().dest(self.pos)
         );
-
-    }
+        
+        match self.menu_type {
+            MenuType::UIScreenTop => {}
+            MenuType::ShipInfo => {}
+            MenuType::OrbitBodyInfo => {
+                let obi_pos = OrbMenuPos::new();
+                //Draw the Sprite
+                canvas.draw(
+                    &ents.draw_comp[self.ent_id].sprite,
+                    obi_pos.spr_pos
+                );
+       
+ 
+            }
+        }
+   }
     
 
     pub fn set_pos(&mut self, pos: glam::Vec2) {
