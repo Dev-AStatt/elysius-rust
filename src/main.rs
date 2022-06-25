@@ -285,7 +285,6 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         match self.mouse.focus {
             MouseFocus::Body(id) => {
                 if self.entities.ent_type[id] == ecs::ObjectType::Ship {
-
                 } else {
                     //add menu to menu stack
                     self.menus.push(
@@ -295,20 +294,12 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                             id,
                         )
                     );
-                    //Set bool trigger for the menu popup
-                    //self.menu_trigger = (true, id);
                 }
-                
             }
             MouseFocus::Background => {
                 //Pop off any menu that is a OrbitBodyInfo
-                for i in 0..self.menus.len() {
-                    if self.menus[i].menu_type_OBI() {
-                        self.menus.remove(i);        
-                    }
-                }
-                //Reset bool trigger for menu popup
-                //self.menu_trigger.0 = false;
+                //function says retain any vector element where .menu returns false
+                self.menus.retain(|i| !i.menu_type_OBI());
             }
             MouseFocus::Menu => {}
         }
