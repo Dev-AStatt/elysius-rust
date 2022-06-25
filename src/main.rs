@@ -15,6 +15,7 @@ mod ecs;
 mod globs;
 mod menus;
 mod user;
+mod ui_component;
 
 #[derive(PartialEq)]
 enum GameState {
@@ -52,6 +53,7 @@ struct ElysiusMainState {
     active_solar_system: i32,
     current_game_state: GameState,
     //Menu Items
+    menus: Vec<ui_component::UIComponent>,
     menu_trigger: (bool, usize),
     game_menus: menus::Menus,
 }
@@ -80,6 +82,7 @@ impl ElysiusMainState {
             entities_id: Vec::new(),
             mouse,
             player: user::Player::new(),
+            menus: Vec::new(),
             first_time: true,
             game_scale: glam::Vec2::new(1.0,1.0),
             player_screen_move: glam::Vec2::new(globs::SCREEN_OFFSET.0,globs::SCREEN_OFFSET.1),
@@ -206,7 +209,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         let mut canvas = graphics::Canvas::from_frame(
             ctx,
-            graphics::CanvasLoadOp::Clear([0.2, 0.2, 0.2, 1.0].into()),
+            graphics::CanvasLoadOp::Clear([0.1, 0.1, 0.1, 1.0].into()),
         );
 
          //Draw ECS Ent
@@ -220,21 +223,21 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         if self.menu_trigger.0 {
             match self.entities.ent_type[self.menu_trigger.1] {
                 ecs::ObjectType::Planet => {
-                    self.game_menus.draw_body_info_menu(
+                    self.game_menus.draw_body_info_menu_sprite(
                         &mut canvas,
                         &self.entities,
                         self.menu_trigger.1
                     );
                 }
                 ecs::ObjectType::Sun => {
-                    self.game_menus.draw_body_info_menu(
+                    self.game_menus.draw_body_info_menu_sprite(
                         &mut canvas,
                         &self.entities,
                         self.menu_trigger.1
                     );
                 }
                 ecs::ObjectType::Moon => {
-                    self.game_menus.draw_body_info_menu(
+                    self.game_menus.draw_body_info_menu_sprite(
                         &mut canvas,
                         &self.entities,
                         self.menu_trigger.1
@@ -242,8 +245,8 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                 }
                 ecs::ObjectType::Ship => {}
             }
-        }
-
+        } 
+          
         //Concatinating strings is dumb
         let mut str = String::from("Tick: ");
         str.push_str(&ctx.time.ticks().to_string());
@@ -274,6 +277,19 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         ctx.gfx.set_window_title(&format!(
             "Elysius - {:.0} FPS", ctx.time.fps()));
 
+        //THIS IS JUST FOR TESTING PLEAAAAAASE REMOVE 
+
+        let test_meu = ui_component::UIComponent::new_menu_orbit_body_info(ctx,(10.0,10.0));
+        let dest = glam::Vec2::new(40.0,40.0);
+        canvas.draw(
+            &test_meu.mesh,
+            graphics::DrawParam::new().dest(dest)
+        );
+
+
+
+        //END OF TESTING  
+            
         //Nothing after this, pushes all the draws to the graphics card
         canvas.finish(ctx)?;
         Ok(())

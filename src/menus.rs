@@ -6,14 +6,14 @@ use ggez::{
 
 
 
-struct MenuBodyPositions {
+struct SpriteMenuBodyPositions {
     pos: glam::Vec2,
     name_pos: glam::Vec2,
     pos_coal_text: glam::Vec2,
     pos_radioactive_text: glam::Vec2,
     pos_body_sprite: glam::Vec2,
 }
-    impl MenuBodyPositions {
+    impl SpriteMenuBodyPositions {
         pub fn new() -> Self {
             let pos = glam::Vec2::new(30.0,30.0);
             let name_pos = glam::Vec2::new(
@@ -29,7 +29,7 @@ struct MenuBodyPositions {
                 pos.x + 40.0,
                 pos.y + 70.0);
 
-            MenuBodyPositions {
+            SpriteMenuBodyPositions {
                 pos,
                 name_pos,
                 pos_coal_text,
@@ -39,7 +39,7 @@ struct MenuBodyPositions {
         }
     }
 
-impl Default for MenuBodyPositions {
+impl Default for SpriteMenuBodyPositions {
     fn default() -> Self {
         Self::new()
     }
@@ -48,7 +48,7 @@ impl Default for MenuBodyPositions {
 pub struct Menus {
     pub body_texture: graphics::Image,
 
-    menu_body_pos: MenuBodyPositions,
+    menu_body_pos: SpriteMenuBodyPositions,
     
 }
 
@@ -58,11 +58,11 @@ impl Menus {
         Menus {
             body_texture: ecs::sprite_get(ctx, "/menu_02.png"),
 
-            menu_body_pos: MenuBodyPositions::new(),
+            menu_body_pos: SpriteMenuBodyPositions::new(),
         }
     }
 
-    pub fn draw_body_info_menu(
+    pub fn draw_body_info_menu_sprite(
         self: &Self,
         canvas: &mut graphics::Canvas,
         ents: &Entities,
