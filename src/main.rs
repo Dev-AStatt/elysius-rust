@@ -280,7 +280,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         //THIS IS JUST FOR TESTING PLEAAAAAASE REMOVE 
 
         let test_meu = ui_component::UIComponent::new_menu_orbit_body_info(ctx,(10.0,10.0));
-        let dest = glam::Vec2::new(40.0,40.0);
+        let dest = glam::Vec2::new(50.0,50.0);
         canvas.draw(
             &test_meu.mesh,
             graphics::DrawParam::new().dest(dest)
