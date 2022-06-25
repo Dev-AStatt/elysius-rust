@@ -54,7 +54,6 @@ struct ElysiusMainState {
     current_game_state: GameState,
     //Menu Items
     menus: Vec<ui_component::UIComponent>,
-    menu_trigger: (bool, usize),
     game_menus: menus::Menus,
 }
 
@@ -89,7 +88,6 @@ impl ElysiusMainState {
             active_solar_system: 0,
             current_game_state: GameState::Running,
             
-            menu_trigger: (false, 0),
             game_menus: menus::Menus::new(&_ctx),
             })
     }
@@ -219,34 +217,12 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             }
         }
 
-        //Check if a menu is triggered then search what object it is to display
-        if self.menu_trigger.0 {
-            match self.entities.ent_type[self.menu_trigger.1] {
-                ecs::ObjectType::Planet => {
-                    self.game_menus.draw_body_info_menu_sprite(
-                        &mut canvas,
-                        &self.entities,
-                        self.menu_trigger.1
-                    );
-                }
-                ecs::ObjectType::Sun => {
-                    self.game_menus.draw_body_info_menu_sprite(
-                        &mut canvas,
-                        &self.entities,
-                        self.menu_trigger.1
-                    );
-                }
-                ecs::ObjectType::Moon => {
-                    self.game_menus.draw_body_info_menu_sprite(
-                        &mut canvas,
-                        &self.entities,
-                        self.menu_trigger.1
-                    );
-                }
-                ecs::ObjectType::Ship => {}
-            }
+        //Draw any menus on screen
+        for i in 0..self.menus.len() {
+           self.menus[i].draw_ui_comp(&mut canvas, &self.entities); 
         } 
-          
+
+
         //Concatinating strings is dumb
         let mut str = String::from("Tick: ");
         str.push_str(&ctx.time.ticks().to_string());
@@ -277,19 +253,6 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         ctx.gfx.set_window_title(&format!(
             "Elysius - {:.0} FPS", ctx.time.fps()));
 
-        //THIS IS JUST FOR TESTING PLEAAAAAASE REMOVE 
-
-        let test_meu = ui_component::UIComponent::new_menu_orbit_body_info(ctx,(10.0,10.0));
-        let dest = glam::Vec2::new(50.0,50.0);
-        canvas.draw(
-            &test_meu.mesh,
-            graphics::DrawParam::new().dest(dest)
-        );
-
-
-
-        //END OF TESTING  
-            
         //Nothing after this, pushes all the draws to the graphics card
         canvas.finish(ctx)?;
         Ok(())
@@ -312,7 +275,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
     //ggez as an update function. no need to call it yourself. 
     fn mouse_button_down_event(
         &mut self,
-        _ctx: &mut Context,
+        ctx: &mut Context,
         _button: MouseButton,
         _x: f32,
         _y: f32,
@@ -324,14 +287,28 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                 if self.entities.ent_type[id] == ecs::ObjectType::Ship {
 
                 } else {
+                    //add menu to menu stack
+                    self.menus.push(
+                        ui_component::UIComponent::new_menu_orbit_body_info(
+                            &ctx,
+                            (50.0,50.0),
+                            id,
+                        )
+                    );
                     //Set bool trigger for the menu popup
-                    self.menu_trigger = (true, id);
+                    //self.menu_trigger = (true, id);
                 }
                 
             }
             MouseFocus::Background => {
+                //Pop off any menu that is a OrbitBodyInfo
+                for i in 0..self.menus.len() {
+                    if self.menus[i].menu_type_OBI() {
+                        self.menus.remove(i);        
+                    }
+                }
                 //Reset bool trigger for menu popup
-                self.menu_trigger.0 = false;
+                //self.menu_trigger.0 = false;
             }
             MouseFocus::Menu => {}
         }
