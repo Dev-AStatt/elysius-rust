@@ -299,7 +299,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             MouseFocus::Background => {
                 //Pop off any menu that is a OrbitBodyInfo
                 //function says retain any vector element where .menu returns false
-                self.menus.retain(|i| !i.menu_type_OBI());
+                self.menus.retain(|i| !i.menu_type_obi());
             }
             MouseFocus::Menu => {}
         }
