@@ -15,14 +15,13 @@ struct OrbMenuPos {
     bkgr_pos: (f32, f32),
     bkgr_w: f32,
     bkgr_h: f32,
-    bkgr_sec2_percent: f32,
     spr_corner: (f32,f32),
     spr_pos: glam::Vec2,
     bkgr_sec2_pos_x: f32,
     bkgr_sec2_w: f32,
     spr_w: f32,
     spr_h: f32,
-    button_pos: (f32, f32),
+    display_item_pos: (f32, f32),
 }
 
 impl OrbMenuPos {
@@ -39,7 +38,7 @@ impl OrbMenuPos {
         let bkgr_sec2_w = bkgr_w - bkgr_sec2_pos_x;
         let spr_w = bkgr_w *0.35;
         let spr_h = bkgr_h * 0.50;
-        let button_pos = (bkgr_sec2_pos_x + (bkgr_w * 0.05), spr_corner.1);
+        let disp_pos = (bkgr_sec2_pos_x + (bkgr_w * 0.02), spr_corner.1);
 
         let spr_pos = glam::Vec2::new(spr_corner.0 + 75.0,spr_corner.1 + 75.0);
 
@@ -47,21 +46,20 @@ impl OrbMenuPos {
             bkgr_pos,
             bkgr_w,
             bkgr_h,
-            bkgr_sec2_percent,
             spr_corner,
             spr_pos,
             bkgr_sec2_pos_x,
             bkgr_sec2_w,
             spr_w,
             spr_h,
-            button_pos,
+            display_item_pos: disp_pos,
           }
     }
 }
 
-struct Button {
-    pos: (f32, f32),
-    str_pos: (f32, f32),
+struct DisplayItem {
+    pos: glam::Vec2,
+    str_pos: glam::Vec2,
     w: f32,
     h: f32,
     mesh: graphics::Mesh,
@@ -75,7 +73,7 @@ pub struct UIComponent {
     menu_type: MenuType,
     pub pos: glam::Vec2,
     pub mesh: graphics::Mesh,
-    buttons: Vec<Button>,
+    display_items: Vec<DisplayItem>,
     ent_id: usize,
 }
 
@@ -98,14 +96,14 @@ impl UIComponent {
         let mesh =  graphics::Mesh::from_data(ctx, mb.build());
 
         //Get buttons into vector
-        let mut buttons: Vec<Button> = Vec::new();
-        buttons.push(get_button(positions.button_pos, ctx, None));
+        let mut buttons: Vec<DisplayItem> = Vec::new();
+        buttons.push(get_disp_item(positions.display_item_pos, ctx, None));
 
         let ui = UIComponent { 
                     menu_type,
                     pos,
                     mesh,
-                    buttons,
+                    display_items: buttons,
                     ent_id,
                 }; 
         return ui;
@@ -135,6 +133,14 @@ impl UIComponent {
  
             }
         }
+        //For Each Button 
+        for i in 0..self.display_items.len() {
+            //Draw Button itself
+            canvas.draw(
+                &self.display_items[i].mesh,
+                graphics::DrawParam::new().dest(self.pos) //Position is position of the menu itself not the button
+            );
+        }
    }
     
 
@@ -146,7 +152,7 @@ impl UIComponent {
         &self.menu_type
     }
 
-    pub fn menu_type_OBI(&self) -> bool {
+    pub fn menu_type_obi(&self) -> bool {
         if self.menu_type == MenuType::OrbitBodyInfo {
             return true;
         } else {return false;}
@@ -173,34 +179,40 @@ impl ColorPalette {
 }
 
 //Returns a fixed sized button with an optional image to go with it. 
-fn get_button(pos: (f32, f32), ctx: &Context, img: Option<graphics::Image>) -> Button {
-    let btn_w = 50.0;
-    let btn_h = 36.0;
+fn get_disp_item(n_pos: (f32, f32), ctx: &Context, img: Option<graphics::Image>) -> DisplayItem {
+    let disp_w = 150.0;
+    let disp_h = 50.0;
+    let pos = glam::Vec2::new(n_pos.0, n_pos.1);
+
     let n_str_pos; 
     match img {
         Some(_) => {
-            n_str_pos = (pos.0 + 35.0, pos.1 + 2.0);
+            n_str_pos = (pos.x + 35.0, pos.y + 2.0);
         }
         None => {
-            n_str_pos = (pos.0 + 2.0, pos.1 + 2.0);    
+            n_str_pos = (pos.x + 2.0, pos.y + 2.0);    
         }
     }
+    let str_pos = glam::Vec2::new(n_str_pos.0, n_str_pos.1);
 
     let col_palette = ColorPalette::new();
+    
+    //So this is going to look really odd. But what we do is we make two meshes
+    //one for the button normally, and one for an alternate color mesh
+    //so we can choose what to draw on runtime weather its focused or not.
     //make mesh
     let mb = &mut graphics::MeshBuilder::new();
     mb.rounded_rectangle(
         graphics::DrawMode::fill(), 
-        graphics::Rect::new(pos.0, pos.1, btn_w, btn_h),
+        graphics::Rect::new(pos.x, pos.y, disp_w, disp_h),
         15.0, 
-        col_palette.color_4,
+        col_palette.color_3,
     ).expect("Rec Mesh Failed");
     let mesh = graphics::Mesh::from_data(ctx, mb.build());        
-
-
-    return Button {
+  
+    return DisplayItem {
         pos,
-        str_pos: n_str_pos,
+        str_pos,
         w: 50.0,
         h: 36.0,
         mesh,
