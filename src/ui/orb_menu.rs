@@ -1,6 +1,5 @@
 
-use ggez::graphics;
-
+use ggez::{graphics, Context};
 use super::color_palette;
 pub struct OrbMenuPos {
     bkgr_pos: (f32, f32),
@@ -46,50 +45,50 @@ impl OrbMenuPos {
             display_item_pos: disp_pos,
           }
     }
+        
+    //Function will add the mesh data for the background to the orbiting body mesh builder 
+    pub fn get_mesh(
+        &self,
+        ctx: &Context,
+    ) -> graphics::Mesh {
+        let rad = 15.0;
+        let color_palette = color_palette::ColorPalette::new();
+        //Background
+        let mb = &mut graphics::MeshBuilder::new();
+        mb.rounded_rectangle(
+            graphics::DrawMode::fill(), 
+            graphics::Rect::new(
+                self.bkgr_pos.0,
+                self.bkgr_pos.1, 
+                self.bkgr_w,
+                self.bkgr_h),
+            rad, 
+            color_palette.color_1,
+        ).expect("Rec Mesh Failed");
+        // Second Rounded Background
+        mb.rounded_rectangle(
+            graphics::DrawMode::fill(), 
+            graphics::Rect::new(
+                self.bkgr_sec2_pos_x, 
+                self.bkgr_pos.1,
+                self.bkgr_sec2_w,
+                self.bkgr_h),
+            rad, 
+            color_palette.color_2,
+        ).expect("Rec Mesh Failed");
+        // Boundary for sprite box
+        mb.rounded_rectangle(
+            graphics::DrawMode::fill(), 
+            graphics::Rect::new(
+                self.spr_corner.0,
+                self.spr_corner.1,
+                self.spr_w,
+                self.spr_h),
+            rad, 
+            color_palette.color_2,
+        ).expect("Rec Mesh Failed");
+                //build mesh
+        return graphics::Mesh::from_data(ctx, mb.build());
+    }
 }
-
-
-//Function will add the mesh data for the background to the orbiting body mesh builder 
-pub fn add_bkgr_orb_bod_to_mesh(
-    mb: &mut graphics::MeshBuilder,
-    positions: &OrbMenuPos,
-) {
-    let rad = 15.0;
-    let color_palette = color_palette::ColorPalette::new();
-    //Background
-    mb.rounded_rectangle(
-        graphics::DrawMode::fill(), 
-        graphics::Rect::new(
-            positions.bkgr_pos.0,
-            positions.bkgr_pos.1, 
-            positions.bkgr_w,
-            positions.bkgr_h),
-        rad, 
-        color_palette.color_1,
-    ).expect("Rec Mesh Failed");
-    // Second Rounded Background
-    mb.rounded_rectangle(
-        graphics::DrawMode::fill(), 
-        graphics::Rect::new(
-            positions.bkgr_sec2_pos_x, 
-            positions.bkgr_pos.1,
-            positions.bkgr_sec2_w,
-            positions.bkgr_h),
-        rad, 
-        color_palette.color_2,
-    ).expect("Rec Mesh Failed");
-    // Boundary for sprite box
-    mb.rounded_rectangle(
-        graphics::DrawMode::fill(), 
-        graphics::Rect::new(
-            positions.spr_corner.0,
-            positions.spr_corner.1,
-            positions.spr_w,
-            positions.spr_h),
-        rad, 
-        color_palette.color_2,
-    ).expect("Rec Mesh Failed");
-
-}
-
 

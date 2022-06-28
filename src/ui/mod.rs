@@ -34,13 +34,7 @@ impl UIComponent {
         let positions = orb_menu::OrbMenuPos::new();
         //make position out of pos_init
         let pos = glam::Vec2::new(pos_init.0, pos_init.1);
-        
-        //make a new mesh for us to add things to
-        let mb = &mut graphics::MeshBuilder::new();
-        orb_menu::add_bkgr_orb_bod_to_mesh(mb, &positions);
-        //build mesh
-        let mesh =  graphics::Mesh::from_data(ctx, mb.build());
-
+        let mesh = positions.get_mesh(ctx);
         //Get buttons into vector
         let mut disp_items: Vec<disp_item::DisplayItem> = Vec::new();
         disp_items.push(disp_item::DisplayItem::new(positions.display_item_pos, ctx, None));
