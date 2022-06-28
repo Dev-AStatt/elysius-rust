@@ -1,4 +1,4 @@
-use crate::ecs::Entities;
+use crate::ecs::{Entities, sprite_get };
 use ggez::{
     graphics::{self},
     Context,
@@ -37,7 +37,10 @@ impl UIComponent {
         let mesh = positions.get_mesh(ctx);
         //Get buttons into vector
         let mut disp_items: Vec<disp_item::DisplayItem> = Vec::new();
-        disp_items.push(disp_item::DisplayItem::new(positions.display_item_pos, ctx, None));
+        disp_items.push(disp_item::DisplayItem::new(
+            positions.display_item_pos,
+            ctx,
+            Some(sprite_get(ctx, "/Sprite-Coal_01.png"))));
 
         let ui = UIComponent { 
                     menu_type,
@@ -74,7 +77,7 @@ impl UIComponent {
         }
         //Draw each Display Item
         for i in 0..self.display_items.len() {
-            self.display_items[i].draw_self(canvas, self.pos);
+            self.display_items[i].draw_self(canvas, self.pos, "str".to_string());
         }
    }
     
