@@ -28,7 +28,7 @@ impl DisplayItem {
             Some(_) => {n_str_pos = (pos.x + 35.0, pos.y + 2.0);}
             None => {   n_str_pos = (pos.x + 2.0, pos.y + 2.0); }
         }
-        let str_pos = glam::Vec2::new(n_str_pos.0, n_str_pos.1);
+        let str_pos = glam::Vec2::new(n_str_pos.0, n_str_pos.1 + 10.0);
         let col_palette = color_palette::ColorPalette::new();
         
         //make mesh
@@ -57,7 +57,32 @@ impl DisplayItem {
     pub fn draw_self(
         &self,
         canvas: &mut graphics::Canvas,
-        pos_of_menu: glam::Vec2) {
-       canvas.draw(&self.mesh, graphics::DrawParam::new().dest(pos_of_menu)); 
+        pos_of_menu: glam::Vec2,
+        disp_str: String,
+    ) {
+        //Draw Back
+        canvas.draw(&self.mesh, graphics::DrawParam::new().dest(pos_of_menu)); 
+        let mut final_pos = pos_of_menu + self.str_pos;
+       
+        //seperate if the display icon has an icon to display or not
+        match self.icon {
+            None => {
+            }
+            Some(ref s_icon) => {
+                final_pos.x -= s_icon.width() as f32;
+                canvas.draw(
+                    s_icon,
+                    final_pos
+                );
+                final_pos.x += s_icon.width() as f32 + 2.0;
+            }
+        }
+        canvas.draw(
+            &graphics::Text::new(&disp_str), 
+            graphics::DrawParam::new().dest(final_pos)
+            .color(Color::BLACK)
+            .scale(glam::Vec2::new(2.0,2.0)) 
+        );        
+       
     }
 }
