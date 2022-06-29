@@ -13,7 +13,6 @@ use std::{env, path};
 
 mod ecs;
 mod globs;
-mod menus;
 mod user;
 mod ui;
 
@@ -54,7 +53,6 @@ struct ElysiusMainState {
     current_game_state: GameState,
     //Menu Items
     menus: Vec<ui::UIComponent>,
-    game_menus: menus::Menus,
 }
 
 impl ElysiusMainState {
@@ -88,7 +86,6 @@ impl ElysiusMainState {
             active_solar_system: 0,
             current_game_state: GameState::Running,
             
-            game_menus: menus::Menus::new(&_ctx),
             })
     }
     
