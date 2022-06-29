@@ -27,17 +27,37 @@ impl UIComponent {
     pub fn new_menu_orbit_body_info(
         ctx: &Context,    
         pos: glam::Vec2,
+        ents: &Entities,
         ent_id: usize,
     ) -> Self {
         //Get the positions of things in the menu
         let positions = orb_menu::OrbMenu::new();
         //Get disp_info into vector
         let mut disp_items: Vec<disp_item::DisplayItem> = Vec::new();
+
+        //Make Name Dipsplay Item
         disp_items.push(disp_item::DisplayItem::new(
-            positions.display_item_pos,
+            (positions.name_pos.x, positions.name_pos.y),
             ctx,
-            Some(sprite_get(ctx, "/Sprite-Coal_01.png")))
-        );
+            ents.ent_name[ent_id].clone(),
+            None
+        ));
+
+        //Figure out how to get this much cleaner
+        match ents.energy_comp[ent_id] {
+            None => {}
+            Some(ref e_c) => {
+                disp_items.push(disp_item::DisplayItem::new(
+                    positions.display_item_pos,
+                    ctx,
+                    e_c.fossil.to_string(),
+                    Some(sprite_get(ctx, "/Sprite-Coal_01.png")))
+                );
+            }
+        }
+
+
+
 
         let ui = UIComponent { 
                     menu_type: MenuType::OrbitBodyInfo,
@@ -74,7 +94,7 @@ impl UIComponent {
         }
         //Draw each Display Item
         for i in 0..self.display_items.len() {
-            self.display_items[i].draw_self(canvas, self.pos, "str".to_string());
+            self.display_items[i].draw_self(canvas, self.pos);
         }
    }
     
