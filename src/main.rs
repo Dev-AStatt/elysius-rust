@@ -287,10 +287,11 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                 if self.entities.ent_type[id] == ecs::ObjectType::Ship {
                 } else {
                     //add menu to menu stack
+                    let p = glam::Vec2::new(50.0,50.0);
                     self.menus.push(
                         ui::UIComponent::new_menu_orbit_body_info(
                             &ctx,
-                            (50.0,50.0),
+                            p,
                             id,
                         )
                     );

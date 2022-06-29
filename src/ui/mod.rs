@@ -26,15 +26,11 @@ pub struct UIComponent {
 impl UIComponent {
     pub fn new_menu_orbit_body_info(
         ctx: &Context,    
-        pos_init: (f32,f32),
+        pos: glam::Vec2,
         ent_id: usize,
     ) -> Self {
-        let menu_type = MenuType::OrbitBodyInfo;
         //Get the positions of things in the menu
         let positions = orb_menu::OrbMenu::new();
-        //make position out of pos_init
-        let pos = glam::Vec2::new(pos_init.0, pos_init.1);
-        let mesh = positions.get_mesh(ctx);
         //Get disp_info into vector
         let mut disp_items: Vec<disp_item::DisplayItem> = Vec::new();
         disp_items.push(disp_item::DisplayItem::new(
@@ -44,9 +40,9 @@ impl UIComponent {
         );
 
         let ui = UIComponent { 
-                    menu_type,
+                    menu_type: MenuType::OrbitBodyInfo,
                     pos,
-                    mesh,
+                    mesh: positions.get_mesh(ctx),
                     display_items: disp_items,
                     ent_id,
                 }; 
