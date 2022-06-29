@@ -292,6 +292,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                         ui::UIComponent::new_menu_orbit_body_info(
                             &ctx,
                             p,
+                            &self.entities,
                             id,
                         )
                     );
