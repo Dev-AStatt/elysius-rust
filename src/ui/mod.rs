@@ -31,16 +31,17 @@ impl UIComponent {
     ) -> Self {
         let menu_type = MenuType::OrbitBodyInfo;
         //Get the positions of things in the menu
-        let positions = orb_menu::OrbMenuPos::new();
+        let positions = orb_menu::OrbMenu::new();
         //make position out of pos_init
         let pos = glam::Vec2::new(pos_init.0, pos_init.1);
         let mesh = positions.get_mesh(ctx);
-        //Get buttons into vector
+        //Get disp_info into vector
         let mut disp_items: Vec<disp_item::DisplayItem> = Vec::new();
         disp_items.push(disp_item::DisplayItem::new(
             positions.display_item_pos,
             ctx,
-            Some(sprite_get(ctx, "/Sprite-Coal_01.png"))));
+            Some(sprite_get(ctx, "/Sprite-Coal_01.png")))
+        );
 
         let ui = UIComponent { 
                     menu_type,
@@ -67,7 +68,7 @@ impl UIComponent {
             MenuType::UIScreenTop => {}
             MenuType::ShipInfo => {}
             MenuType::OrbitBodyInfo => {
-                let obi_pos = orb_menu::OrbMenuPos::new();
+                let obi_pos = orb_menu::OrbMenu::new();
                 //Draw the Sprite
                 canvas.draw(
                     &ents.draw_comp[self.ent_id].sprite,

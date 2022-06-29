@@ -26,7 +26,7 @@ impl DisplayItem {
         let n_str_pos; 
         match img {
             Some(_) => {n_str_pos = (pos.x + 35.0, pos.y + 2.0);}
-            None => {   n_str_pos = (pos.x + 2.0, pos.y + 2.0); }
+            None =>    {n_str_pos = (pos.x + 2.0, pos.y + 2.0); }
         }
         let str_pos = glam::Vec2::new(n_str_pos.0, n_str_pos.1 + 10.0);
         let col_palette = color_palette::ColorPalette::new();

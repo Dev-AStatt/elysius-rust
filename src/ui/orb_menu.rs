@@ -1,7 +1,8 @@
 
 use ggez::{graphics, Context};
 use super::color_palette;
-pub struct OrbMenuPos {
+
+pub struct OrbMenu {
     bkgr_pos: (f32, f32),
     bkgr_w: f32,
     bkgr_h: f32,
@@ -14,7 +15,7 @@ pub struct OrbMenuPos {
     pub display_item_pos: (f32, f32),
 }
 
-impl OrbMenuPos {
+impl OrbMenu {
     pub fn new() -> Self {
         //Here is all the variable locations for Maps 
         let bkgr_pos = (0.0,0.0);
@@ -32,7 +33,7 @@ impl OrbMenuPos {
 
         let spr_pos = glam::Vec2::new(spr_corner.0 + 75.0,spr_corner.1 + 75.0);
 
-        OrbMenuPos {
+        OrbMenu {
             bkgr_pos,
             bkgr_w,
             bkgr_h,
