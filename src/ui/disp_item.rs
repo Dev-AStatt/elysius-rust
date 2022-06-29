@@ -5,6 +5,20 @@ use ggez::{
 };
 use super::color_palette;
 
+pub enum BoxSize {
+    Small,
+    Large
+}
+//returns the value of width that size represents
+impl BoxSize {
+    fn get_size(&self) -> f32 {
+        match self {
+            BoxSize::Small => {return 150.0;}
+            BoxSize::Large => {return 300.0;}
+        }
+    }
+}
+
 pub struct DisplayItem {
     pos: glam::Vec2,
     str_pos: glam::Vec2,
@@ -20,20 +34,24 @@ pub struct DisplayItem {
 impl DisplayItem {
     pub fn new(
         n_pos: (f32, f32),
+        size_type: BoxSize,
         ctx: &Context,
         disp_str: String,
         img: Option<graphics::Image>
     ) -> Self {
-        let disp_w = 150.0;
+        //Box Size
+        
+        let disp_w = size_type.get_size();
         let disp_h = 50.0;
         let pos = glam::Vec2::new(n_pos.0, n_pos.1);
 
         let n_str_pos; 
         match img {
-            Some(_) => {n_str_pos = (pos.x + 35.0, pos.y + 2.0);}
-            None =>    {n_str_pos = (pos.x + 2.0 , pos.y + 2.0);}
+            Some(_) => {n_str_pos = (pos.x + 12.0, pos.y + 12.0);}
+            None =>    {n_str_pos = (pos.x + 12.0 ,pos.y + 12.0);}
         }
-        let str_pos = glam::Vec2::new(n_str_pos.0, n_str_pos.1 + 10.0);
+        //Fix this line, its close enough for now
+        let str_pos = glam::Vec2::new(n_str_pos.0, n_str_pos.1);
         let col_palette = color_palette::ColorPalette::new();
         
         //make mesh
@@ -58,6 +76,7 @@ impl DisplayItem {
             focus_col_on: col_palette.color_5,
         };
     }
+    
 
     pub fn draw_self(
         &self,
@@ -68,17 +87,12 @@ impl DisplayItem {
         canvas.draw(&self.mesh, graphics::DrawParam::new().dest(pos_of_menu)); 
         let mut final_pos = pos_of_menu + self.str_pos;
        
-        //seperate if the display icon has an icon to display or not
         match self.icon {
-            None => {
-            }
+            None => {}
             Some(ref s_icon) => {
-                final_pos.x -= s_icon.width() as f32;
-                canvas.draw(
-                    s_icon,
-                    final_pos
-                );
-                final_pos.x += s_icon.width() as f32 + 2.0;
+                //Draw Icon and bump final position for text
+                canvas.draw(s_icon, final_pos);
+                final_pos.x += s_icon.width() as f32 + 10.0;
             }
         }
         canvas.draw(
@@ -89,3 +103,4 @@ impl DisplayItem {
         );        
     }
 }
+

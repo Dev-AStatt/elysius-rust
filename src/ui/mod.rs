@@ -38,6 +38,7 @@ impl UIComponent {
         //Make Name Dipsplay Item
         disp_items.push(disp_item::DisplayItem::new(
             (positions.name_pos.x, positions.name_pos.y),
+            disp_item::BoxSize::Large,
             ctx,
             ents.ent_name[ent_id].clone(),
             None
@@ -49,6 +50,7 @@ impl UIComponent {
             Some(ref e_c) => {
                 disp_items.push(disp_item::DisplayItem::new(
                     positions.display_item_pos,
+                    disp_item::BoxSize::Small,
                     ctx,
                     e_c.fossil.to_string(),
                     Some(sprite_get(ctx, "/Sprite-Coal_01.png")))
