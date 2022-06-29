@@ -37,7 +37,7 @@ impl UIComponent {
 
         //Make Name Dipsplay Item
         disp_items.push(disp_item::DisplayItem::new(
-            (positions.name_pos.x, positions.name_pos.y),
+            positions.name_pos,
             disp_item::BoxSize::Large,
             ctx,
             ents.ent_name[ent_id].clone(),

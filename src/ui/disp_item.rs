@@ -33,7 +33,7 @@ pub struct DisplayItem {
 
 impl DisplayItem {
     pub fn new(
-        n_pos: (f32, f32),
+        pos: glam::Vec2, 
         size_type: BoxSize,
         ctx: &Context,
         disp_str: String,
@@ -43,7 +43,6 @@ impl DisplayItem {
         
         let disp_w = size_type.get_size();
         let disp_h = 50.0;
-        let pos = glam::Vec2::new(n_pos.0, n_pos.1);
 
         let n_str_pos; 
         match img {
