@@ -8,6 +8,7 @@ pub struct OrbMenu {
     bkgr_h: f32,
     spr_corner: (f32,f32),
     pub spr_pos: glam::Vec2,
+    pub name_pos: glam::Vec2,
     bkgr_sec2_pos_x: f32,
     bkgr_sec2_w: f32,
     spr_w: f32,
@@ -32,6 +33,7 @@ impl OrbMenu {
         let disp_pos = (bkgr_sec2_pos_x + (bkgr_w * 0.02), spr_corner.1);
 
         let spr_pos = glam::Vec2::new(spr_corner.0 + 75.0,spr_corner.1 + 75.0);
+        let name_pos = glam::Vec2::new(spr_corner.0 + 75.0,spr_corner.1 + 30.0);
 
         OrbMenu {
             bkgr_pos,
@@ -39,6 +41,7 @@ impl OrbMenu {
             bkgr_h,
             spr_corner,
             spr_pos,
+            name_pos,
             bkgr_sec2_pos_x,
             bkgr_sec2_w,
             spr_w,
