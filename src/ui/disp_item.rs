@@ -8,17 +8,22 @@ use super::color_palette;
 pub struct DisplayItem {
     pos: glam::Vec2,
     str_pos: glam::Vec2,
+    disp_str: String,
     w: f32,
     h: f32,
     pub mesh: graphics::Mesh,
     icon: Option<graphics::Image>,
     focus: bool,
     focus_col_on: Color, 
-    focus_col_off: Color, 
 }
 
 impl DisplayItem {
-    pub fn new(n_pos: (f32, f32), ctx: &Context, img: Option<graphics::Image>) -> Self {
+    pub fn new(
+        n_pos: (f32, f32),
+        ctx: &Context,
+        disp_str: String,
+        img: Option<graphics::Image>
+    ) -> Self {
         let disp_w = 150.0;
         let disp_h = 50.0;
         let pos = glam::Vec2::new(n_pos.0, n_pos.1);
@@ -26,7 +31,7 @@ impl DisplayItem {
         let n_str_pos; 
         match img {
             Some(_) => {n_str_pos = (pos.x + 35.0, pos.y + 2.0);}
-            None =>    {n_str_pos = (pos.x + 2.0, pos.y + 2.0); }
+            None =>    {n_str_pos = (pos.x + 2.0 , pos.y + 2.0);}
         }
         let str_pos = glam::Vec2::new(n_str_pos.0, n_str_pos.1 + 10.0);
         let col_palette = color_palette::ColorPalette::new();
@@ -44,13 +49,13 @@ impl DisplayItem {
         return DisplayItem {
             pos,
             str_pos,
+            disp_str,
             w: 50.0,
             h: 36.0,
             mesh,
             icon: img,
             focus: false,
             focus_col_on: col_palette.color_5,
-            focus_col_off: col_palette.color_4,
         };
     }
 
@@ -58,7 +63,6 @@ impl DisplayItem {
         &self,
         canvas: &mut graphics::Canvas,
         pos_of_menu: glam::Vec2,
-        disp_str: String,
     ) {
         //Draw Back
         canvas.draw(&self.mesh, graphics::DrawParam::new().dest(pos_of_menu)); 
@@ -78,11 +82,10 @@ impl DisplayItem {
             }
         }
         canvas.draw(
-            &graphics::Text::new(&disp_str), 
+            &graphics::Text::new(&self.disp_str), 
             graphics::DrawParam::new().dest(final_pos)
             .color(Color::BLACK)
             .scale(glam::Vec2::new(2.0,2.0)) 
         );        
-       
     }
 }
