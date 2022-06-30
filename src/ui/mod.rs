@@ -6,6 +6,7 @@ use ggez::{
 mod color_palette;
 mod orb_menu;
 mod disp_item;
+mod transtions;
 
 #[derive(PartialEq)]
 pub enum MenuType {
