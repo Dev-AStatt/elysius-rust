@@ -23,12 +23,9 @@ pub struct DisplayItem {
     pos: glam::Vec2,
     str_pos: glam::Vec2,
     disp_str: String,
-    w: f32,
-    h: f32,
     pub mesh: graphics::Mesh,
     icon: Option<graphics::Image>,
-    focus: bool,
-    focus_col_on: Color, 
+    text_color: Color
 }
 
 impl DisplayItem {
@@ -41,8 +38,9 @@ impl DisplayItem {
     ) -> Self {
         //Box Size
         
-        let disp_w = size_type.get_size();
         let disp_h = 50.0;
+        let disp_w = size_type.get_size();
+        let bkgr_color = color_palette::ColorPalette::new().color_5;
 
         let n_str_pos; 
         match img {
@@ -51,7 +49,6 @@ impl DisplayItem {
         }
         //Fix this line, its close enough for now
         let str_pos = glam::Vec2::new(n_str_pos.0, n_str_pos.1);
-        let col_palette = color_palette::ColorPalette::new();
         
         //make mesh
         let mb = &mut graphics::MeshBuilder::new();
@@ -59,7 +56,7 @@ impl DisplayItem {
             graphics::DrawMode::fill(), 
             graphics::Rect::new(pos.x, pos.y, disp_w, disp_h),
             15.0, 
-            col_palette.color_3,
+            bkgr_color,
         ).expect("Rec Mesh Failed");
         let mesh = graphics::Mesh::from_data(ctx, mb.build());        
     
@@ -67,12 +64,9 @@ impl DisplayItem {
             pos,
             str_pos,
             disp_str,
-            w: 50.0,
-            h: 36.0,
             mesh,
             icon: img,
-            focus: false,
-            focus_col_on: col_palette.color_5,
+            text_color: Color::BLACK,
         };
     }
     
@@ -97,7 +91,7 @@ impl DisplayItem {
         canvas.draw(
             &graphics::Text::new(&self.disp_str), 
             graphics::DrawParam::new().dest(final_pos)
-            .color(Color::BLACK)
+            .color(self.text_color)
             .scale(glam::Vec2::new(2.0,2.0)) 
         );        
     }
