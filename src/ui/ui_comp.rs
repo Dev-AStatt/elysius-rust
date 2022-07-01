@@ -1,12 +1,14 @@
 
 
-use super::ui_tools;
+use super::ui_tools::disp_item;
+use super::ui_tools::orb_menu;
+use super::ui_tools::transtions::InOrOut;
+use super::ui_tools::transtions::Transition;
+use super::ui_tools::transtions::TransitionType;
 
 use crate::ecs::{Entities, sprite_get };
-use ggez::{
-    graphics::{self},
-    Context,
-};
+use ggez::Context;
+use ggez::graphics;
 
 #[derive(PartialEq)]
 pub enum MenuType {
@@ -21,8 +23,9 @@ pub struct UIComponent {
     menu_type: MenuType,
     pub pos: glam::Vec2,
     pub mesh: graphics::Mesh,
-    display_items: Vec<ui_tools::disp_item::DisplayItem>,
+    display_items: Vec<disp_item::DisplayItem>,
     ent_id: usize,
+    transition: Transition,
 }
 
 impl UIComponent {
@@ -33,14 +36,14 @@ impl UIComponent {
         ent_id: usize,
     ) -> Self {
         //Get the positions of things in the menu
-        let positions = ui_tools::orb_menu::OrbMenu::new();
+        let positions = orb_menu::OrbMenu::new();
         //Get disp_info into vector
-        let mut disp_items: Vec<ui_tools::disp_item::DisplayItem> = Vec::new();
+        let mut disp_items: Vec<disp_item::DisplayItem> = Vec::new();
 
         //Make Name Dipsplay Item
-        disp_items.push(ui_tools::disp_item::DisplayItem::new(
+        disp_items.push(disp_item::DisplayItem::new(
             positions.name_pos,
-            ui_tools::disp_item::BoxSize::Large,
+            disp_item::BoxSize::Large,
             ctx,
             ents.ent_name[ent_id].clone(),
             None
@@ -50,25 +53,30 @@ impl UIComponent {
         match ents.energy_comp[ent_id] {
             None => {}
             Some(ref e_c) => {
-                disp_items.push(ui_tools::disp_item::DisplayItem::new(
+                disp_items.push(disp_item::DisplayItem::new(
                     positions.display_item_pos,
-                    ui_tools::disp_item::BoxSize::Small,
+                    disp_item::BoxSize::Small,
                     ctx,
                     e_c.fossil.to_string(),
                     Some(sprite_get(ctx, "/Sprite-Coal_01.png")))
                 );
             }
         }
+        let transition = Transition::new(
+            TransitionType::Slide,
+            pos - glam::Vec2::new(600.0,0.0),
+            pos,
+            InOrOut::IN,
+        );
 
-
-
-
+       
         let ui = UIComponent { 
                     menu_type: MenuType::OrbitBodyInfo,
-                    pos,
+                    pos: transition.get_pos(),
                     mesh: positions.get_mesh(ctx),
                     display_items: disp_items,
                     ent_id,
+                    transition,
                 }; 
         return ui;
     }
@@ -78,7 +86,7 @@ impl UIComponent {
         canvas: &mut graphics::Canvas,
         ents: &Entities,
     ) {
-        //Draw the background
+       //Draw the background
         canvas.draw(
             &self.mesh,
             graphics::DrawParam::new().dest(self.pos)
@@ -88,11 +96,11 @@ impl UIComponent {
             MenuType::UIScreenTop => {}
             MenuType::ShipInfo => {}
             MenuType::OrbitBodyInfo => {
-                let obi_pos = ui_tools::orb_menu::OrbMenu::new();
+                let obi_pos = orb_menu::OrbMenu::new();
                 //Draw the Sprite
                 canvas.draw(
                     &ents.draw_comp[self.ent_id].sprite,
-                    obi_pos.spr_pos
+                    self.pos + obi_pos.spr_pos
                 );
             }
         }
@@ -101,7 +109,36 @@ impl UIComponent {
             self.display_items[i].draw_self(canvas, self.pos);
         }
    }
-    
+   //Fucntion will update the position of the Menu if it is in a transition state
+    pub fn if_transition_update(self: &mut Self) {
+        if self.transition.is_in_transition() {
+            self.transition.inc_transition();
+            self.pos = self.transition.get_pos();
+        }
+    } 
+
+
+    pub fn transition_out(self: &mut Self) {
+        self.transition = Transition::new(
+            TransitionType::Slide,
+            self.pos,
+            self.pos - glam::Vec2::new(600.0,0.0), 
+            InOrOut::OUT,
+        );
+
+    }
+    //function impliments the checks to see if the menu is ready to be removed
+    //checking if it is in a transition and if it has transntioned out.
+    pub fn ready_to_remove(&self) -> bool {
+        match self.transition.in_or_out() {
+            InOrOut::IN => {return false;}
+            InOrOut::OUT => {
+                if !self.transition.is_in_transition() {
+                    return true;
+                } else { return false };
+            }
+        }
+    }
 
     pub fn set_pos(&mut self, pos: glam::Vec2) {
         self.pos = pos;
