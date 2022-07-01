@@ -1,4 +1,9 @@
-use std::ops::Div;
+
+#[derive(PartialEq, Copy,Clone)]
+pub enum InOrOut {
+    IN,
+    OUT,
+}
 
 pub enum TransitionType {
     Slide,
@@ -12,20 +17,21 @@ pub struct Transition {
     pos: glam::Vec2,
     dpt: glam::Vec2,
     arrived: bool,
-
+    t_io: InOrOut,
 }
 
 impl Transition {
     pub fn new(
         t_type: TransitionType,
         pos_start: glam::Vec2,
-        pos_end: glam::Vec2
+        pos_end: glam::Vec2,
+        t_io: InOrOut,
     ) -> Self {
         let dpt = Transition::get_dist_per_tick(
             &t_type, 
             pos_start, 
             pos_end, 
-            60.0
+            10.0
         );
         Transition {
             in_transition: true,
@@ -34,10 +40,12 @@ impl Transition {
             pos: pos_start,
             dpt,
             arrived: false,
+            t_io,
         }
     }
-
+    pub fn get_pos(&self) -> glam::Vec2 {return self.pos;}
     pub fn is_in_transition(&self) -> bool {return self.in_transition;}
+    pub fn in_or_out(&self) -> InOrOut {return self.t_io;  }
 
     pub fn inc_transition(self: &mut Self) {
         if self.arived_at_dest() {
@@ -49,7 +57,10 @@ impl Transition {
     }
 
     fn arived_at_dest(&self) -> bool {
-        let t_v = f32::min(self.dpt.x, self.dpt.y);
+        let mut t_v = f32::min(self.dpt.x, self.dpt.y);
+        if t_v == 0.0 {
+            t_v = 0.1;
+        }
         if (self.pos.x - self.pos_end.x).powi(2) + (self.pos.y - self.pos_end.y).powi(2) < t_v.powi(2) {
             return true;
         } else {return false;}
@@ -67,7 +78,7 @@ impl Transition {
             TransitionType::Slide => {
                 //Get the total distance we need to move
                 let total = p_end - pos; 
-                dpt = total.div(ticks);
+                dpt = std::ops::Div::div(total, ticks);
             }
         }
         return dpt;
@@ -87,7 +98,7 @@ impl Transition {
 mod tests {
     pub(crate) use ui::ui_tools::{transtions::{Transition, TransitionType}};
 
-    use crate::ui;
+    use crate::ui::{self, ui_tools::transtions::InOrOut};
     
 
     //Test is designed to create a transition and push it through a transition phase
@@ -98,6 +109,7 @@ mod tests {
             TransitionType::Slide,
             glam::Vec2::new(0.0,0.0),
             glam::Vec2::new(10.0,10.0),
+            InOrOut::IN,
         );
         while t_1.arrived == false {
             t_1.inc_transition();
@@ -106,6 +118,7 @@ mod tests {
             TransitionType::Slide,
             glam::Vec2::new(10.0,10.0),
             glam::Vec2::new(0.0,0.0),
+            InOrOut::IN,
         );
         while t_2.arrived == false {
             t_2.inc_transition();
