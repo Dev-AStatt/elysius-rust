@@ -16,6 +16,7 @@ mod globs;
 mod user;
 mod ui;
 
+
 #[derive(PartialEq)]
 enum GameState {
     Running,
@@ -52,7 +53,7 @@ struct ElysiusMainState {
     active_solar_system: i32,
     current_game_state: GameState,
     //Menu Items
-    menus: Vec<ui::UIComponent>,
+    menus: Vec<ui::ui_comp::UIComponent> ,
 }
 
 impl ElysiusMainState {
@@ -286,7 +287,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                     //add menu to menu stack
                     let p = glam::Vec2::new(50.0,50.0);
                     self.menus.push(
-                        ui::UIComponent::new_menu_orbit_body_info(
+                        ui::ui_comp::UIComponent::new_menu_orbit_body_info(
                             &ctx,
                             p,
                             &self.entities,

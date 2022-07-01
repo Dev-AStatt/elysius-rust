@@ -21,7 +21,12 @@ impl Transition {
         pos_start: glam::Vec2,
         pos_end: glam::Vec2
     ) -> Self {
-        let dpt = Transition::get_dist_per_tick(&t_type, pos_start, pos_end, 60.0);
+        let dpt = Transition::get_dist_per_tick(
+            &t_type, 
+            pos_start, 
+            pos_end, 
+            60.0
+        );
         Transition {
             in_transition: true,
             t_type,
@@ -31,7 +36,6 @@ impl Transition {
             arrived: false,
         }
     }
-
 
     pub fn is_in_transition(&self) -> bool {return self.in_transition;}
 
@@ -50,7 +54,6 @@ impl Transition {
             return true;
         } else {return false;}
     }   
-
 
     fn get_dist_per_tick(
         t_t: &TransitionType,
@@ -82,7 +85,10 @@ impl Transition {
 
 #[cfg(test)]
 mod tests {
-    use crate::ui::transtions::{Transition, TransitionType};
+    pub(crate) use ui::ui_tools::{transtions::{Transition, TransitionType}};
+
+    use crate::ui;
+    
 
     //Test is designed to create a transition and push it through a transition phase
     //If the transition phase is caught by the check end. Pass 
