@@ -3,11 +3,10 @@
 //Comment this out for dead code errors
 #![allow(dead_code)]
 
-
 use ecs::sprite_get;
 use ggez::{
     event::{self, MouseButton},
-    graphics::{self},
+    graphics,
     Context, GameResult,
     input::keyboard::{KeyCode, KeyInput},
 };
@@ -125,6 +124,21 @@ impl ElysiusMainState {
         );
     }
 
+    //Check if any menus can be deleted, then remove them
+    fn remove_dead_menus(self: &mut Self) {
+        //if self.menus.len() == 0 {return}        
+        //Pop off any menu that is ready to remove
+        self.menus.retain(|i| i.ready_to_remove());
+    }
+    fn update_menus(self: &mut Self) {
+        //Draw any menus on screen
+        for i in 0..self.menus.len() {
+            self.menus[i].if_transition_update();
+            //self.remove_dead_menus();
+        } 
+    }
+
+
     fn gen_new_system(self: &mut Self, _ctx: &mut Context) {
 
         //First Sun
@@ -169,6 +183,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         //0----------------------GAME UPDATES----------------------------------0
         //Reset the mouse focus
         self.mouse.focus = MouseFocus::Background;
+        self.update_menus();
 
         for i in 0..self.entities_id.len() {
             //For all entities that are on screen
@@ -217,12 +232,10 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                 self.draw_solar_object_ecs(&mut canvas, i); 
             }
         }
-
         //Draw any menus on screen
         for i in 0..self.menus.len() {
-           self.menus[i].draw_ui_comp(&mut canvas, &self.entities); 
+            self.menus[i].draw_ui_comp(&mut canvas, &self.entities); 
         } 
-
 
         //Concatinating strings is dumb
         let mut str = String::from("Tick: ");
@@ -300,9 +313,11 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                 }
             }
             MouseFocus::Background => {
-                //Pop off any menu that is a OrbitBodyInfo
-                //function says retain any vector element where .menu returns false
-                self.menus.retain(|i| !i.menu_type_obi());
+                for i in 0..self.menus.len() {
+                    if self.menus[i].menu_type_obi() {
+                        self.menus[i].transition_out();    
+                    }
+                } 
             }
             MouseFocus::Menu => {}
         }
