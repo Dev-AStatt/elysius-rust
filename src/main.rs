@@ -1,6 +1,9 @@
 #![allow(clippy::unnecessary_wraps)]
 
-//use crate::MouseFocus::body;
+//Comment this out for dead code errors
+#![allow(dead_code)]
+
+
 use ecs::sprite_get;
 use ggez::{
     event::{self, MouseButton},
@@ -325,7 +328,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                     self.player_screen_move.y += yrel;
                 }
                 MouseFocus::Menu => {}
-                MouseFocus::Body(id) => {}
+                MouseFocus::Body(_id) => {}
             }
         }
         Ok(()) 
