@@ -70,7 +70,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         }
         //0----------------------GAME UPDATES----------------------------------0
         //Reset the mouse focus
-        self.mouse.focus = io::MouseFocus::Background;
+        self.mouse.set_focus(io::MouseFocus::Background);
         self.update_menus();
 
         for i in 0..self.entities_id.len() {
@@ -91,11 +91,11 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                     self.entities.draw_comp[i].screen_pos.x + sprite_offset_scaled.0, 
                     self.entities.draw_comp[i].screen_pos.y + sprite_offset_scaled.1
                 );
-                if ecs::point_in_object(&self.mouse.pos,
+                if ecs::point_in_object(&&self.mouse.get_pos_f32(),
                     adj_pos_for_input, 
                 self.entities.draw_comp[i].sprite_offset.0 as f32 * self.game_scale.x,
                 ) {
-                    self.mouse.focus = io::MouseFocus::Body(i);
+                    self.mouse.set_focus(io::MouseFocus::Body(i));
                 }
             }
         }
@@ -116,8 +116,8 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             graphics::CanvasLoadOp::Clear([0.1, 0.1, 0.1, 1.0].into()),
         );
 
-            //Draw ECS Ent
-            for i in 0..self.entities_id.len() {
+        //Draw ECS Ent
+        for i in 0..self.entities_id.len() {
             if self.entities.solar_system_id[i] == self.active_solar_system {
                 self.draw_solar_object_ecs(&mut canvas, i); 
             }
@@ -127,43 +127,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             self.menus[i].draw_ui_comp(&mut canvas, &self.entities); 
         } 
 
-        //Concatinating strings is dumb
-        let mut str = String::from("Tick: ");
-        str.push_str(&ctx.time.ticks().to_string());
-        //Draw the current tick to the screen
-        canvas.draw(graphics::Text::new(str)
-                    .set_scale(10.0),
-                    glam::Vec2::new(0.0,990.0));
-
-        //Draw the focus mode
-        let mut focus_str = String::from("Mouse Focus: ");
-        match self.mouse.focus {
-            io::MouseFocus::Background => {
-                focus_str.push_str("Background");
-            }
-            io::MouseFocus::Body(id) => {
-                focus_str.push_str(&("Entity ".to_owned()+ &id.to_string()));
-            }
-            io::MouseFocus::Menu => {
-                focus_str.push_str("Menu");
-            }
-        }
-        canvas.draw(graphics::Text::new(focus_str)
-                    .set_scale(10.0),
-                    glam::Vec2::new(0.0,1000.0));
-
-        let mut str = String::from("Menus In Stack: ");
-        str.push_str(&self.menus.len().to_string());
-        //Draw the current tick to the screen
-        canvas.draw(graphics::Text::new(str)
-                    .set_scale(10.0),
-                    glam::Vec2::new(0.0,980.0));
-
-
-        //Draw the FPS counter
-        ctx.gfx.set_window_title(&format!(
-            "Elysius - {:.0} FPS", ctx.time.fps()));
-
+        self.draw_debug_info(&mut canvas, ctx);
         //Nothing after this, pushes all the draws to the graphics card
         canvas.finish(ctx)?;
         Ok(())
@@ -176,12 +140,13 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         _x: f32,
         _y: f32,
     ) -> GameResult {
-        self.mouse.click_down = false;
+        self.mouse.set_click_down(false);
         Ok(())
+
     }  
 
-    //Mouse button down triggers when the mouse button is pressed down, called by
-    //ggez as an update function. no need to call it yourself. 
+    //Mouse button down triggers when the mouse button is pressed down, called 
+    //by ggez as an update function. no need to call it yourself. 
     fn mouse_button_down_event(
         &mut self,
         ctx: &mut Context,
@@ -189,9 +154,9 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         _x: f32,
         _y: f32,
     ) -> GameResult {
-        self.mouse.click_down = true;
+        self.mouse.set_click_down(true);
         //Match what the mose is focused on
-        match self.mouse.focus {
+        match self.mouse.get_focus() {
             io::MouseFocus::Body(id) => {
                 if self.entities.ent_type[id] == ecs::ObjectType::Ship {
                 } else {
@@ -228,10 +193,10 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         yrel: f32,
     ) -> GameResult { 
         //set the current mouse position for the game
-        self.mouse.pos = (x,y);
+        self.mouse.set_pos_f32((x,y));
         //this is all for a check to see if the background is dragged to move things
-        if self.mouse.click_down {
-            match self.mouse.focus {
+        if self.mouse.get_click_down() {
+            match self.mouse.get_focus() {
                 io::MouseFocus::Background => {
                     //self.current_mouse_pos = (x,y);
                     self.player_screen_move.x += xrel;
