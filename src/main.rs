@@ -126,16 +126,15 @@ impl ElysiusMainState {
 
     //Check if any menus can be deleted, then remove them
     fn remove_dead_menus(self: &mut Self) {
-        //if self.menus.len() == 0 {return}        
         //Pop off any menu that is ready to remove
-        self.menus.retain(|i| i.ready_to_remove());
+        self.menus.retain(|i| !i.ready_to_remove());
     }
     fn update_menus(self: &mut Self) {
         //Draw any menus on screen
         for i in 0..self.menus.len() {
             self.menus[i].if_transition_update();
-            //self.remove_dead_menus();
         } 
+        self.remove_dead_menus();
     }
 
 
@@ -262,7 +261,14 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                     .set_scale(10.0),
                     glam::Vec2::new(0.0,1000.0));
 
-   
+        let mut str = String::from("Menus In Stack: ");
+        str.push_str(&self.menus.len().to_string());
+        //Draw the current tick to the screen
+        canvas.draw(graphics::Text::new(str)
+                    .set_scale(10.0),
+                    glam::Vec2::new(0.0,980.0));
+
+
         //Draw the FPS counter
         ctx.gfx.set_window_title(&format!(
             "Elysius - {:.0} FPS", ctx.time.fps()));
