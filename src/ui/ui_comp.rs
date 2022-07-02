@@ -2,9 +2,8 @@
 
 use super::ui_tools::disp_item;
 use super::ui_tools::orb_menu;
-use super::ui_tools::transtions::InOrOut;
-use super::ui_tools::transtions::Transition;
-use super::ui_tools::transtions::TransitionType;
+use super::ui_tools::transtions::{Transition, TransitionType, InOrOut, Speed};
+
 
 use crate::ecs::{Entities, sprite_get };
 use ggez::Context;
@@ -67,6 +66,7 @@ impl UIComponent {
             pos - glam::Vec2::new(600.0,0.0),
             pos,
             InOrOut::IN,
+            Speed::Normal,
         );
 
        
@@ -122,8 +122,9 @@ impl UIComponent {
         self.transition = Transition::new(
             TransitionType::Slide,
             self.pos,
-            self.pos - glam::Vec2::new(600.0,0.0), 
+            self.pos - glam::Vec2::new(500.0,0.0), 
             InOrOut::OUT,
+            Speed::Fast,
         );
 
     }
