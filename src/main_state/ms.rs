@@ -27,7 +27,7 @@ pub struct ElysiusMainState {
     pub entities: ecs::Entities,
     pub entities_id: Vec<ecs::EntityIndex>,
     //Structures
-    pub mouse: io::MouseState,
+    pub mouse: io::Mouse,
     pub player: user::Player,
     //Game State Values
     pub first_time: bool,
@@ -43,27 +43,12 @@ impl ElysiusMainState {
     pub fn new(_ctx: &mut Context) -> GameResult<ElysiusMainState> {
         //This is where you can put stuff that needs to be pre-calculated
 
-        let init_ent = ecs::Entities{
-            orbit_comp: Vec::new(),
-            draw_comp: Vec::new(),
-            energy_comp: Vec::new(),
-            solar_pos_comp: Vec::new(),
-            solar_system_id: Vec::new(),
-            ent_name: Vec::new(),
-            ent_type: Vec::new()
-        };
-        let mouse = io::MouseState {
-            focus: io::MouseFocus::Background,
-            pos: (0.0,0.0),
-            click_down: false,
-        };
-
         Ok(ElysiusMainState {
-            entities: init_ent,
-            entities_id: Vec::new(),
-            mouse,
-            player: user::Player::new(),
-            menus: Vec::new(),
+            entities:       ecs::Entities::new(),
+            entities_id:    Vec::new(),
+            mouse:          io::Mouse::new(),
+            player:         user::Player::new(),
+            menus:          Vec::new(),
             first_time: true,
             game_scale: glam::Vec2::new(1.0,1.0),
             player_screen_move: glam::Vec2::new(globs::SCREEN_OFFSET.0,globs::SCREEN_OFFSET.1),

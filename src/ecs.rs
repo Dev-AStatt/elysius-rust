@@ -68,6 +68,20 @@ pub struct Entities {
   }
 
 impl Entities {
+    //Do NOT CREATE A NEW ENTITY FUNCTION UNLESS YOUR THE MAIN FN
+    pub fn new() -> Entities {
+        Entities{
+            orbit_comp: Vec::new(),
+            draw_comp: Vec::new(),
+            energy_comp: Vec::new(),
+            solar_pos_comp: Vec::new(),
+            solar_system_id: Vec::new(),
+            ent_name: Vec::new(),
+            ent_type: Vec::new()
+        }
+    }
+
+
      fn get_new_name(&self) -> String {
         let mut rng = rand::thread_rng();
         let names = vec![
