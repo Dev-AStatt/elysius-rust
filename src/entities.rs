@@ -48,7 +48,7 @@ pub struct Entities {
     pub orbit_comp: Vec<Option<orbit::OrbitalComponent>>,
     pub draw_comp: Vec<DrawingComponent>,
     pub energy_comp: Vec<Option<EnergyComponent>>,
-    pub solar_pos_comp: Vec<(f32, f32)>,
+    pub solar_pos_comp: Vec<glam::Vec2>,
     pub solar_system_id: Vec<i32>,
     pub ent_name: Vec<String>,
     pub ent_type: Vec<ObjectType>,
@@ -95,8 +95,8 @@ impl Entities {
         player_offset: glam::Vec2,
     ) -> glam::Vec2 {
         let sprite_pos = glam::Vec2::new(
-            self.solar_pos_comp[ent_id].0 * scale.x,
-            self.solar_pos_comp[ent_id].1 * scale.y
+            self.solar_pos_comp[ent_id].x * scale.x,
+            self.solar_pos_comp[ent_id].y * scale.y
         );
         let disp_adj = glam::Vec2::new(
             self.draw_comp[ent_id].sprite_offset.0 * scale.x,
@@ -115,17 +115,19 @@ impl Entities {
     ) {
         for i in 0..self.solar_system_id.len() {
             if self.solar_system_id[i] == system_id {
-                match self.orbit_comp[i] {
-                    None => {}
-                    Some(ref mut orb) => {
-                         //give new position to ent
-                        let pos_adj = orb.pos_adj();
-                        self.solar_pos_comp[i].0 = pos_adj.0 + self.solar_pos_comp[orb.orb_ent_id()].0;
-                        self.solar_pos_comp[i].1 = pos_adj.1 + self.solar_pos_comp[orb.orb_ent_id()].1;
-                   }
-                }
+                //if there is some orbital component at , then
+                if let Some(ref mut orb) = self.orbit_comp[i] {
+                    //give new position to ent
+                    let pos_adj = orb.pos_adj();
+                    self.solar_pos_comp[i] = pos_adj + self.solar_pos_comp[orb.orb_ent_id()];
+                }             
+                        
             }
         }
+
+
+
+
     }
 
     pub fn make_new_sun(
@@ -239,10 +241,10 @@ impl Entities {
         //orbital component for the ECS system.
         match orbit_inputs {
             Some(orb_inp) => {
-                //Solar Position
-                let n_sol_pos = (
-                    self.solar_pos_comp[orb_inp.orb_ent_id].0,
-                    self.solar_pos_comp[orb_inp.orb_ent_id].1 + orb_inp.orb_rad as f32
+                //solar position 
+                let n_sol_pos = glam::Vec2::new(
+                    self.solar_pos_comp[orb_inp.orb_ent_id].x,
+                    self.solar_pos_comp[orb_inp.orb_ent_id].y + orb_inp.orb_rad as f32
                 );
                 self.solar_pos_comp.push(n_sol_pos);
                 //Push to ECS orbital component the OrbitalComponent Struct
@@ -257,7 +259,7 @@ impl Entities {
             }
             None => {
                 //Solar Position if no Orbit Comp
-                self.solar_pos_comp.push((0.0,0.0));
+                self.solar_pos_comp.push(glam::Vec2::new(0.0,0.0));
                 self.orbit_comp.push(None);
             }
         }
