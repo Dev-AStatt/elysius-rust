@@ -6,6 +6,8 @@ use ggez::{
 };
 use glam::{f32, i32, vec2};
 
+use super::ecs::orbit;
+
 #[derive(PartialEq)]
 pub enum ObjectType {
     Sun,
@@ -16,20 +18,6 @@ pub enum ObjectType {
 
 // 0------------------Start of ECS Sstem---------------------------------------0
 pub type EntityIndex = usize;
-
-pub struct OrbitalComponent {
-    pub orbiting_ent_id: usize,
-    pub radius: i32,
-    pub angle: f32,
-    pub orbit_circle: graphics::Mesh,
-}
-
-pub struct OptionalOrbitalInputs<'a> {
-    ctx: &'a Context,
-    orb_ent_id: usize,
-    orb_rad: i32,
-}
-
 
 pub struct EnergyComponent {
     //units of energy
@@ -57,7 +45,7 @@ pub struct DrawingComponent {
 }
 
 pub struct Entities {
-    pub orbit_comp: Vec<Option<OrbitalComponent>>,
+    pub orbit_comp: Vec<Option<orbit::OrbitalComponent>>,
     pub draw_comp: Vec<DrawingComponent>,
     pub energy_comp: Vec<Option<EnergyComponent>>,
     pub solar_pos_comp: Vec<(f32, f32)>,
@@ -130,24 +118,12 @@ impl Entities {
                 match self.orbit_comp[i] {
                     None => {}
                     Some(ref mut orb) => {
-                        //increment angle
-                        let adjustment = 0.1;   //This is what to mess around with to slow down
-                        let mut new_angle = orb.angle + adjustment;
-                        if new_angle > 360.0 {new_angle = new_angle - 360.0;}
-                        orb.angle = new_angle;
-
-                       //calculate new position
-                        let unitx = (orb.angle * 3.14 / 180.0).sin();
-                        let unity = (orb.angle * 3.14 / 180.0).cos();
-                        let x = unitx * orb.radius as f32;
-                        let y = unity * orb.radius as f32;
-                        //give new position to ent
-                        self.solar_pos_comp[i].0 = x + self.solar_pos_comp[orb.orbiting_ent_id].0;
-                        self.solar_pos_comp[i].1 = y + self.solar_pos_comp[orb.orbiting_ent_id].1;
-                        
-                    }
+                         //give new position to ent
+                        let pos_adj = orb.pos_adj();
+                        self.solar_pos_comp[i].0 = pos_adj.0 + self.solar_pos_comp[orb.orb_ent_id()].0;
+                        self.solar_pos_comp[i].1 = pos_adj.1 + self.solar_pos_comp[orb.orb_ent_id()].1;
+                   }
                 }
-                //update position of body
             }
         }
     }
@@ -177,7 +153,7 @@ impl Entities {
         n_orbiting_ent_id: usize,
         n_orb_rad: i32,
     ) {
-        let orbit_input = OptionalOrbitalInputs {
+        let orbit_input = orbit::OptionalOrbitalInputs {
             ctx,
             orb_ent_id: n_orbiting_ent_id,
             orb_rad: n_orb_rad,
@@ -200,7 +176,7 @@ impl Entities {
         n_orbiting_ent_id: usize,
         n_orb_rad: i32,
     ) {
-        let orbit_input = OptionalOrbitalInputs {
+        let orbit_input = orbit::OptionalOrbitalInputs {
             ctx,
             orb_ent_id: n_orbiting_ent_id,
             orb_rad: n_orb_rad,
@@ -222,7 +198,7 @@ impl Entities {
         entities_id: &mut Vec<EntityIndex>,
         n_sprite: graphics::Image,
         n_sol_sys_id: i32,
-        orbit_inputs: Option<OptionalOrbitalInputs>,
+        orbit_inputs: Option<orbit::OptionalOrbitalInputs>,
         ) {
 
         //STEP 1 DRAWING COMPONENT 
@@ -273,7 +249,7 @@ impl Entities {
                 //Returned by get_orbit and add as Some(). Sorry its so complicated
                 self.orbit_comp.push(
                     //get orbital struct from get_orbit function
-                    Some(self.get_orbit(
+                    Some(orbit::OrbitalComponent::new(
                         orb_inp.ctx,
                         orb_inp.orb_rad,
                         orb_inp.orb_ent_id))
@@ -292,35 +268,6 @@ impl Entities {
         self.ent_name.push(self.get_new_name());
         //Create a new entity ID
         entities_id.push(entities_id.len());    
-    }
-
-
-    fn get_orbit(self: &Self,
-        current_ctx: &Context,
-        n_orb_rad: i32,
-        n_orbiting_ent_id: usize, 
-    ) -> OrbitalComponent {
-
-        //get a new meshbuilder to make our circle
-        let mb = &mut graphics::MeshBuilder::new();
-        //get our new circle
-        mb.circle(graphics::DrawMode::stroke(1.0),
-            vec2(0.0,0.0), //dest.0,dest.1
-            n_orb_rad as f32,
-            2.0,
-            graphics::Color::WHITE).expect("ecs new planet mesh error");
-
-        let orbit_circle = graphics::Mesh::from_data(current_ctx, mb.build());
-
-        //Orbit
-        let new_orbit = OrbitalComponent {
-            orbiting_ent_id: n_orbiting_ent_id,
-            radius: n_orb_rad,
-            angle: 25.0,
-            orbit_circle,
-        };
-        return new_orbit;
-
     }
 }
 

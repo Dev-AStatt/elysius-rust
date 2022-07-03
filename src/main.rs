@@ -13,6 +13,7 @@ mod globs;
 mod ui;
 mod user;
 mod entities;
+mod ecs;
 use std::{env, path};
 
 

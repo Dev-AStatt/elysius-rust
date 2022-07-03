@@ -5,6 +5,7 @@ use ggez::{
 
 use super::ms;
 
+
 impl ms::ElysiusMainState {
     //Draw function for solar objects and their rings
     pub fn draw_solar_object_ecs(
@@ -19,11 +20,11 @@ impl ms::ElysiusMainState {
             Some(ref orb) => { 
                 //get the final position of the circle
                 let circle_pos = glam::Vec2::new(
-                    (self.entities.solar_pos_comp[orb.orbiting_ent_id].0 * self.game_scale.x) + self.player_screen_move.x,
-                    (self.entities.solar_pos_comp[orb.orbiting_ent_id].1 * self.game_scale.y) + self.player_screen_move.y 
+                    (self.entities.solar_pos_comp[orb.orb_ent_id()].0 * self.game_scale.x) + self.player_screen_move.x,
+                    (self.entities.solar_pos_comp[orb.orb_ent_id()].1 * self.game_scale.y) + self.player_screen_move.y 
                 );
                 //Draw the circle
-                canvas.draw(&orb.orbit_circle, 
+                canvas.draw(orb.orbit_circle(), 
                     graphics::DrawParam::new()
                         .scale(self.game_scale)
                         .dest(circle_pos)
