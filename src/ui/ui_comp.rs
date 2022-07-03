@@ -5,7 +5,7 @@ use super::ui_tools::orb_menu;
 use super::ui_tools::transtions::{Transition, TransitionType, InOrOut, Speed};
 
 
-use crate::ecs::{Entities, sprite_get };
+use crate::entities::{Entities, sprite_get };
 use ggez::Context;
 use ggez::graphics;
 

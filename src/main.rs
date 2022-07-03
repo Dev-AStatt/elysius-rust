@@ -12,7 +12,7 @@ mod main_state;
 mod globs;
 mod ui;
 mod user;
-mod ecs;
+mod entities;
 use std::{env, path};
 
 

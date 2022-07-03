@@ -7,7 +7,7 @@ use ggez::{
 };
 use super::io;
 use super::super::ui;
-use super::super::ecs;
+use super::super::entities;
 use super::super::user;
 use super::super::globs;
 
@@ -24,8 +24,8 @@ pub enum GameState {
 //MAIN GAME STRUCT
 pub struct ElysiusMainState {
     //ECS
-    pub entities: ecs::Entities,
-    pub entities_id: Vec<ecs::EntityIndex>,
+    pub entities: entities::Entities,
+    pub entities_id: Vec<entities::EntityIndex>,
     //Structures
     pub mouse: io::Mouse,
     pub player: user::Player,
@@ -44,7 +44,7 @@ impl ElysiusMainState {
         //This is where you can put stuff that needs to be pre-calculated
 
         Ok(ElysiusMainState {
-            entities:       ecs::Entities::new(),
+            entities:       entities::Entities::new(),
             entities_id:    Vec::new(),
             mouse:          io::Mouse::new(),
             player:         user::Player::new(),
@@ -91,7 +91,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                     self.entities.draw_comp[i].screen_pos.x + sprite_offset_scaled.0, 
                     self.entities.draw_comp[i].screen_pos.y + sprite_offset_scaled.1
                 );
-                if ecs::point_in_object(&&self.mouse.get_pos_f32(),
+                if entities::point_in_object(&&self.mouse.get_pos_f32(),
                     adj_pos_for_input, 
                 self.entities.draw_comp[i].sprite_offset.0 as f32 * self.game_scale.x,
                 ) {
@@ -158,7 +158,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         //Match what the mose is focused on
         match self.mouse.get_focus() {
             io::MouseFocus::Body(id) => {
-                if self.entities.ent_type[id] == ecs::ObjectType::Ship {
+                if self.entities.ent_type[id] == entities::ObjectType::Ship {
                 } else {
                     //add menu to menu stack
                     let p = glam::Vec2::new(50.0,50.0);

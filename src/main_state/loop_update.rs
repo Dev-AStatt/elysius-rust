@@ -5,7 +5,7 @@ use ggez::{
 
 use super::ms::ElysiusMainState;
 
-use super::super::ecs;
+use super::super::entities;
 
 
 
@@ -32,14 +32,14 @@ impl ElysiusMainState {
         //First Sun
         self.entities.make_new_sun(
             &mut self.entities_id,
-            ecs::sprite_get(_ctx, "/Sprite-SUN_02.png"),
+            entities::sprite_get(_ctx, "/Sprite-SUN_02.png"),
             self.active_solar_system                       
         );            
             
         //First Planet
         self.entities.make_new_planet(
             &mut self.entities_id,
-            ecs::sprite_get(_ctx, "/Sprite-Planet_01.png"),
+            entities::sprite_get(_ctx, "/Sprite-Planet_01.png"),
             self.active_solar_system,                   
             &_ctx,
             0,                                     
@@ -49,7 +49,7 @@ impl ElysiusMainState {
         //First Ship
         self.entities.make_new_ship(
             &mut self.entities_id,
-            ecs::sprite_get(_ctx, "/Sprite-Ship_01.png"),
+            entities::sprite_get(_ctx, "/Sprite-Ship_01.png"),
             self.active_solar_system,                   
             &_ctx,
             1,                                     
