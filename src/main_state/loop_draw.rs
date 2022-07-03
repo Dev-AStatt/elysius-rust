@@ -13,23 +13,20 @@ impl ms::ElysiusMainState {
         canvas: &mut graphics::Canvas,
         ent_id: usize
     ) {
+        //if there is some orb component, then 
+        if let Some(ref orb) = &self.entities.orbit_comp[ent_id] {
+            //get the final position of the circle
+            let circle_pos = (
+                self.entities.solar_pos_comp[orb.orb_ent_id()]
+                * self.game_scale
+                ) + self.player_screen_move;
 
-        //Orbit Circle Component
-        match &self.entities.orbit_comp[ent_id] {
-            None => {}
-            Some(ref orb) => { 
-                //get the final position of the circle
-                let circle_pos = glam::Vec2::new(
-                    (self.entities.solar_pos_comp[orb.orb_ent_id()].0 * self.game_scale.x) + self.player_screen_move.x,
-                    (self.entities.solar_pos_comp[orb.orb_ent_id()].1 * self.game_scale.y) + self.player_screen_move.y 
-                );
-                //Draw the circle
-                canvas.draw(orb.orbit_circle(), 
-                    graphics::DrawParam::new()
-                        .scale(self.game_scale)
-                        .dest(circle_pos)
-                );    
-            }
+            //Draw the circle
+            canvas.draw(orb.orbit_circle(), 
+                graphics::DrawParam::new()
+                    .scale(self.game_scale)
+                    .dest(circle_pos)
+            ); 
         }
         //Draw the sprite
         canvas.draw(&self.entities.draw_comp[ent_id].sprite,
