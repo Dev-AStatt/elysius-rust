@@ -3,7 +3,6 @@
 //Comment this out for dead code errors
 #![allow(dead_code)]
 
-
 use ggez::{
     event, GameResult,
 };
@@ -15,12 +14,6 @@ mod user;
 mod entities;
 mod ecs;
 use std::{env, path};
-
-
-
-
-
-
 
 // 0---------------------PROGRAM MAIN------------------------------------------0
 
