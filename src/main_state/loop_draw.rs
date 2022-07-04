@@ -18,13 +18,13 @@ impl ms::ElysiusMainState {
             //get the final position of the circle
             let circle_pos = (
                 self.entities.solar_pos_comp[orb.orb_ent_id()]
-                * self.game_scale
-                ) + self.player_screen_move;
+                * self.state.scale()
+                ) + self.state.player_screen_offset_pos();
 
             //Draw the circle
             canvas.draw(orb.orbit_circle(), 
                 graphics::DrawParam::new()
-                    .scale(self.game_scale)
+                    .scale(self.state.scale())
                     .dest(circle_pos)
             ); 
         }
@@ -32,7 +32,7 @@ impl ms::ElysiusMainState {
         canvas.draw(&self.entities.draw_comp[ent_id].sprite,
             graphics::DrawParam::new()
                 .dest(self.entities.draw_comp[ent_id].screen_pos)
-                .scale(self.game_scale)
+                .scale(self.state.scale())
         );
     }
 
