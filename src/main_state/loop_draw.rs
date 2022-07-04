@@ -5,6 +5,7 @@ use ggez::{
 
 use super::ms;
 
+
 impl ms::ElysiusMainState {
     //Draw function for solar objects and their rings
     pub fn draw_solar_object_ecs(
@@ -12,29 +13,26 @@ impl ms::ElysiusMainState {
         canvas: &mut graphics::Canvas,
         ent_id: usize
     ) {
+        //if there is some orb component, then 
+        if let Some(ref orb) = &self.entities.orbit_comp[ent_id] {
+            //get the final position of the circle
+            let circle_pos = (
+                self.entities.solar_pos_comp[orb.orb_ent_id()]
+                * self.state.scale()
+                ) + self.state.player_screen_offset_pos();
 
-        //Orbit Circle Component
-        match &self.entities.orbit_comp[ent_id] {
-            None => {}
-            Some(ref orb) => { 
-                //get the final position of the circle
-                let circle_pos = glam::Vec2::new(
-                    (self.entities.solar_pos_comp[orb.orbiting_ent_id].0 * self.game_scale.x) + self.player_screen_move.x,
-                    (self.entities.solar_pos_comp[orb.orbiting_ent_id].1 * self.game_scale.y) + self.player_screen_move.y 
-                );
-                //Draw the circle
-                canvas.draw(&orb.orbit_circle, 
-                    graphics::DrawParam::new()
-                        .scale(self.game_scale)
-                        .dest(circle_pos)
-                );    
-            }
+            //Draw the circle
+            canvas.draw(orb.orbit_circle(), 
+                graphics::DrawParam::new()
+                    .scale(self.state.scale())
+                    .dest(circle_pos)
+            ); 
         }
         //Draw the sprite
         canvas.draw(&self.entities.draw_comp[ent_id].sprite,
             graphics::DrawParam::new()
                 .dest(self.entities.draw_comp[ent_id].screen_pos)
-                .scale(self.game_scale)
+                .scale(self.state.scale())
         );
     }
 
