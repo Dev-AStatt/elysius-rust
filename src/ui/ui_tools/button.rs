@@ -5,7 +5,7 @@ use ggez::{
 use super::color_palette;
 use super::disp_item;
 
-struct Button {
+pub struct Button {
     dp: disp_item::DisplayItem,
     clicked: bool,
     col_focus: Color,

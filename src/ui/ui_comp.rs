@@ -3,7 +3,7 @@
 use super::ui_tools::disp_item;
 use super::ui_tools::orb_menu;
 use super::ui_tools::transtions::{Transition, TransitionType, InOrOut, Speed};
-
+use super::ui_tools::button;
 
 use crate::entities::{Entities, sprite_get };
 use ggez::Context;
@@ -13,6 +13,7 @@ use ggez::graphics;
 pub enum MenuType {
     OrbitBodyInfo,
     ShipInfo,
+    ShipOptions,
     UIScreenTop,
 }
 
@@ -23,6 +24,7 @@ pub struct UIComponent {
     pub pos: glam::Vec2,
     pub mesh: graphics::Mesh,
     display_items: Vec<disp_item::DisplayItem>,
+    buttons: Vec<button::Button>,
     ent_id: usize,
     transition: Transition,
 }
@@ -77,9 +79,41 @@ impl UIComponent {
                     display_items: disp_items,
                     ent_id,
                     transition,
+                    buttons: Vec::new(),
                 }; 
         return ui;
     }
+
+    pub fn new_ship_menu(
+        ctx: &Context,
+        pos: glam::Vec2,
+        ents: &Entities,
+        ent_id: usize,
+    ) -> Self {
+
+        //Setup the transition for the menu to pop in
+        //Change the positions later
+        let transition = Transition::new(
+                    TransitionType::Slide,
+                    pos - glam::Vec2::new(600.0,0.0),
+                    pos,
+                    InOrOut::IN,
+                    Speed::Normal,
+                );
+
+        UIComponent { 
+            menu_type: MenuType::ShipInfo, 
+            pos: transition.get_pos(), 
+            mesh: (), 
+            display_items: Vec::new(), 
+            buttons: (), 
+            ent_id, 
+            transition, 
+        }
+    }
+
+
+
 
     pub fn draw_ui_comp(
         self: &Self,
