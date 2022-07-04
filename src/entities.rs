@@ -4,7 +4,6 @@ use ggez::{
     graphics::{self},
     Context,
 };
-use glam::{f32, i32, vec2};
 
 use super::ecs::orbit;
 
