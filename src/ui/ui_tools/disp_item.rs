@@ -4,23 +4,30 @@ use ggez::{
     Context,
 };
 use super::color_palette;
-
+#[derive(PartialEq)]
 pub enum BoxSize {
     Small,
     Large
 }
 //returns the value of width that size represents
 impl BoxSize {
-    fn get_size(&self) -> f32 {
+    fn get_width(&self) -> f32 {
         match self {
             BoxSize::Small => {return 150.0;}
             BoxSize::Large => {return 300.0;}
+        }
+    }
+    fn get_hight(&self) -> f32 {
+        match self {
+            BoxSize::Small => {return 50.0;}
+            BoxSize::Large => {return 50.0;}
         }
     }
 }
 
 pub struct DisplayItem {
     pos: glam::Vec2,
+    size: BoxSize,
     str_pos: glam::Vec2,
     disp_str: String,
     pub mesh: graphics::Mesh,
@@ -31,15 +38,13 @@ pub struct DisplayItem {
 impl DisplayItem {
     pub fn new(
         pos: glam::Vec2, 
-        size_type: BoxSize,
+        size: BoxSize,
         ctx: &Context,
         disp_str: String,
         img: Option<graphics::Image>
     ) -> Self {
         //Box Size
         
-        let disp_h = 50.0;
-        let disp_w = size_type.get_size();
         let bkgr_color = color_palette::ColorPalette::new().color_5;
 
         let n_str_pos; 
@@ -54,7 +59,7 @@ impl DisplayItem {
         let mb = &mut graphics::MeshBuilder::new();
         mb.rounded_rectangle(
             graphics::DrawMode::fill(), 
-            graphics::Rect::new(pos.x, pos.y, disp_w, disp_h),
+            graphics::Rect::new(pos.x, pos.y, size.get_width(), size.get_hight()),
             15.0, 
             bkgr_color,
         ).expect("Rec Mesh Failed");
@@ -62,6 +67,7 @@ impl DisplayItem {
     
         return DisplayItem {
             pos,
+            size,
             str_pos,
             disp_str,
             mesh,
@@ -70,6 +76,14 @@ impl DisplayItem {
         };
     }
     
+    //Getters and Setters
+    pub fn hight(&self) -> f32 {return self.size.get_hight()} 
+    pub fn width(&self) -> f32 {return self.size.get_width()} 
+    pub fn is_box_size(&self, b: BoxSize) -> bool {
+        if b == self.size {return true;} 
+        else {return false;}
+    }
+
 
     pub fn draw_self(
         &self,
