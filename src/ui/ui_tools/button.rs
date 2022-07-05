@@ -2,7 +2,7 @@ use ggez::{
     graphics::{self,Color},
     Context,
 };
-use super::color_palette;
+use super::{color_palette, disp_item::BoxSize};
 use super::disp_item;
 
 pub struct Button {
@@ -15,7 +15,34 @@ pub struct Button {
 
 impl Button {
     pub fn is_clicked(&self) -> bool {return self.clicked;}
-     
+    pub fn hight(&self) -> f32 {return self.dp.hight();} 
+    pub fn width(&self) -> f32 {return self.dp.width();} 
+    pub fn col_focus(&self) -> Color {return self.col_focus}
+    pub fn col_unfocus(&self) -> Color {return self.col_unfocus}
+
+    pub fn new(
+        size_type: BoxSize,
+        ctx: &Context,
+        disp_string: String,
+        img: Option<graphics::Image>,
+    ) -> Self {
+        //Make the display Item 
+        let dp = disp_item::DisplayItem::new(
+            glam::Vec2::new(0.0,0.0),
+            BoxSize::Small,
+            ctx,
+            disp_string,
+            img,
+        );
+        let col = color_palette::ColorPalette::new(); 
+
+        Button {
+            dp,
+            clicked: false,
+            col_focus: col.color_4, 
+            col_unfocus: col.color_5,
+        }
+    }
 }
 
 
