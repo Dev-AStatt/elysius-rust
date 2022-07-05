@@ -4,7 +4,7 @@ use ggez::{
 };
 use super::{color_palette, disp_item::BoxSize};
 use super::disp_item;
-
+#[derive(Clone)]
 pub struct Button {
     dp: disp_item::DisplayItem,
     clicked: bool,
@@ -29,7 +29,7 @@ impl Button {
         //Make the display Item 
         let dp = disp_item::DisplayItem::new(
             glam::Vec2::new(0.0,0.0),
-            BoxSize::Small,
+            size_type,
             ctx,
             disp_string,
             img,

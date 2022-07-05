@@ -4,7 +4,7 @@ use ggez::{
     Context,
 };
 use super::color_palette;
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum BoxSize {
     Small,
     Large
@@ -25,6 +25,7 @@ impl BoxSize {
     }
 }
 
+#[derive(Clone)]
 pub struct DisplayItem {
     pos: glam::Vec2,
     size: BoxSize,
