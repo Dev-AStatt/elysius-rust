@@ -1,6 +1,7 @@
 
 
 use super::ui_tools::disp_item;
+use super::ui_tools::list_menu;
 use super::ui_tools::orb_menu;
 use super::ui_tools::transtions::{Transition, TransitionType, InOrOut, Speed};
 use super::ui_tools::button;
@@ -12,7 +13,6 @@ use ggez::graphics;
 #[derive(PartialEq)]
 pub enum MenuType {
     OrbitBodyInfo,
-    ShipInfo,
     ShipOptions,
     UIScreenTop,
 }
@@ -101,12 +101,21 @@ impl UIComponent {
                     Speed::Normal,
                 );
 
+        //create the ship menu list menu
+        let s_m = list_menu::ListMenu::new(
+            MenuType::ShipOptions,
+            ctx,
+        );
+        //give the title bar to display items
+        let mut display_items: Vec<disp_item::DisplayItem> = Vec::new();
+        display_items.push(s_m.title());
+        
         UIComponent { 
-            menu_type: MenuType::ShipInfo, 
+            menu_type: MenuType::ShipOptions, 
             pos: transition.get_pos(), 
-            mesh: (), 
-            display_items: Vec::new(), 
-            buttons: (), 
+            mesh: s_m.mesh(ctx), 
+            display_items, 
+            buttons: s_m.buttons(), 
             ent_id, 
             transition, 
         }
@@ -128,7 +137,7 @@ impl UIComponent {
         
         match self.menu_type {
             MenuType::UIScreenTop => {}
-            MenuType::ShipInfo => {}
+            MenuType::ShipOptions => {}
             MenuType::OrbitBodyInfo => {
                 let obi_pos = orb_menu::OrbMenu::new();
                 //Draw the Sprite
