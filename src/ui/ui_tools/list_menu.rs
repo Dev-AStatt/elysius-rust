@@ -11,14 +11,14 @@ pub struct ListMenu {
 
 }
 
-
 impl ListMenu {
     //Getters and Setters
-    pub fn buttons(&self) -> Vec<button::Button> {return self.buttons;}
-    pub fn title(&self) -> disp_item::DisplayItem {return self.title;}
+    pub fn buttons(&self) -> Vec<button::Button> {return self.buttons.clone();}
+    pub fn title(&self) -> disp_item::DisplayItem {return self.title.clone();}
     pub fn hight(&self) -> f32 {return self.hw.x;}
     pub fn width(&self) -> f32 {return self.hw.y;}
     pub fn size(&self) -> glam::Vec2 {return self.hw;}
+    
 
     pub fn new(m_type: ui_comp::MenuType, ctx: &Context) -> Self {
         let mut buttons: Vec<button::Button> = Vec::new();
@@ -32,15 +32,34 @@ impl ListMenu {
         if m_type == ui_comp::MenuType::ShipOptions {
             buttons = get_test_vect(ctx); 
         } 
-                 
-
+        let hw = calc_bkgr_pos(&buttons, &title); 
         ListMenu {
-            hw: calc_bkgr_pos(&buttons, &title),
+            hw,
             buttons,
             title,
         }
     }
+ 
+    pub fn mesh(&self, ctx: &Context) -> graphics::Mesh {
+        let rad = 15.0;
+        let color_palette = color_palette::ColorPalette::new();
+        let mb = &mut graphics::MeshBuilder::new();
+        mb.rounded_rectangle(
+            graphics::DrawMode::fill(), 
+            graphics::Rect::new(
+                0.0,
+                0.0, 
+                self.hw.x,
+                self.hw.y),
+            rad, 
+            color_palette.color_1,
+        ).expect("list menu Mesh Failed");
+
+        return graphics::Mesh::from_data(ctx, mb.build());
+    }
+
 }
+
 
 fn calc_bkgr_pos(
     buttons: &Vec<button::Button>, 
@@ -64,8 +83,7 @@ fn calc_bkgr_pos(
 
 //function for testing filling a vector of junk values
 fn get_test_vect(ctx: &Context) -> Vec<button::Button> {
-    let buttons: Vec<button::Button> = Vec::new();
-        let buttons = Vec::new();
+    let mut buttons: Vec<button::Button> = Vec::new();
         buttons.push(button::Button::new(
             super::disp_item::BoxSize::Small,
             ctx,
