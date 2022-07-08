@@ -170,7 +170,7 @@ impl UIComponent {
 
    }
    //Fucntion will update the position of the Menu if it is in a transition state
-    pub fn if_transition_update(self: &mut Self) {
+    fn if_transition_update(self: &mut Self) {
         if self.transition.is_in_transition() {
             self.transition.inc_transition();
             self.pos = self.transition.get_pos();
@@ -197,6 +197,9 @@ impl UIComponent {
                 } else { return false };
             }
         }
+    }
+    pub fn update(self: &mut Self, mouse_pos: glam::Vec2) {
+        self.if_transition_update();
     }
 }
 
