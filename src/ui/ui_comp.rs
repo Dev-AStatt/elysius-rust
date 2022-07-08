@@ -3,9 +3,13 @@
 use super::ui_tools::disp_item;
 use super::ui_tools::list_menu;
 use super::ui_tools::orb_menu;
-use super::ui_tools::transtions::{Transition, TransitionType, InOrOut, Speed};
+use super::ui_tools::transtions::{
+    Transition,
+    TransitionType,
+    InOrOut,
+    Speed
+};
 use super::ui_tools::button;
-
 use crate::entities::{Entities, sprite_get };
 use ggez::Context;
 use ggez::graphics;
@@ -16,8 +20,6 @@ pub enum MenuType {
     ShipOptions,
     UIScreenTop,
 }
-
-
 
 pub struct UIComponent {
     menu_type: MenuType,
@@ -30,6 +32,14 @@ pub struct UIComponent {
 }
 
 impl UIComponent {
+    pub fn set_pos(&mut self, pos: glam::Vec2) {self.pos = pos;}
+    pub fn menu_type(&self) -> &MenuType {&self.menu_type}
+    pub fn menu_removeable(&self) -> bool {
+        if self.menu_type == MenuType::OrbitBodyInfo {return true;}
+        if self.menu_type == MenuType::ShipOptions   {return true;}
+        else {return false;}
+    }
+
     pub fn new_menu_orbit_body_info(
         ctx: &Context,    
         pos: glam::Vec2,
@@ -106,6 +116,7 @@ impl UIComponent {
         let s_m = list_menu::ListMenu::new(
             MenuType::ShipOptions,
             ctx,
+            ents.ent_name[ent_id].to_string(),
         );
         //give the title bar to display items
         let mut display_items: Vec<disp_item::DisplayItem> = Vec::new();
@@ -152,6 +163,7 @@ impl UIComponent {
         for i in 0..self.display_items.len() {
             self.display_items[i].draw(canvas, self.pos);
         }
+        //Draw Each button
         for i in 0..self.buttons.len() {
             self.buttons[i].draw(canvas, self.pos);
         }
@@ -163,9 +175,7 @@ impl UIComponent {
             self.transition.inc_transition();
             self.pos = self.transition.get_pos();
         }
-
     } 
-
 
     pub fn transition_out(self: &mut Self) {
         self.transition = Transition::new(
@@ -175,7 +185,6 @@ impl UIComponent {
             InOrOut::OUT,
             Speed::Fast,
         );
-
     }
     //function impliments the checks to see if the menu is ready to be removed
     //checking if it is in a transition and if it has transntioned out.
@@ -188,20 +197,6 @@ impl UIComponent {
                 } else { return false };
             }
         }
-    }
-
-    pub fn set_pos(&mut self, pos: glam::Vec2) {
-        self.pos = pos;
-    }
-
-    pub fn menu_type(&self) -> &MenuType {
-        &self.menu_type
-    }
-
-    pub fn menu_removeable(&self) -> bool {
-        if self.menu_type == MenuType::OrbitBodyInfo {return true;}
-        if self.menu_type == MenuType::ShipOptions   {return true;}
-        else {return false;}
     }
 }
 
