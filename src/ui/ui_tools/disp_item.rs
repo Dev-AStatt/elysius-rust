@@ -23,12 +23,15 @@ impl BoxSize {
             BoxSize::Large => {return 50.0;}
         }
     }
+    pub fn size(&self) -> glam::Vec2 {
+        return glam::Vec2::new(self.get_width(), self.get_hight());
+    }
 }
 
 #[derive(Clone)]
 pub struct DisplayItem {
     pos: glam::Vec2,
-    size: BoxSize,
+    box_size: BoxSize,
     str_pos: glam::Vec2,
     disp_str: String,
     pub mesh: graphics::Mesh,
@@ -39,7 +42,7 @@ pub struct DisplayItem {
 impl DisplayItem {
     pub fn new(
         pos: glam::Vec2, 
-        size: BoxSize,
+        box_size: BoxSize,
         ctx: &Context,
         disp_str: String,
         img: Option<graphics::Image>
@@ -60,7 +63,7 @@ impl DisplayItem {
         let mb = &mut graphics::MeshBuilder::new();
         mb.rounded_rectangle(
             graphics::DrawMode::fill(), 
-            graphics::Rect::new(pos.x, pos.y, size.get_width(), size.get_hight()),
+            graphics::Rect::new(pos.x, pos.y, box_size.get_width(), box_size.get_hight()),
             15.0, 
             bkgr_color,
         ).expect("Rec Mesh Failed");
@@ -68,7 +71,7 @@ impl DisplayItem {
     
         return DisplayItem {
             pos,
-            size,
+            box_size,
             str_pos,
             disp_str,
             mesh,
@@ -78,10 +81,12 @@ impl DisplayItem {
     }
     
     //Getters and Setters
-    pub fn hight(&self) -> f32 {return self.size.get_hight()} 
-    pub fn width(&self) -> f32 {return self.size.get_width()} 
+    pub fn hight(&self) -> f32 {return self.box_size.get_hight()} 
+    pub fn width(&self) -> f32 {return self.box_size.get_width()} 
+    pub fn box_size(&self) -> BoxSize {return self.box_size}
+    pub fn rel_pos(&self) -> glam::Vec2 {return self.pos;}
     pub fn is_box_size(&self, b: BoxSize) -> bool {
-        if b == self.size {return true;} 
+        if b == self.box_size {return true;} 
         else {return false;}
     }
 
