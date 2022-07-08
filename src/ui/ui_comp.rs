@@ -197,10 +197,10 @@ impl UIComponent {
         &self.menu_type
     }
 
-    pub fn menu_type_obi(&self) -> bool {
-        if self.menu_type == MenuType::OrbitBodyInfo {
-            return true;
-        } else {return false;}
+    pub fn menu_removeable(&self) -> bool {
+        if self.menu_type == MenuType::OrbitBodyInfo {return true;}
+        if self.menu_type == MenuType::ShipOptions   {return true;}
+        else {return false;}
     }
 }
 

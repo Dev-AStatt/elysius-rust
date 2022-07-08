@@ -159,7 +159,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             }
             io::MouseFocus::Background => {
                 for i in 0..self.menus.len() {
-                    if self.menus[i].menu_type_obi() {
+                    if self.menus[i].menu_removeable() {
                         self.menus[i].transition_out();    
                     }
                 } 
