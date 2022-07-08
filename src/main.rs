@@ -13,7 +13,9 @@ mod ui;
 mod user;
 mod entities;
 mod ecs;
+mod utilities;
 use std::{env, path};
+
 
 // 0---------------------PROGRAM MAIN------------------------------------------0
 
