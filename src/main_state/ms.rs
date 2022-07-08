@@ -139,7 +139,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         match self.mouse.get_focus() {
             io::MouseFocus::Body(id) => {
                 if self.entities.ent_type[id] == entities::ObjectType::Ship {
-                    let p = glam::Vec2::new(50.0,50.0);
+                    let p = glam::Vec2::new(self.state.screen_size().x - 400.0 ,50.0);
                     self.menus.push(
                         ui::ui_comp::UIComponent::new_ship_menu(
                             ctx, p, &self.entities, id)

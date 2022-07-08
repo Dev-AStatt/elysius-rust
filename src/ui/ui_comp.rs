@@ -5,6 +5,7 @@ use super::ui_tools::list_menu;
 use super::ui_tools::orb_menu;
 use super::ui_tools::transtions::{Transition, TransitionType, InOrOut, Speed};
 use super::ui_tools::button;
+use super::super::globs;
 
 use crate::entities::{Entities, sprite_get };
 use ggez::Context;
@@ -93,9 +94,10 @@ impl UIComponent {
 
         //Setup the transition for the menu to pop in
         //Change the positions later
+        
         let transition = Transition::new(
                     TransitionType::Slide,
-                    pos - glam::Vec2::new(600.0,0.0),
+                    glam::Vec2::new(pos.x + 600.0, pos.y),
                     pos,
                     InOrOut::IN,
                     Speed::Normal,
