@@ -253,12 +253,12 @@ impl Entities {
         let sprite_width = sprite.width().try_into().unwrap();
         let sprite_height = sprite.height().try_into().unwrap();
         //Drawing
-        let new_draw_comp = DrawingComponent{
+        let new_draw_comp = DrawingComponent::new(
             sprite,
-            image_size: (sprite_width,sprite_height),
-            sprite_offset: glam::Vec2::new(sprite_width as f32 / 2.0, sprite_height as f32 / 2.0),
-            screen_pos: glam::Vec2::new(0.0,0.0),
-        };
+            (sprite_width,sprite_height),
+            glam::Vec2::new(sprite_width as f32 / 2.0, sprite_height as f32 / 2.0),
+            glam::Vec2::new(0.0,0.0),
+        );
 
         self.draw_comp.push(new_draw_comp);
 

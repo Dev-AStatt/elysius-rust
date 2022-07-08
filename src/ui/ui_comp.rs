@@ -154,7 +154,7 @@ impl UIComponent {
                 let obi_pos = orb_menu::OrbMenu::new();
                 //Draw the Sprite
                 canvas.draw(
-                    &ents.draw_comp[self.ent_id].sprite,
+                    ents.draw_comp[self.ent_id].sprite(),
                     self.pos + obi_pos.spr_pos
                 );
             }

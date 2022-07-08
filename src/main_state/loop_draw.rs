@@ -30,9 +30,9 @@ impl ms::ElysiusMainState {
             ); 
         }
         //Draw the sprite
-        canvas.draw(&self.entities.draw_comp[ent_id].sprite,
+        canvas.draw(self.entities.draw_comp[ent_id].sprite(),
             graphics::DrawParam::new()
-                .dest(self.entities.draw_comp[ent_id].screen_pos)
+                .dest(self.entities.draw_comp[ent_id].screen_pos())
                 .scale(self.state.scale())
         );
     }
