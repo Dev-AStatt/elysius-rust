@@ -50,7 +50,7 @@ impl DisplayItem {
     ) -> Self {
         //figure out what color
         let mut bkgr_color = color_palette::ColorPalette::new().color_5;
-        if let Some(col) = bkgr_col {bkgr_color = bkgr_col;}
+        if let Some(col) = bkgr_col {bkgr_color = col;}
 
         let n_str_pos; 
         match img {
@@ -97,8 +97,6 @@ impl DisplayItem {
         canvas: &mut graphics::Canvas,
         menu_pos: glam::Vec2,
     ) {
-       
-        let bkgr_color = color_palette::ColorPalette::new().color_5;
         self.draw_with_color(canvas, menu_pos, None);
     }
 
