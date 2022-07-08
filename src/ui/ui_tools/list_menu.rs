@@ -24,10 +24,9 @@ impl ListMenu {
     pub fn size(&self) -> glam::Vec2 {return self.hw;}
     
 
-    pub fn new(m_type: ui_comp::MenuType, ctx: &Context) -> Self {
+    pub fn new(m_type: ui_comp::MenuType, ctx: &Context, title_str: String) -> Self {
         let buttons: Vec<button::Button> = Vec::new();
         let mut positions = Vec::new();
-        //add the title
         //add the title position to it
         positions.push(glam::Vec2::new(15.0,15.0));
         
@@ -35,7 +34,7 @@ impl ListMenu {
             positions[0],
             disp_item::BoxSize::Small,
             ctx,
-            "Title".to_string(),
+            title_str, 
             None,
         );
         let mut l = ListMenu {
@@ -53,13 +52,9 @@ impl ListMenu {
     }
     
     fn build_ship_menu(self: &mut Self, ctx: &Context) {
-        //For each button to add
-        for i in 0..2 {
-            self.add_button(
-                ctx,
-                "Text Test".to_string(), 
-            );
-        }        
+        //Add the first Option
+        self.add_button(ctx,"Move Ship".to_string());
+        self.add_button(ctx,"Option 2".to_string());
         self.hw = self.get_hw(); 
     }
 
