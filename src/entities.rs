@@ -6,6 +6,7 @@ use ggez::{
 };
 
 use super::ecs::orbit;
+use super::ecs::draw_comp::DrawingComponent;
 
 #[derive(PartialEq)]
 pub enum ObjectType {
@@ -35,13 +36,6 @@ impl EnergyComponent {
     }
 }
 
-pub struct DrawingComponent {
-    pub sprite: graphics::Image,
-    pub image_size: (i32, i32),
-    pub sprite_offset: (f32, f32),
-    pub screen_pos: glam::Vec2,
-    
-}
 
 pub struct Entities {
     pub orbit_comp: Vec<Option<orbit::OrbitalComponent>>,
@@ -271,9 +265,5 @@ impl Entities {
         entities_id.push(entities_id.len());    
     }
 }
-
-
-
-// 0--------------------End of ECS System---------------------------------------0
 
 
