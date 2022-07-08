@@ -149,7 +149,7 @@ impl UIComponent {
         }
         //Draw each Display Item
         for i in 0..self.display_items.len() {
-            self.display_items[i].draw_self(canvas, self.pos);
+            self.display_items[i].draw(canvas, self.pos);
         }
    }
    //Fucntion will update the position of the Menu if it is in a transition state

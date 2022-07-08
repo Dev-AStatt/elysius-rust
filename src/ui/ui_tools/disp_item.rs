@@ -86,7 +86,7 @@ impl DisplayItem {
     }
 
 
-    pub fn draw_self(
+    pub fn draw(
         &self,
         canvas: &mut graphics::Canvas,
         pos_of_menu: glam::Vec2,
