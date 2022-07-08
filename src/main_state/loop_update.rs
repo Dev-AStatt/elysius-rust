@@ -4,12 +4,7 @@ use ggez::{
 };
 
 use super::ms::ElysiusMainState;
-
-use super::super::entities;
-
-
-
-
+use crate::utilities;
 
 impl ElysiusMainState {
     //Check if any menus can be deleted, then remove them
@@ -32,14 +27,14 @@ impl ElysiusMainState {
         //First Sun
         self.entities.make_new_sun(
             &mut self.entities_id,
-            entities::sprite_get(_ctx, "/Sprite-SUN_02.png"),
+            utilities::sprite_get(_ctx, "/Sprite-SUN_02.png"),
             self.state.active_solar_system()                       
         );            
             
         //First Planet
         self.entities.make_new_planet(
             &mut self.entities_id,
-            entities::sprite_get(_ctx, "/Sprite-Planet_01.png"),
+            utilities::sprite_get(_ctx, "/Sprite-Planet_01.png"),
             self.state.active_solar_system(),                   
             &_ctx,
             0,                                     
@@ -49,7 +44,7 @@ impl ElysiusMainState {
         //First Ship
         self.entities.make_new_ship(
             &mut self.entities_id,
-            entities::sprite_get(_ctx, "/Sprite-Ship_01.png"),
+            utilities::sprite_get(_ctx, "/Sprite-Ship_01.png"),
             self.state.active_solar_system(),                   
             &_ctx,
             1,                                     

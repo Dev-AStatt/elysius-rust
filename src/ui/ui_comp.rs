@@ -10,9 +10,10 @@ use super::ui_tools::transtions::{
     Speed
 };
 use super::ui_tools::button;
-use crate::entities::{Entities, sprite_get };
+use crate::entities::Entities;
 use ggez::Context;
 use ggez::graphics;
+use crate::utilities;
 
 #[derive(PartialEq)]
 pub enum MenuType {
@@ -70,7 +71,7 @@ impl UIComponent {
                     disp_item::BoxSize::Small,
                     ctx,
                     e_c.fossil.to_string(),
-                    Some(sprite_get(ctx, "/Sprite-Coal_01.png")),
+                    Some(utilities::sprite_get(ctx, "/Sprite-Coal_01.png")),
                     None,
                 ));
             }
