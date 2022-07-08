@@ -151,6 +151,10 @@ impl UIComponent {
         for i in 0..self.display_items.len() {
             self.display_items[i].draw(canvas, self.pos);
         }
+        for i in 0..self.buttons.len() {
+            self.buttons[i].draw(canvas, self.pos);
+        }
+
    }
    //Fucntion will update the position of the Menu if it is in a transition state
     pub fn if_transition_update(self: &mut Self) {
@@ -158,6 +162,7 @@ impl UIComponent {
             self.transition.inc_transition();
             self.pos = self.transition.get_pos();
         }
+
     } 
 
 

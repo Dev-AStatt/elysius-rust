@@ -1,3 +1,4 @@
+use ggez::input::mouse::position;
 use ggez::{graphics, Context};
 use super::color_palette;
 use super::button;
@@ -8,6 +9,7 @@ pub struct ListMenu {
     hw: glam::Vec2,
     buttons: Vec<button::Button>,
     title: disp_item::DisplayItem,
+    positions: Vec<glam::Vec2>
 
 }
 
@@ -21,7 +23,9 @@ impl ListMenu {
     
 
     pub fn new(m_type: ui_comp::MenuType, ctx: &Context) -> Self {
-        let mut buttons: Vec<button::Button> = Vec::new();
+        let buttons: Vec<button::Button> = Vec::new();
+        let mut positions = Vec::new();
+        //add the title
         let title = disp_item::DisplayItem::new(
             glam::Vec2::new(0.0,0.0),
             disp_item::BoxSize::Small,
@@ -29,17 +33,45 @@ impl ListMenu {
             "Title".to_string(),
             None,
         );
-        if m_type == ui_comp::MenuType::ShipOptions {
-            buttons = get_test_vect(ctx); 
-        } 
-        let hw = calc_bkgr_pos(&buttons, &title); 
-        ListMenu {
-            hw,
+        //add the title position to it
+        positions.push(glam::Vec2::new(15.0,15.0));
+        
+        let mut l = ListMenu {
+            hw: glam::Vec2::new(0.0,0.0),
             buttons,
             title,
+            positions,
+        };
+        if m_type == ui_comp::MenuType::ShipOptions {
+            l.build_ship_menu(ctx);
         }
+        return l;
     }
- 
+    
+    fn build_ship_menu(self: &mut Self, ctx: &Context) {
+        //For each button to add
+        for i in 0..2 {
+            self.add_button(ctx, "Text Test".to_string());
+        }        
+    }
+
+    fn add_button(self: &mut Self, ctx: &Context, text: String) {
+        //get next position
+        if let Some(last) = self.positions.last() {
+            let next_pos = glam::Vec2::new(last.x,last.y + 50.0 + 15.0);
+            self.positions.push(next_pos);
+            self.buttons.push(
+              button::Button::new(
+                disp_item::BoxSize::Small,
+                next_pos,
+                ctx,
+                text,
+                None,
+              )  
+            );
+        } 
+    }
+
     pub fn mesh(&self, ctx: &Context) -> graphics::Mesh {
         let rad = 15.0;
         let color_palette = color_palette::ColorPalette::new();
@@ -58,53 +90,6 @@ impl ListMenu {
         return graphics::Mesh::from_data(ctx, mb.build());
     }
 
-}
-
-
-fn calc_bkgr_pos(
-    buttons: &Vec<button::Button>, 
-    title: &disp_item::DisplayItem
-) -> glam::Vec2 {
-    //Buffer Between buttons
-    let buff: f32 = 15.0;
-    let mut total_hight: f32;
-
-    total_hight = buff + title.hight() + buff;
-    
-    for i in 0..buttons.len() {
-        total_hight += buttons[i].hight();
-        total_hight += buff;
-    }
-
-    return glam::Vec2::new(total_hight, title.width())
-}
-
-
-
-//function for testing filling a vector of junk values
-fn get_test_vect(ctx: &Context) -> Vec<button::Button> {
-    let mut buttons: Vec<button::Button> = Vec::new();
-        buttons.push(button::Button::new(
-            super::disp_item::BoxSize::Small,
-            ctx,
-            "Test 1".to_string(),
-            None,
-        ));
-        buttons.push(button::Button::new(
-            super::disp_item::BoxSize::Small,
-            ctx,
-            "Test 2".to_string(),
-            None,
-        ));
-     buttons.push(button::Button::new(
-            super::disp_item::BoxSize::Small,
-            ctx,
-            "Test 3".to_string(),
-            None,
-        ));
-
-
-    return buttons;
 }
 
 

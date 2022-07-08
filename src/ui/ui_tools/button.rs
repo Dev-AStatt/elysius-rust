@@ -22,13 +22,14 @@ impl Button {
 
     pub fn new(
         size_type: BoxSize,
+        pos: glam::Vec2,
         ctx: &Context,
         disp_string: String,
         img: Option<graphics::Image>,
     ) -> Self {
         //Make the display Item 
         let dp = disp_item::DisplayItem::new(
-            glam::Vec2::new(0.0,0.0),
+            pos,
             size_type,
             ctx,
             disp_string,
@@ -42,6 +43,10 @@ impl Button {
             col_focus: col.color_4, 
             col_unfocus: col.color_5,
         }
+    }
+
+    pub fn draw(&self, canvas: &mut graphics::Canvas, menu_pos: glam::Vec2) {
+        self.dp.draw(canvas, menu_pos);
     }
 }
 
