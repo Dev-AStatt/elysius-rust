@@ -9,7 +9,9 @@ pub struct ListMenu {
     hw: glam::Vec2,
     buttons: Vec<button::Button>,
     title: disp_item::DisplayItem,
-    positions: Vec<glam::Vec2>
+    positions: Vec<glam::Vec2>,
+    bttn_gap: f32,
+    size: disp_item::BoxSize,
 
 }
 
@@ -26,21 +28,23 @@ impl ListMenu {
         let buttons: Vec<button::Button> = Vec::new();
         let mut positions = Vec::new();
         //add the title
+        //add the title position to it
+        positions.push(glam::Vec2::new(15.0,15.0));
+        
         let title = disp_item::DisplayItem::new(
-            glam::Vec2::new(0.0,0.0),
+            positions[0],
             disp_item::BoxSize::Small,
             ctx,
             "Title".to_string(),
             None,
         );
-        //add the title position to it
-        positions.push(glam::Vec2::new(15.0,15.0));
-        
         let mut l = ListMenu {
             hw: glam::Vec2::new(0.0,0.0),
             buttons,
             title,
             positions,
+            bttn_gap: 15.0,
+            size: disp_item::BoxSize::Large,
         };
         if m_type == ui_comp::MenuType::ShipOptions {
             l.build_ship_menu(ctx);
@@ -51,18 +55,37 @@ impl ListMenu {
     fn build_ship_menu(self: &mut Self, ctx: &Context) {
         //For each button to add
         for i in 0..2 {
-            self.add_button(ctx, "Text Test".to_string());
+            self.add_button(
+                ctx,
+                "Text Test".to_string(), 
+            );
         }        
+        self.hw = self.get_hw(); 
     }
 
-    fn add_button(self: &mut Self, ctx: &Context, text: String) {
+    fn get_hw(self: &mut Self) -> glam::Vec2 {
+        let mut h: f32 = 0.0;
+        let w: f32 = self.size.get_width() + 30.0;
+        if let Some(last) = self.positions.last() {
+            h = last.y + 50.0 + 15.0;
+        }
+        return glam::Vec2::new(w,h);
+    }
+
+    fn add_button(
+        self: &mut Self, 
+        ctx: &Context, 
+        text: String, 
+        ) {
         //get next position
         if let Some(last) = self.positions.last() {
-            let next_pos = glam::Vec2::new(last.x,last.y + 50.0 + 15.0);
+            let next_pos = glam::Vec2::new(
+                last.x,
+                last.y + self.size.get_hight() + self.bttn_gap);
             self.positions.push(next_pos);
             self.buttons.push(
               button::Button::new(
-                disp_item::BoxSize::Small,
+                self.size,
                 next_pos,
                 ctx,
                 text,
