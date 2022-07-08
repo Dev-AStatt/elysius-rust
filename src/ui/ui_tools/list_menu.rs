@@ -1,4 +1,3 @@
-use ggez::input::mouse::position;
 use ggez::{graphics, Context};
 use super::color_palette;
 use super::button;
@@ -36,6 +35,7 @@ impl ListMenu {
             ctx,
             title_str, 
             None,
+            Some(color_palette::ColorPalette::new().color_1),
         );
         let mut l = ListMenu {
             hw: glam::Vec2::new(0.0,0.0),

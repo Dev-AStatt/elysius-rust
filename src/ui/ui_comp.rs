@@ -57,7 +57,8 @@ impl UIComponent {
             disp_item::BoxSize::Large,
             ctx,
             ents.ent_name[ent_id].clone(),
-            None
+            None,
+            None,
         ));
 
         //Figure out how to get this much cleaner
@@ -69,8 +70,9 @@ impl UIComponent {
                     disp_item::BoxSize::Small,
                     ctx,
                     e_c.fossil.to_string(),
-                    Some(sprite_get(ctx, "/Sprite-Coal_01.png")))
-                );
+                    Some(sprite_get(ctx, "/Sprite-Coal_01.png")),
+                    None,
+                ));
             }
         }
         let transition = Transition::new(

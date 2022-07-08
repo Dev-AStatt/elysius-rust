@@ -11,7 +11,6 @@ pub struct Button {
     dp: disp_item::DisplayItem,
     mouse_over: bool,
     col_focus: Color,
-    col_unfocus: Color,
 
 }
 
@@ -21,7 +20,6 @@ impl Button {
     pub fn width(&self) -> f32 {return self.dp.width();} 
     pub fn size(&self) -> glam::Vec2 {return self.dp.box_size().size(); }
     pub fn col_focus(&self) -> Color {return self.col_focus}
-    pub fn col_unfocus(&self) -> Color {return self.col_unfocus}
     pub fn rel_pos(&self) -> glam::Vec2 {return self.dp.rel_pos()}
     //Sets
     pub fn set_mouse_over(self: &mut Self) {self.mouse_over = true;}
@@ -40,19 +38,23 @@ impl Button {
             ctx,
             disp_string,
             img,
+            None,
         );
         let col = color_palette::ColorPalette::new(); 
 
         Button {
             dp,
             mouse_over: false,
-            col_focus: col.color_4, 
-            col_unfocus: col.color_5,
+            col_focus: col.color_3, 
         }
     }
 
     pub fn draw(&self, canvas: &mut graphics::Canvas, menu_pos: glam::Vec2) {
-        self.dp.draw(canvas, menu_pos);
+        if self.mouse_over {
+            self.dp.draw_with_color(canvas, menu_pos, Some(self.col_focus));
+        } else {
+            self.dp.draw_with_color(canvas, menu_pos, None);
+        } 
     }
 
     pub fn mouse_over_bttn(&self, menu_pos: glam::Vec2, mouse_pos: glam::Vec2
