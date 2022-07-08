@@ -57,7 +57,8 @@ impl UIComponent {
             disp_item::BoxSize::Large,
             ctx,
             ents.ent_name[ent_id].clone(),
-            None
+            None,
+            None,
         ));
 
         //Figure out how to get this much cleaner
@@ -69,8 +70,9 @@ impl UIComponent {
                     disp_item::BoxSize::Small,
                     ctx,
                     e_c.fossil.to_string(),
-                    Some(sprite_get(ctx, "/Sprite-Coal_01.png")))
-                );
+                    Some(sprite_get(ctx, "/Sprite-Coal_01.png")),
+                    None,
+                ));
             }
         }
         let transition = Transition::new(
@@ -133,9 +135,6 @@ impl UIComponent {
         }
     }
 
-
-
-
     pub fn draw_ui_comp(
         self: &Self,
         canvas: &mut graphics::Canvas,
@@ -169,15 +168,7 @@ impl UIComponent {
         }
 
    }
-   //Fucntion will update the position of the Menu if it is in a transition state
-    pub fn if_transition_update(self: &mut Self) {
-        if self.transition.is_in_transition() {
-            self.transition.inc_transition();
-            self.pos = self.transition.get_pos();
-        }
-    } 
-
-    pub fn transition_out(self: &mut Self) {
+       pub fn transition_out(self: &mut Self) {
         self.transition = Transition::new(
             TransitionType::Slide,
             self.pos,
@@ -198,5 +189,37 @@ impl UIComponent {
             }
         }
     }
+    pub fn update(self: &mut Self, mouse_pos: glam::Vec2) {
+        self.if_transition_update();
+        self.update_buttons(mouse_pos);
+    }
+    
+//0-------------------------Private Functions----------------------------------0
+    
+    //Fucntion will update the position of the Menu if it is in a transition state
+    fn if_transition_update(self: &mut Self) {
+        if self.transition.is_in_transition() {
+            self.transition.inc_transition();
+            self.pos = self.transition.get_pos();
+        }
+    }
+
+    fn update_buttons(self: &mut Self, mouse_pos: glam::Vec2) {
+        for (_i,btn) in self.buttons.iter_mut().enumerate() {
+            btn.update(self.pos, mouse_pos);
+        }
+        //for (btn) self.buttons.any(|&btn| btn.mouse_over_bttn(self.pos, mouse_pos)) {
+        
+    }
+
+
+
+
+
+
+
+
+
+
 }
 

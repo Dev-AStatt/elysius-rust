@@ -14,7 +14,7 @@ impl BoxSize {
     pub fn get_width(&self) -> f32 {
         match self {
             BoxSize::Small => {return 150.0;}
-            BoxSize::Large => {return 300.0;}
+            BoxSize::Large => {return 250.0;}
         }
     }
     pub fn get_hight(&self) -> f32 {
@@ -23,12 +23,15 @@ impl BoxSize {
             BoxSize::Large => {return 50.0;}
         }
     }
+    pub fn size(&self) -> glam::Vec2 {
+        return glam::Vec2::new(self.get_width(), self.get_hight());
+    }
 }
 
 #[derive(Clone)]
 pub struct DisplayItem {
     pos: glam::Vec2,
-    size: BoxSize,
+    box_size: BoxSize,
     str_pos: glam::Vec2,
     disp_str: String,
     pub mesh: graphics::Mesh,
@@ -39,14 +42,15 @@ pub struct DisplayItem {
 impl DisplayItem {
     pub fn new(
         pos: glam::Vec2, 
-        size: BoxSize,
+        box_size: BoxSize,
         ctx: &Context,
         disp_str: String,
-        img: Option<graphics::Image>
+        img: Option<graphics::Image>,
+        bkgr_col: Option<Color>,
     ) -> Self {
-        //Box Size
-        
-        let bkgr_color = color_palette::ColorPalette::new().color_5;
+        //figure out what color
+        let mut bkgr_color = color_palette::ColorPalette::new().color_5;
+        if let Some(col) = bkgr_col {bkgr_color = col;}
 
         let n_str_pos; 
         match img {
@@ -60,7 +64,7 @@ impl DisplayItem {
         let mb = &mut graphics::MeshBuilder::new();
         mb.rounded_rectangle(
             graphics::DrawMode::fill(), 
-            graphics::Rect::new(pos.x, pos.y, size.get_width(), size.get_hight()),
+            graphics::Rect::new(pos.x, pos.y, box_size.get_width(), box_size.get_hight()),
             15.0, 
             bkgr_color,
         ).expect("Rec Mesh Failed");
@@ -68,7 +72,7 @@ impl DisplayItem {
     
         return DisplayItem {
             pos,
-            size,
+            box_size,
             str_pos,
             disp_str,
             mesh,
@@ -78,10 +82,12 @@ impl DisplayItem {
     }
     
     //Getters and Setters
-    pub fn hight(&self) -> f32 {return self.size.get_hight()} 
-    pub fn width(&self) -> f32 {return self.size.get_width()} 
+    pub fn hight(&self) -> f32 {return self.box_size.get_hight()} 
+    pub fn width(&self) -> f32 {return self.box_size.get_width()} 
+    pub fn box_size(&self) -> BoxSize {return self.box_size}
+    pub fn rel_pos(&self) -> glam::Vec2 {return self.pos;}
     pub fn is_box_size(&self, b: BoxSize) -> bool {
-        if b == self.size {return true;} 
+        if b == self.box_size {return true;} 
         else {return false;}
     }
 
@@ -89,11 +95,34 @@ impl DisplayItem {
     pub fn draw(
         &self,
         canvas: &mut graphics::Canvas,
-        pos_of_menu: glam::Vec2,
+        menu_pos: glam::Vec2,
+    ) {
+        self.draw_with_color(canvas, menu_pos, None);
+    }
+
+    pub fn draw_with_color(
+        &self,
+        canvas: &mut graphics::Canvas,
+        menu_pos: glam::Vec2,
+        bkgr_color: Option<Color>,
     ) {
         //Draw Back
-        canvas.draw(&self.mesh, graphics::DrawParam::new().dest(pos_of_menu)); 
-        let mut final_pos = pos_of_menu + self.str_pos;
+        match bkgr_color {
+            Some(col) => {
+                canvas.draw(&self.mesh, graphics::DrawParam::new()
+                    .dest(menu_pos)
+                    .color(col)
+                ); 
+            }
+            None => {
+                canvas.draw(&self.mesh, graphics::DrawParam::new()
+                    .dest(menu_pos)
+                ); 
+            }
+        }
+
+
+       let mut final_pos = menu_pos + self.str_pos;
        
         match self.icon {
             None => {}
@@ -108,7 +137,8 @@ impl DisplayItem {
             graphics::DrawParam::new().dest(final_pos)
             .color(self.text_color)
             .scale(glam::Vec2::new(2.0,2.0)) 
-        );        
+        ); 
     }
+
 }
 
