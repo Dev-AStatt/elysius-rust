@@ -10,7 +10,6 @@ use super::super::ui;
 use super::super::entities;
 use super::super::user;
 use super::game_state;
-use crate::utilities;
 
 //MAIN GAME STRUCT
 pub struct ElysiusMainState {
@@ -51,42 +50,10 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         }
         //0----------------------GAME UPDATES----------------------------------0
         //Reset the mouse focus
-        self.mouse.set_focus(io::MouseFocus::Background);
         self.update_menus();
-
-        for i in 0..self.entities_id.len() {
-            //For all entities that are on screen
-            if self.entities.position_comp[i].is_in_system(self.state.active_solar_system()) {
-                //update the final positions of entites
-                let spr_offset = self.entities.draw_comp[i].sprite_offset();
-                self.entities.draw_comp[i].set_screen_pos(
-                    self.entities.position_comp[i].get_orbit_final_pos(
-                        self.state.scale(), 
-                        self.state.player_screen_offset_pos(), 
-                        spr_offset,
-                    ));
-                
-               //update mouse focus
-                let sprite_offset_scaled = (
-                    self.entities.draw_comp[i].sprite_offset().x * self.state.scale().x,
-                    self.entities.draw_comp[i].sprite_offset().y * self.state.scale().y); 
-                let adj_pos_for_input = (
-                    self.entities.draw_comp[i].screen_pos().x + sprite_offset_scaled.0, 
-                    self.entities.draw_comp[i].screen_pos().y + sprite_offset_scaled.1
-                );
-                if utilities::point_in_circle(&&self.mouse.get_pos_f32(),
-                    adj_pos_for_input, 
-                self.entities.draw_comp[i].sprite_offset().x * self.state.scale().x,
-                ) {
-                    self.mouse.set_focus(io::MouseFocus::Body(i));
-                }
-            }
-        }
-       
-        //GameState Running
-        if self.state.if_state_is(game_state::StateType::Running) {
-            self.entities.inc_orbital_body_pos();
-        }
+        self.update_mouse();
+        self.entities.update(&self.entities_id, &self.state);
+        
         Ok(())
     }
 

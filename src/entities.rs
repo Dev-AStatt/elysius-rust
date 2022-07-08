@@ -5,7 +5,10 @@ use ggez::{
     Context,
 };
 
-use crate::ecs::orbit::OrbitalComponent;
+use crate::{
+    ecs::orbit::OrbitalComponent,
+    main_state::game_state
+};
 
 use super::ecs::orbit;
 use super::ecs::draw_comp::DrawingComponent;
@@ -66,46 +69,29 @@ impl Entities {
     }
 
 
-     fn get_new_name(&self) -> String {
-        let mut rng = rand::thread_rng();
-        let names = vec![
-            "Lodania Minor",
-            "Paumi",
-            "Padikar 230",
-            "Roshar",
-            "Dune",
-            "Arrakis",
-            "Helios",
-            "Dimos",
-            "Perseus",
-            "Ares",
-        ];
-        let i = rng.gen_range(0..names.len());
-        return names[i].to_string();
+    pub fn update(
+        self: &mut Self, 
+        ids: &Vec<EntityIndex>,
+        state: &game_state::GameState,
+    ) {
+        //For everything in vect
+        for i in 0..ids.len() {
+            self.draw_comp[i].update(state, &self.position_comp[i]);
+        }
+        if state.if_state_is(game_state::StateType::Running) {
+            self.inc_orbital_body_pos();
+        }
     }
 
-    
-    // pub fn get_orbit_final_pos(&self,
-    //     ent_id: usize,
-    //     scale: glam::Vec2,
-    //     player_offset: glam::Vec2,
-    // ) -> glam::Vec2 {
-    //     let sprite_pos = glam::Vec2::new(
-    //         self.solar_pos_comp[ent_id].x * scale.x,
-    //         self.solar_pos_comp[ent_id].y * scale.y
-    //     );
-    //     let disp_adj = glam::Vec2::new(
-    //         self.draw_comp[ent_id].sprite_offset.0 * scale.x,
-    //         self.draw_comp[ent_id].sprite_offset.1 * scale.y
-    //     );
-    //     return sprite_pos - disp_adj + player_offset;
-    // }
+
+
+
 
 // 0-------------------------MAKE THINGS---------------------------------------0    
 
     //Function will itterate through the active entities in solar system
     //and update position
-    pub fn inc_orbital_body_pos(
+    fn inc_orbital_body_pos(
         self: &mut Self,
     ) {
         for i in 0..self.position_comp.len() {
@@ -115,9 +101,6 @@ impl Entities {
                 self.position_comp[i].set_solar_pos(or + pos_orb_ent );
             }
         }
-
-
-
     }
 
     pub fn make_new_sun(
@@ -184,8 +167,15 @@ impl Entities {
     }
 
 
+
+
+
+
+    //PRIVATE FUNCTIONS
+
+
     //Function creates a new planet into the ECS system
-    pub fn make_new_orbiting_body(
+    fn make_new_orbiting_body(
         self: &mut Self,
         b_type: ObjectType,
         entities_id: &mut Vec<EntityIndex>,
@@ -253,6 +243,25 @@ impl Entities {
         self.draw_comp.push(new_draw_comp);
 
     }
+
+     fn get_new_name(&self) -> String {
+        let mut rng = rand::thread_rng();
+        let names = vec![
+            "Lodania Minor",
+            "Paumi",
+            "Padikar 230",
+            "Roshar",
+            "Dune",
+            "Arrakis",
+            "Helios",
+            "Dimos",
+            "Perseus",
+            "Ares",
+        ];
+        let i = rng.gen_range(0..names.len());
+        return names[i].to_string();
+    }
+
 
 
 }

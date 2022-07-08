@@ -1,5 +1,8 @@
 use ggez::graphics;
 
+use crate::main_state::game_state;
+use super::pos_comp::PosComponent;
+
 
 pub struct DrawingComponent {
     sprite: graphics::Image,
@@ -24,4 +27,19 @@ impl DrawingComponent {
     pub fn screen_pos(&self)    -> glam::Vec2       {self.screen_pos}
 
     pub fn set_screen_pos(self: &mut Self, pos: glam::Vec2) {self.screen_pos = pos;}
+
+
+    pub fn update(
+        self: &mut Self,
+        state: &game_state::GameState,
+        pos: &PosComponent,
+    ) {
+        self.set_screen_pos(
+            pos.get_orbit_final_pos(
+                state.scale(), 
+                state.player_screen_offset_pos(), 
+                self.sprite_offset
+            )
+        );
+    }
 }
