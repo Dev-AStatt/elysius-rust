@@ -4,20 +4,20 @@ use ggez::{
     Context,
 };
 use super::color_palette;
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Copy,Clone)]
 pub enum BoxSize {
     Small,
     Large
 }
 //returns the value of width that size represents
 impl BoxSize {
-    fn get_width(&self) -> f32 {
+    pub fn get_width(&self) -> f32 {
         match self {
             BoxSize::Small => {return 150.0;}
             BoxSize::Large => {return 300.0;}
         }
     }
-    fn get_hight(&self) -> f32 {
+    pub fn get_hight(&self) -> f32 {
         match self {
             BoxSize::Small => {return 50.0;}
             BoxSize::Large => {return 50.0;}

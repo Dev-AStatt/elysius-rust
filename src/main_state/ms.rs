@@ -81,11 +81,6 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             }
         }
        
-        
-        
-
-
-
         //GameState Running
         if self.state.if_state_is(game_state::StateType::Running) {
             self.entities.inc_orbital_body_pos(self.state.active_solar_system());
@@ -144,6 +139,13 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         match self.mouse.get_focus() {
             io::MouseFocus::Body(id) => {
                 if self.entities.ent_type[id] == entities::ObjectType::Ship {
+                    let p = glam::Vec2::new(self.state.screen_size().x - 400.0 ,50.0);
+                    self.menus.push(
+                        ui::ui_comp::UIComponent::new_ship_menu(
+                            ctx, p, &self.entities, id)
+                    );
+
+
                 } else {
                     //add menu to menu stack
                     let p = glam::Vec2::new(50.0,50.0);
@@ -159,7 +161,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             }
             io::MouseFocus::Background => {
                 for i in 0..self.menus.len() {
-                    if self.menus[i].menu_type_obi() {
+                    if self.menus[i].menu_removeable() {
                         self.menus[i].transition_out();    
                     }
                 } 
