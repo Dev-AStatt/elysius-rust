@@ -107,17 +107,7 @@ impl Entities {
     //and update position
     pub fn inc_orbital_body_pos(
         self: &mut Self,
-        system_id: i32,
     ) {
-        // for i in 0..self.orbit_comp.len() {
-        //     //if there is some orbital component at , then
-        //     if let Some(ref mut orb) = self.orbit_comp[i] {
-        //         //give new position to ent
-        //         let pos_adj = orb.pos_adj();
-        //         //self.solar_pos_comp[i] = pos_adj + self.solar_pos_comp[orb.orb_ent_id()];
-        //     }             
-        // }
-        // }
         for i in 0..self.position_comp.len() {
             if let Some(ref mut orb) = self.orbit_comp[i] {
                 let pos_orb_ent = self.position_comp[orb.orb_ent_id()].solar_pos();

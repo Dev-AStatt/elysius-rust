@@ -85,7 +85,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
        
         //GameState Running
         if self.state.if_state_is(game_state::StateType::Running) {
-            self.entities.inc_orbital_body_pos(self.state.active_solar_system());
+            self.entities.inc_orbital_body_pos();
         }
         Ok(())
     }
