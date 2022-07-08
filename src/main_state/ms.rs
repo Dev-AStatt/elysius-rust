@@ -72,7 +72,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
                     self.entities.draw_comp[i].screen_pos.x + sprite_offset_scaled.0, 
                     self.entities.draw_comp[i].screen_pos.y + sprite_offset_scaled.1
                 );
-                if entities::point_in_object(&&self.mouse.get_pos_f32(),
+                if entities::point_in_circle(&&self.mouse.get_pos_f32(),
                     adj_pos_for_input, 
                 self.entities.draw_comp[i].sprite_offset.0 as f32 * self.state.scale().x,
                 ) {
