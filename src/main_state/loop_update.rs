@@ -3,13 +3,8 @@ use ggez::{
     Context,
 };
 
-use super::ms::ElysiusMainState;
-
-use super::super::entities;
-
-
-
-
+use super::{ms::ElysiusMainState, io};
+use crate::utilities;
 
 impl ElysiusMainState {
     //Check if any menus can be deleted, then remove them
@@ -24,22 +19,45 @@ impl ElysiusMainState {
             self.menus[i].update(self.mouse.get_pos_vec2());
         } 
         self.remove_dead_menus();
-    }
+   }
 
+
+    pub fn update_mouse(self: &mut Self) {
+        self.mouse.set_focus(io::MouseFocus::Background);
+        for i in 0..self.entities_id.len() {
+           
+            //update mouse focus
+            let sprite_offset_scaled = self.entities.draw_comp[i].sprite_offset() * self.state.scale();
+            
+            let adj_pos_for_input = (
+                self.entities.draw_comp[i].screen_pos().x + sprite_offset_scaled.x, 
+                self.entities.draw_comp[i].screen_pos().y + sprite_offset_scaled.y
+            );
+
+            if utilities::point_in_circle(&self.mouse.get_pos_f32(),
+                adj_pos_for_input, 
+            self.entities.draw_comp[i].sprite_offset().x * self.state.scale().x,
+            ) {
+                self.mouse.set_focus(io::MouseFocus::Body(i));
+            }
+        
+        }    
+ 
+    }
 
     pub fn gen_new_system(self: &mut Self, _ctx: &mut Context) {
 
         //First Sun
         self.entities.make_new_sun(
             &mut self.entities_id,
-            entities::sprite_get(_ctx, "/Sprite-SUN_02.png"),
+            utilities::sprite_get(_ctx, "/Sprite-SUN_02.png"),
             self.state.active_solar_system()                       
         );            
             
         //First Planet
         self.entities.make_new_planet(
             &mut self.entities_id,
-            entities::sprite_get(_ctx, "/Sprite-Planet_01.png"),
+            utilities::sprite_get(_ctx, "/Sprite-Planet_01.png"),
             self.state.active_solar_system(),                   
             &_ctx,
             0,                                     
@@ -49,7 +67,7 @@ impl ElysiusMainState {
         //First Ship
         self.entities.make_new_ship(
             &mut self.entities_id,
-            entities::sprite_get(_ctx, "/Sprite-Ship_01.png"),
+            utilities::sprite_get(_ctx, "/Sprite-Ship_01.png"),
             self.state.active_solar_system(),                   
             &_ctx,
             1,                                     
