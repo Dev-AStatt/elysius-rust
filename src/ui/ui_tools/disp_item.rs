@@ -14,7 +14,7 @@ impl BoxSize {
     pub fn get_width(&self) -> f32 {
         match self {
             BoxSize::Small => {return 150.0;}
-            BoxSize::Large => {return 300.0;}
+            BoxSize::Large => {return 250.0;}
         }
     }
     pub fn get_hight(&self) -> f32 {
@@ -45,11 +45,12 @@ impl DisplayItem {
         box_size: BoxSize,
         ctx: &Context,
         disp_str: String,
-        img: Option<graphics::Image>
+        img: Option<graphics::Image>,
+        bkgr_col: Option<Color>,
     ) -> Self {
-        //Box Size
-        
-        let bkgr_color = color_palette::ColorPalette::new().color_5;
+        //figure out what color
+        let mut bkgr_color = color_palette::ColorPalette::new().color_5;
+        if let Some(col) = bkgr_col {bkgr_color = bkgr_col;}
 
         let n_str_pos; 
         match img {
@@ -94,11 +95,36 @@ impl DisplayItem {
     pub fn draw(
         &self,
         canvas: &mut graphics::Canvas,
-        pos_of_menu: glam::Vec2,
+        menu_pos: glam::Vec2,
+    ) {
+       
+        let bkgr_color = color_palette::ColorPalette::new().color_5;
+        self.draw_with_color(canvas, menu_pos, None);
+    }
+
+    pub fn draw_with_color(
+        &self,
+        canvas: &mut graphics::Canvas,
+        menu_pos: glam::Vec2,
+        bkgr_color: Option<Color>,
     ) {
         //Draw Back
-        canvas.draw(&self.mesh, graphics::DrawParam::new().dest(pos_of_menu)); 
-        let mut final_pos = pos_of_menu + self.str_pos;
+        match bkgr_color {
+            Some(col) => {
+                canvas.draw(&self.mesh, graphics::DrawParam::new()
+                    .dest(menu_pos)
+                    .color(col)
+                ); 
+            }
+            None => {
+                canvas.draw(&self.mesh, graphics::DrawParam::new()
+                    .dest(menu_pos)
+                ); 
+            }
+        }
+
+
+       let mut final_pos = menu_pos + self.str_pos;
        
         match self.icon {
             None => {}
@@ -113,7 +139,8 @@ impl DisplayItem {
             graphics::DrawParam::new().dest(final_pos)
             .color(self.text_color)
             .scale(glam::Vec2::new(2.0,2.0)) 
-        );        
+        ); 
     }
+
 }
 
