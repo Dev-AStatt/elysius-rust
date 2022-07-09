@@ -4,7 +4,7 @@ pub enum ElysiusEventType {
     MoveShip,     
     TestEvent,
 }
-
+//Comment to push
 #[derive(Copy, Clone)]
 pub struct Event {
     event_type: ElysiusEventType,
