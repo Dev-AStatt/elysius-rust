@@ -22,6 +22,15 @@ pub fn point_in_circle(point: &(f32,f32), center: (f32, f32), r: f32) -> bool {
     else {return false;}
 }
 
+pub fn point_in_circle_vec2(point: &glam::Vec2, center: glam::Vec2, r: f32) -> bool {
+    return point_in_circle(
+        &(point.x, point.y),
+        (center.x,center.y), 
+        r
+    );
+}
+
+
 //Function will take a path to the sprite that wants to load and return either
 //that sprite or a red cube of 5x5 if there was an error
 pub fn sprite_get(ctx: &Context, path: &str) -> graphics::Image {

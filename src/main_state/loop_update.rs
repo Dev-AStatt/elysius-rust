@@ -24,11 +24,9 @@ impl ElysiusMainState {
 
     pub fn update_mouse(self: &mut Self) {
         self.mouse.set_focus(io::MouseFocus::Background);
+
         for i in 0..self.entities_id.len() {
-           
-            //update mouse focus
             let sprite_offset_scaled = self.entities.draw_comp[i].sprite_offset() * self.state.scale();
-            
             let adj_pos_for_input = (
                 self.entities.draw_comp[i].screen_pos().x + sprite_offset_scaled.x, 
                 self.entities.draw_comp[i].screen_pos().y + sprite_offset_scaled.y
@@ -40,10 +38,23 @@ impl ElysiusMainState {
             ) {
                 self.mouse.set_focus(io::MouseFocus::Body(i));
             }
-        
         }    
- 
     }
+
+    fn mouse_over_ent(&self, ent: usize) -> bool {
+        let sprite_offset_scaled = self.entities.draw_comp[ent].sprite_offset() * self.state.scale();
+        let adj_pos_for_input = (
+            self.entities.draw_comp[ent].screen_pos().x + sprite_offset_scaled.x, 
+            self.entities.draw_comp[ent].screen_pos().y + sprite_offset_scaled.y
+        );
+
+        if utilities::point_in_circle(&self.mouse.get_pos_f32(),
+            adj_pos_for_input, 
+        self.entities.draw_comp[ent].sprite_offset().x * self.state.scale().x,
+        ) {return true;}
+        else {return false;}
+    }
+
 
     pub fn gen_new_system(self: &mut Self, _ctx: &mut Context) {
 
