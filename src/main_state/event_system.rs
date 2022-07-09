@@ -1,7 +1,7 @@
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum ElysiusEventType {
-    MoveShip,     
+    InitShipTransfer,     
     TestEvent,
 }
 //Comment to push
@@ -75,15 +75,15 @@ mod tests {
 
     #[test]
     fn test_get_events() {
-        let e1 = Event::new(ElysiusEventType::MoveShip, Some(2), Some(3));
-        let e2 = Event::new(ElysiusEventType::MoveShip, Some(5), Some(4));
+        let e1 = Event::new(ElysiusEventType::InitShipTransfer, Some(2), Some(3));
+        let e2 = Event::new(ElysiusEventType::InitShipTransfer, Some(5), Some(4));
         let e3 = Event::new(ElysiusEventType::TestEvent, None, None);
         let mut event_system = EventSystem::new();
         event_system.new_event_from(e1);
         event_system.new_event_from(e2);
         event_system.new_event_from(e3);
         event_system.new_event_from(e3);
-        let v = event_system.get_events(ElysiusEventType::MoveShip);
+        let v = event_system.get_events(ElysiusEventType::InitShipTransfer);
         //Vector.len() returns the intager length not a i-1 length
         assert_eq!(v.len(), 2);
     }
