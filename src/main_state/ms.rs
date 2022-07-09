@@ -23,6 +23,7 @@ pub struct ElysiusMainState {
     pub state: game_state::GameState,
     //Menu Items
     pub menus: Vec<ui::ui_comp::UIComponent> ,
+    pub events : event_system::EventSystem,
 }
 
 impl ElysiusMainState {
@@ -36,6 +37,7 @@ impl ElysiusMainState {
             player:         user::Player::new(),
             menus:          Vec::new(),
             state:          game_state::GameState::new(), 
+            events:         event_system::EventSystem::new(),
         })
     }
 }
@@ -50,7 +52,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             self.gen_new_system(_ctx); 
         }
         //0----------------------GAME UPDATES----------------------------------0
-        //Reset the mouse focus
+        self.events.clear_events(); 
         self.update_menus();
         self.update_mouse();
         self.entities.update(&self.entities_id, &self.state);

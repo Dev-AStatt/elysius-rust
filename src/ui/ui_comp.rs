@@ -11,6 +11,7 @@ use super::ui_tools::transtions::{
 };
 use super::ui_tools::button;
 use crate::entities::Entities;
+use crate::main_state::event_system::EventSystem;
 use ggez::Context;
 use ggez::graphics;
 use crate::utilities;
@@ -120,6 +121,7 @@ impl UIComponent {
             MenuType::ShipOptions,
             ctx,
             ents.ent_name[ent_id].to_string(),
+            ent_id,
         );
         //give the title bar to display items
         let mut display_items: Vec<disp_item::DisplayItem> = Vec::new();
@@ -190,7 +192,7 @@ impl UIComponent {
             }
         }
     }
-    pub fn update(self: &mut Self, mouse_pos: glam::Vec2) {
+    pub fn update(self: &mut Self, mouse_pos: glam::Vec2, events: &EventSystem) {
         self.if_transition_update();
         self.update_buttons(mouse_pos);
     }

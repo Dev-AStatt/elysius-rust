@@ -16,7 +16,7 @@ impl ElysiusMainState {
     pub fn update_menus(self: &mut Self) {
         //Draw any menus on screen
         for i in 0..self.menus.len() {
-            self.menus[i].update(self.mouse.get_pos_vec2());
+            self.menus[i].update(self.mouse.get_pos_vec2(), &self.events);
         } 
         self.remove_dead_menus();
    }
