@@ -54,14 +54,11 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         //0----------------------GAME UPDATES----------------------------------0
         self.update_mouse();
         self.update_menus(ctx);
-        self.entities.update(&self.entities_id, &self.state);
-       
+        self.entities.update(&self.entities_id, &self.state, &mut self.events);
 
         self.events.clear_events();         //Make sure to clear events last
         Ok(())
     }
-
-
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         let mut canvas = graphics::Canvas::from_frame(
@@ -69,12 +66,8 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             graphics::CanvasLoadOp::Clear([0.1, 0.1, 0.1, 1.0].into()),
         );
 
-        //Draw ECS Ent
-        for i in 0..self.entities_id.len() {
-            if self.entities.position_comp[i].is_in_system(self.state.active_solar_system()) {
-                self.draw_solar_object_ecs(&mut canvas, i); 
-            }
-        }
+        //Draw Entities
+        self.entities.draw_objects(&mut canvas, &self.entities_id, &self.state);
         //Draw any menus on screen
         for i in 0..self.menus.len() {
             self.menus[i].draw_ui_comp(&mut canvas, &self.entities); 
