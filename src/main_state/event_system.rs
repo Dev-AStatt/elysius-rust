@@ -2,6 +2,7 @@
 #[derive(PartialEq, Copy, Clone)]
 pub enum EventType {
     InitShipTransfer,     
+    ShipTransferComplete,
     MoveShip,
     TestEvent,
     LeftMouseDown,

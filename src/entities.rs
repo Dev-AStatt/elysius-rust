@@ -102,7 +102,6 @@ impl Entities {
                     self.transfer_ship(ent_id, dest_id, events);
                 }
             }
-            
         });
     }
     
