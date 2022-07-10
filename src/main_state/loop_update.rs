@@ -35,10 +35,10 @@ impl ElysiusMainState {
         }   
 //        if self.mouse.get_click_down() {self.mouse_down_event(ctx);}
         if self.events.check_event(ElysiusEventType::LeftMouseDown) {
+            self.mouse.set_click_down(true);
             self.mouse_down_event(ctx);
         }
     }
-
 
     fn mouse_down_event(self: &mut Self, ctx: &Context) {
         match self.mouse.get_focus() {
