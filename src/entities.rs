@@ -110,29 +110,26 @@ impl Entities {
                 self.draw_sprite(canvas, i, state.scale());
             }
         });
-
-
-
     }
 
 
     fn draw_circle(&self, canvas: &mut graphics::Canvas ,ent_id: usize, state: &game_state::GameState) {
-    //if there is some orb component, then 
-            if let Some(ref orb) = &self.orbit_comp[ent_id] {
-                //get the final position of the circle
-                let circle_pos = (
-                    //self.entities.solar_pos_comp[orb.orb_ent_id()]
-                    self.position_comp[orb.orb_ent_id()].solar_pos()
-                    * state.scale()
-                    ) + state.player_screen_offset_pos();
+        //if there is some orb component, then 
+        if let Some(ref orb) = &self.orbit_comp[ent_id] {
+            //get the final position of the circle
+            let circle_pos = (
+                //self.entities.solar_pos_comp[orb.orb_ent_id()]
+                self.position_comp[orb.orb_ent_id()].solar_pos()
+                * state.scale()
+                ) + state.player_screen_offset_pos();
 
-                //Draw the circle
-                canvas.draw(orb.orbit_circle(), 
-                    graphics::DrawParam::new()
-                        .scale(state.scale())
-                        .dest(circle_pos)
-                ); 
-            }
+            //Draw the circle
+            canvas.draw(orb.orbit_circle(), 
+                graphics::DrawParam::new()
+                    .scale(state.scale())
+                    .dest(circle_pos)
+            ); 
+        }
     }
 
     fn draw_sprite(&self, canvas: &mut graphics::Canvas ,ent_id: usize, scale: glam::Vec2) {
