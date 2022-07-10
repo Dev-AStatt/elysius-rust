@@ -16,9 +16,9 @@ impl ElysiusMainState {
 
     pub fn update_menus(self: &mut Self, ctx: &Context) {
         //Draw any menus on screen
-        for i in 0..self.menus.len() {
+        (0..self.menus.len()).for_each(|i| {
             self.menus[i].update(&self.mouse, &mut self.events);
-        } 
+        }); 
         self.remove_dead_menus();
         self.add_new_menus(ctx); 
     }
@@ -28,7 +28,7 @@ impl ElysiusMainState {
         if new_events.len() == 0 {return;}      //if no menus bail
 
         //for each new menu events, where menu event is i
-        for i in new_events {
+        new_events.into_iter().for_each(|i| {
             if let Some(ent_id) = i.generated_by() {        //Get what ent_id was clicked on
                 let ent_type = self.entities.ent_type[ent_id]; 
                 if ent_type == entities::ObjectType::Ship {
@@ -37,7 +37,7 @@ impl ElysiusMainState {
                     self.add_menu_body(ctx, ent_id);
                 }
             }
-        }
+        });
     } 
 
 
@@ -66,13 +66,13 @@ impl ElysiusMainState {
     pub fn update_mouse(self: &mut Self) {
         self.mouse.set_focus(io::MouseFocus::Background);
 
-        for i in 0..self.entities_id.len() {
+        (0..self.entities_id.len()).for_each(|i| {
             if self.mouse_over_ent(i) {
                 self.mouse.set_focus(io::MouseFocus::Body(i));
             }
-        }   
+        });   
 
-        self.menus.iter_mut().for_each(|m| {
+        self.menus.iter().for_each(|m| {
             if m.mouse_over(self.mouse.get_pos_vec2()) {
                 self.mouse.set_focus(io::MouseFocus::Menu);
             }
