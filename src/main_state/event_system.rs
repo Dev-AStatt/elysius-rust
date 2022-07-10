@@ -27,6 +27,7 @@ pub struct Event {
     target: Option<usize>,
 }
 
+
 impl Event {
     pub fn new(event_type: EventType, generated_by: Option<usize>, target: Option<usize>) -> Self {
         Event {event_type, generated_by, target}
@@ -39,6 +40,7 @@ impl Event {
         else {return false;}
     }
     pub fn is_persistant(&self) -> bool {return self.event_type.is_persistant();}
+    pub fn set_target(self: &mut Self, id: usize) {self.target = Some(id);}
 }
 
 pub struct EventSystem {
@@ -88,7 +90,22 @@ impl EventSystem {
         if self.events.iter().any(|&e| e.is_event(event_type)) {return true;}
         else {return false;}
     } 
+
+    pub fn update_event_target(
+        self: &mut Self, 
+        event_type: EventType, 
+        target: usize
+    ) {
+        for i in 0..self.events.len() {
+            if self.events[i].is_event(event_type) {
+                self.events[i].set_target(target);
+            }
+        }       
+    }
+
+
     fn num_of_events(&self) -> usize {return self.events.len();}
+
 }
 
 

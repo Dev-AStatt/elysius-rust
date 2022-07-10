@@ -88,7 +88,7 @@ impl ElysiusMainState {
     fn mouse_down_event(self: &mut Self) {
         match self.mouse.get_focus() {
             io::MouseFocus::Body(id) => {
-               self.events.new_event(EventType::NewMenu, Some(id), None);
+                self.mouse_down_entity_events(id);
             }
             io::MouseFocus::Background => {
                 self.menus.iter_mut().for_each(|m| {
@@ -96,11 +96,18 @@ impl ElysiusMainState {
                         m.transition_out();    
                     }
                 }); 
+                self.events.clear_event_type(EventType::InitShipTransfer);
             }
             io::MouseFocus::Menu => {}
         }
     }
-
+    fn mouse_down_entity_events(self: &mut Self, ent_id: usize) {
+        if self.events.check_event(EventType::InitShipTransfer) {
+            self.events.update_event_target(EventType::InitShipTransfer, ent_id);
+        } else {
+            self.events.new_event(EventType::NewMenu, Some(ent_id), None);
+        }
+    }
 
     //Function will take in an entity id and return if the mouse 
     //position is inside the entity position on the screen
