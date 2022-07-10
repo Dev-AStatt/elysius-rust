@@ -17,6 +17,7 @@ impl OrbitalComponent {
     pub fn orbit_circle(&self) -> &graphics::Mesh {&self.orbit_circle}
     pub fn set_radius(&mut self, radius: i32) {self.radius = radius;}
     pub fn set_angle(&mut self, angle: f32) {self.angle = angle;}
+    pub fn set_orbiting(&mut self, id: usize) {self.orb_ent_id = id;}
 
     //Functions
     pub fn new(
