@@ -2,8 +2,9 @@
 
 
 pub struct PosComponent {
-   solar_pos: glam::Vec2,
-   solar_system: i32,
+    solar_pos: glam::Vec2,
+    solar_system: i32,
+    in_transfer: bool,
 }
 
 impl PosComponent {
@@ -11,13 +12,16 @@ impl PosComponent {
         PosComponent {
             solar_pos,
             solar_system,
+            in_transfer: false,
         }
     }
 
     pub fn solar_pos(&self) -> glam::Vec2 {return self.solar_pos;}
     pub fn solar_system(&self) -> i32 {return self.solar_system;}
+    pub fn in_transfer(&self) -> bool {return self.in_transfer;}
 
     pub fn set_solar_pos(self: &mut Self, pos: glam::Vec2) {self.solar_pos = pos;}
+    pub fn set_in_transfer(self: &mut Self, b: bool) {self.in_transfer = b;}
     pub fn inc_solar_pos(self: &mut Self, inc: glam::Vec2) {self.solar_pos += inc;}
     pub fn inc_solar_pos_x(self: &mut Self, inc: f32) {
         self.solar_pos.x += inc;
