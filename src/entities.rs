@@ -94,7 +94,6 @@ impl Entities {
         }
     }
 
-    //TODO Add is in solar system check to draw
     pub fn draw_objects(
         &self, 
         canvas: &mut graphics::Canvas,
@@ -122,13 +121,24 @@ impl Entities {
                 self.position_comp[orb.orb_ent_id()].solar_pos()
                 * state.scale()
                 ) + state.player_screen_offset_pos();
-
-            //Draw the circle
-            canvas.draw(orb.orbit_circle(), 
-                graphics::DrawParam::new()
-                    .scale(state.scale())
-                    .dest(circle_pos)
-            ); 
+            
+            if self.position_comp[ent_id].in_transfer() {
+                //Draw the circle
+                canvas.draw(orb.orbit_circle(), 
+                    graphics::DrawParam::new()
+                        .scale(state.scale())
+                        .dest(circle_pos)
+                        .color(graphics::Color::GREEN)
+                ); 
+         
+            } else {
+                //Draw the circle
+                canvas.draw(orb.orbit_circle(), 
+                    graphics::DrawParam::new()
+                        .scale(state.scale())
+                        .dest(circle_pos)
+                ); 
+            }
         }
     }
 
