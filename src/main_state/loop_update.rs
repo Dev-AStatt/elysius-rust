@@ -1,7 +1,5 @@
 
-use ggez::{
-    Context,
-};
+use ggez::Context;
 
 use super::{ms::ElysiusMainState, io};
 use super::super::entities;
@@ -29,8 +27,9 @@ impl ElysiusMainState {
         let new_events: Vec<Event> = self.events.get_events(ElysiusEventType::NewMenu);
         if new_events.len() == 0 {return;}      //if no menus bail
 
+        //for each new menu events, where menu event is i
         for i in new_events {
-            if let Some(ent_id) = i.generated_by() {
+            if let Some(ent_id) = i.generated_by() {        //Get what ent_id was clicked on
                 let ent_type = self.entities.ent_type[ent_id]; 
                 if ent_type == entities::ObjectType::Ship {
                     self.add_menu_ship(ctx, ent_id);
