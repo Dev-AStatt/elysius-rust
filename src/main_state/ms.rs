@@ -107,7 +107,6 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         _x: f32,
         _y: f32,
     ) -> GameResult {
-        self.mouse.set_click_down(true);
         self.events.new_event_ez(ElysiusEventType::LeftMouseDown); 
         Ok(())
     }
@@ -124,18 +123,11 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         self.mouse.set_pos_f32((x,y));
         //this is all for a check to see if the background is dragged to move things
         if self.mouse.get_click_down() {
-            match self.mouse.get_focus() {
-                io::MouseFocus::Background => {
-                    //self.current_mouse_pos = (x,y);
-                    let n_rel = glam::Vec2::new(xrel,yrel);
-                    self.state.set_player_screen_offset_pos(
-                        self.state.player_screen_offset_pos() + n_rel
-                    );
-                }
-                io::MouseFocus::Menu => {}
-                io::MouseFocus::Body(_id) => {}
-            }
-        }
+            if self.mouse.get_focus() == io::MouseFocus::Background {
+                let n_rel = glam::Vec2::new(xrel,yrel);
+                self.state.adj_player_screen_offset_pos(n_rel);
+           }
+       }
         Ok(()) 
     }
     
