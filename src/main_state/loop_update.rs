@@ -16,8 +16,8 @@ impl ElysiusMainState {
 
     pub fn update_menus(self: &mut Self, ctx: &Context) {
         //Draw any menus on screen
-        (0..self.menus.len()).for_each(|i| {
-            self.menus[i].update(&self.mouse, &mut self.events);
+        self.menus.iter_mut().for_each(|m| {
+            m.update(&self.mouse, &mut self.events);
         }); 
         self.remove_dead_menus();
         self.add_new_menus(ctx); 
@@ -91,11 +91,11 @@ impl ElysiusMainState {
                self.events.new_event(EventType::NewMenu, Some(id), None);
             }
             io::MouseFocus::Background => {
-                for i in 0..self.menus.len() {
-                    if self.menus[i].menu_removeable() {
-                        self.menus[i].transition_out();    
+                self.menus.iter_mut().for_each(|m| {
+                    if m.menu_removeable() {
+                        m.transition_out();    
                     }
-                } 
+                }); 
             }
             io::MouseFocus::Menu => {}
         }
