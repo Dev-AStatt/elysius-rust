@@ -46,14 +46,14 @@ impl ElysiusMainState {
 impl event::EventHandler<ggez::GameError> for ElysiusMainState {
     
     //Update events go in this function
-    fn update(&mut self, _ctx: &mut Context) -> GameResult {
+    fn update(&mut self, ctx: &mut Context) -> GameResult {
         //Create Inital test scene
         if self.state.first_time() {
-            self.gen_new_system(_ctx); 
+            self.gen_new_system(ctx); 
         }
         //0----------------------GAME UPDATES----------------------------------0
-        self.update_menus();
-        self.update_mouse(_ctx);
+        self.update_mouse();
+        self.update_menus(ctx);
         self.entities.update(&self.entities_id, &self.state);
        
 
