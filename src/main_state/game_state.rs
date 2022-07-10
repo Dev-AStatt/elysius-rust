@@ -50,6 +50,9 @@ impl GameState {
     pub fn set_player_screen_offset_pos(&mut self, screen_offset: glam::Vec2) {
         self.player_screen_offset_pos = screen_offset;
     }
+    pub fn adj_player_screen_offset_pos(&mut self, screen_offset: glam::Vec2) {
+        self.player_screen_offset_pos += screen_offset;
+    }
     pub fn set_active_solar_system(&mut self, active_solar_system: i32) {
         self.active_solar_system = active_solar_system;
     }
