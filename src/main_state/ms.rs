@@ -10,7 +10,7 @@ use super::super::ui;
 use super::super::entities;
 use super::super::user;
 use super::game_state;
-use super::event_system::{EventType, Event, EventSystem};     
+use super::event_system::{EventType, EventSystem};     
 
 //MAIN GAME STRUCT
 pub struct ElysiusMainState {
