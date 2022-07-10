@@ -69,11 +69,26 @@ impl Button {
         else {return false;} 
     }
 
-    pub fn update(self: &mut Self, menu_pos: glam::Vec2, mouse_pos: glam::Vec2) {
-        if self.mouse_over_bttn(menu_pos,mouse_pos) {self.mouse_over = true;}
-        else {self.mouse_over = false;}
+    pub fn update(
+        self: &mut Self, 
+        menu_pos: glam::Vec2, 
+        mouse_pos: glam::Vec2,
+        events: &mut event_system::EventSystem,
+    ) {
+        if self.mouse_over_bttn(menu_pos,mouse_pos) {
+            self.mouse_over = true;
+            self.event_check(events);
+        } else {
+            self.mouse_over = false;
+        }
     }
 
+    fn event_check(self: &mut Self, events: & mut event_system::EventSystem) {
+        if events.check_event(event_system::EventType::LeftMouseDown) {
+            events.new_event_from(self.event);
+            println!("Event Button Click");
+        } 
+    }
 
 
 }

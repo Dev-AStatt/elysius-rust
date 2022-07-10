@@ -3,6 +3,7 @@
 use super::ui_tools::disp_item;
 use super::ui_tools::list_menu;
 use super::ui_tools::orb_menu;
+use super::super::main_state::io;
 use super::ui_tools::transtions::{
     Transition,
     TransitionType,
@@ -12,6 +13,7 @@ use super::ui_tools::transtions::{
 use super::ui_tools::button;
 use crate::entities::Entities;
 use crate::main_state::event_system::EventSystem;
+
 use ggez::Context;
 use ggez::graphics;
 use crate::utilities;
@@ -31,6 +33,7 @@ pub struct UIComponent {
     buttons: Vec<button::Button>,
     ent_id: usize,
     transition: Transition,
+    size: glam::Vec2,
 }
 
 impl UIComponent {
@@ -94,6 +97,7 @@ impl UIComponent {
                     ent_id,
                     transition,
                     buttons: Vec::new(),
+                    size: positions.size(),
                 }; 
         return ui;
     }
@@ -135,6 +139,7 @@ impl UIComponent {
             buttons: s_m.buttons(), 
             ent_id, 
             transition, 
+            size: s_m.size(),
         }
     }
 
@@ -171,7 +176,7 @@ impl UIComponent {
         }
 
    }
-       pub fn transition_out(self: &mut Self) {
+    pub fn transition_out(self: &mut Self) {
         self.transition = Transition::new(
             TransitionType::Slide,
             self.pos,
@@ -192,9 +197,16 @@ impl UIComponent {
             }
         }
     }
-    pub fn update(self: &mut Self, mouse_pos: glam::Vec2, events: &EventSystem) {
+
+    pub fn mouse_over(&self, mouse_pos: glam::Vec2) -> bool {
+        let tl = self.pos;
+        let br = self.pos + self.size;
+        return utilities::point_in_square(tl, br, mouse_pos);
+    }
+
+    pub fn update(self: &mut Self, mouse: &io::Mouse, events: &mut EventSystem) {
         self.if_transition_update();
-        self.update_buttons(mouse_pos);
+        self.update_buttons(mouse.get_pos_vec2(), events);
     }
     
 //0-------------------------Private Functions----------------------------------0
@@ -207,9 +219,9 @@ impl UIComponent {
         }
     }
 
-    fn update_buttons(self: &mut Self, mouse_pos: glam::Vec2) {
+    fn update_buttons(self: &mut Self, mouse_pos: glam::Vec2, events: &mut EventSystem) {
         for (_i,btn) in self.buttons.iter_mut().enumerate() {
-            btn.update(self.pos, mouse_pos);
+            btn.update(self.pos, mouse_pos, events);
         }
         //for (btn) self.buttons.any(|&btn| btn.mouse_over_bttn(self.pos, mouse_pos)) {
         

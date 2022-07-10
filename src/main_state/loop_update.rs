@@ -17,7 +17,7 @@ impl ElysiusMainState {
     pub fn update_menus(self: &mut Self, ctx: &Context) {
         //Draw any menus on screen
         for i in 0..self.menus.len() {
-            self.menus[i].update(self.mouse.get_pos_vec2(), &self.events);
+            self.menus[i].update(&self.mouse, &mut self.events);
         } 
         self.remove_dead_menus();
         self.add_new_menus(ctx); 
@@ -71,6 +71,14 @@ impl ElysiusMainState {
                 self.mouse.set_focus(io::MouseFocus::Body(i));
             }
         }   
+
+        self.menus.iter_mut().for_each(|m| {
+            if m.mouse_over(self.mouse.get_pos_vec2()) {
+                self.mouse.set_focus(io::MouseFocus::Menu);
+            }
+        });
+
+
         if self.events.check_event(EventType::LeftMouseDown) {
             self.mouse.set_click_down(true);
             self.mouse_down_event();
