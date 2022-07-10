@@ -10,7 +10,7 @@ use super::super::ui;
 use super::super::entities;
 use super::super::user;
 use super::game_state;
-use super::event_system::{ElysiusEventType, Event, EventSystem};     
+use super::event_system::{EventType, Event, EventSystem};     
 
 //MAIN GAME STRUCT
 pub struct ElysiusMainState {
@@ -107,7 +107,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         _x: f32,
         _y: f32,
     ) -> GameResult {
-        self.events.new_event_ez(ElysiusEventType::LeftMouseDown); 
+        self.events.new_event_ez(EventType::LeftMouseDown); 
         Ok(())
     }
     //This gets the mouse position

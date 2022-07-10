@@ -86,7 +86,7 @@ impl ListMenu {
             self.positions.push(next_pos);
             //Make generic event
             let linked_event = event_system::Event::new(
-                event_system::ElysiusEventType::InitShipTransfer, 
+                event_system::EventType::InitShipTransfer, 
                 Some(self.linked_ent), None);
 
             //create button

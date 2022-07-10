@@ -4,7 +4,7 @@ use ggez::Context;
 use super::{ms::ElysiusMainState, io};
 use super::super::entities;
 use super::super::ui;
-use super::event_system::{ElysiusEventType, Event};
+use super::event_system::{EventType, Event};
 use crate::utilities;
 
 impl ElysiusMainState {
@@ -24,7 +24,7 @@ impl ElysiusMainState {
     }
     fn add_new_menus(self: &mut Self, ctx: &Context) {
         //get all new menu events
-        let new_events: Vec<Event> = self.events.get_events(ElysiusEventType::NewMenu);
+        let new_events: Vec<Event> = self.events.get_events(EventType::NewMenu);
         if new_events.len() == 0 {return;}      //if no menus bail
 
         //for each new menu events, where menu event is i
@@ -71,7 +71,7 @@ impl ElysiusMainState {
                 self.mouse.set_focus(io::MouseFocus::Body(i));
             }
         }   
-        if self.events.check_event(ElysiusEventType::LeftMouseDown) {
+        if self.events.check_event(EventType::LeftMouseDown) {
             self.mouse.set_click_down(true);
             self.mouse_down_event();
         }
@@ -80,7 +80,7 @@ impl ElysiusMainState {
     fn mouse_down_event(self: &mut Self) {
         match self.mouse.get_focus() {
             io::MouseFocus::Body(id) => {
-               self.events.new_event(ElysiusEventType::NewMenu, Some(id), None);
+               self.events.new_event(EventType::NewMenu, Some(id), None);
             }
             io::MouseFocus::Background => {
                 for i in 0..self.menus.len() {
