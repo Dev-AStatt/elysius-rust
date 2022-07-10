@@ -2,6 +2,7 @@
 #[derive(PartialEq, Copy, Clone)]
 pub enum EventType {
     InitShipTransfer,     
+    MoveShip,
     TestEvent,
     LeftMouseDown,
     RightMouseDown,
@@ -68,6 +69,10 @@ impl EventSystem {
     //Will clear all events that are not persistant
     pub fn clear_events(self: &mut Self) {
         self.events.retain(|e| e.is_persistant());
+    }
+    //Will clear any event of submitted type from the event system
+    pub fn clear_event_type(self: &mut Self, event_type: EventType) {
+        self.events.retain(|e| !e.is_event(event_type));
     }
     
     pub fn get_events(&self, e_type: EventType) -> Vec<Event> {
