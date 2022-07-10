@@ -2,7 +2,7 @@ use ggez::{
     graphics::{self,Color},
     Context,
 };
-use crate::utilities;
+use crate::{utilities, main_state::event_system};
 
 use super::{color_palette, disp_item::BoxSize};
 use super::disp_item;
@@ -11,6 +11,7 @@ pub struct Button {
     dp: disp_item::DisplayItem,
     mouse_over: bool,
     col_focus: Color,
+    event: event_system::Event,
 
 }
 
@@ -21,6 +22,7 @@ impl Button {
     pub fn size(&self) -> glam::Vec2 {return self.dp.box_size().size(); }
     pub fn col_focus(&self) -> Color {return self.col_focus}
     pub fn rel_pos(&self) -> glam::Vec2 {return self.dp.rel_pos()}
+    pub fn linked_event(&self) -> event_system::Event {return self.event;}
     //Sets
     pub fn set_mouse_over(self: &mut Self) {self.mouse_over = true;}
 
@@ -30,6 +32,7 @@ impl Button {
         ctx: &Context,
         disp_string: String,
         img: Option<graphics::Image>,
+        event: event_system::Event,
     ) -> Self {
         //Make the display Item 
         let dp = disp_item::DisplayItem::new(
@@ -46,6 +49,7 @@ impl Button {
             dp,
             mouse_over: false,
             col_focus: col.color_3, 
+            event,
         }
     }
 
@@ -65,11 +69,26 @@ impl Button {
         else {return false;} 
     }
 
-    pub fn update(self: &mut Self, menu_pos: glam::Vec2, mouse_pos: glam::Vec2) {
-        if self.mouse_over_bttn(menu_pos,mouse_pos) {self.mouse_over = true;}
-        else {self.mouse_over = false;}
+    pub fn update(
+        self: &mut Self, 
+        menu_pos: glam::Vec2, 
+        mouse_pos: glam::Vec2,
+        events: &mut event_system::EventSystem,
+    ) {
+        if self.mouse_over_bttn(menu_pos,mouse_pos) {
+            self.mouse_over = true;
+            self.event_check(events);
+        } else {
+            self.mouse_over = false;
+        }
     }
 
+    fn event_check(self: &mut Self, events: & mut event_system::EventSystem) {
+        if events.check_event(event_system::EventType::LeftMouseDown) {
+            events.new_event_from(self.event);
+            println!("Event Button Click");
+        } 
+    }
 
 
 }

@@ -7,7 +7,7 @@ use ggez::{
 
 use crate::{
     ecs::orbit::OrbitalComponent,
-    main_state::game_state
+    main_state::{game_state, event_system}
 };
 
 use super::ecs::orbit;
@@ -73,19 +73,74 @@ impl Entities {
         self: &mut Self, 
         ids: &Vec<EntityIndex>,
         state: &game_state::GameState,
+        events: &mut event_system::EventSystem,
     ) {
         //For everything in vect
         for i in 0..ids.len() {
             self.draw_comp[i].update(state, &self.position_comp[i]);
         }
+        //handle Events
+        self.update_ent_events(events, ids);        
+
         if state.if_state_is(game_state::StateType::Running) {
             self.inc_orbital_body_pos();
         }
     }
+    
+    fn update_ent_events(
+        self: &mut Self, 
+        events: &mut event_system::EventSystem,
+        ids: &Vec<EntityIndex>,
+    ) {
+        let new_events: Vec<event_system::Event> = events.get_events(event_system::EventType::InitShipTransfer);
+        if new_events.len() == 0 {
+            for i in 0..ids.len() {
+                self.position_comp[i].set_in_transfer(false);
+            } 
+        }
+         //for each event that is initiate ship transfer 
+        new_events.into_iter().for_each(|e| {
+            if let Some(ent_id) = e.generated_by() { //get ent_id from event
+                //Do the event
+                self.position_comp[ent_id].set_in_transfer(true);
+                //if there is a target for the transfer
+                if let Some(dest_id) = e.target() {
+                    self.transfer_ship(ent_id, dest_id, events);
+                }
+            }
+        });
+   }
+    
+    fn transfer_ship(self: &mut Self, ent_id: usize, dest_id: usize, events: &mut event_system::EventSystem) {
+        if ent_id == dest_id {return;}    //if dest is ent then cancel
+        //need to handle the Option on ship OrbitalComponent
+        if let Some(orb_comp) = &mut self.orbit_comp[ent_id] {
+            //set new orbiting entity
+            orb_comp.set_orbiting(dest_id);
+            events.new_event_ez(event_system::EventType::ShipTransferComplete);
+            self.position_comp[ent_id].set_in_transfer(false);
+        }
+    }
+   
 
+    pub fn draw_objects(
+        &self, 
+        canvas: &mut graphics::Canvas,
+        ids: &Vec<EntityIndex>,
+        state: &game_state::GameState,
+    ) {
+        //for each entity id in vect ent_ids
+        ids.iter().for_each(|ref_ent| {
+            let i = ref_ent.clone();  //Had to get id as a usize not a &usize 
+            if self.position_comp[i].is_in_system(state.active_solar_system()) {
+                //Then Draw 
+                self.draw_circle(canvas, i, &state);
+                self.draw_sprite(canvas, i, state.scale());
+            }
+        });
+    }
 
-
-
+    
 
 // 0-------------------------MAKE THINGS---------------------------------------0    
 
@@ -172,6 +227,45 @@ impl Entities {
 
 
     //PRIVATE FUNCTIONS
+
+    fn draw_circle(&self, canvas: &mut graphics::Canvas ,ent_id: usize, state: &game_state::GameState) {
+        //if there is some orb component, then 
+        if let Some(ref orb) = &self.orbit_comp[ent_id] {
+            //get the final position of the circle
+            let circle_pos = (
+                //self.entities.solar_pos_comp[orb.orb_ent_id()]
+                self.position_comp[orb.orb_ent_id()].solar_pos()
+                * state.scale()
+                ) + state.player_screen_offset_pos();
+            
+            if self.position_comp[ent_id].in_transfer() {
+                //Draw the circle
+                canvas.draw(orb.orbit_circle(), 
+                    graphics::DrawParam::new()
+                        .scale(state.scale())
+                        .dest(circle_pos)
+                        .color(graphics::Color::GREEN)
+                ); 
+         
+            } else {
+                //Draw the circle
+                canvas.draw(orb.orbit_circle(), 
+                    graphics::DrawParam::new()
+                        .scale(state.scale())
+                        .dest(circle_pos)
+                ); 
+            }
+        }
+    }
+
+    fn draw_sprite(&self, canvas: &mut graphics::Canvas ,ent_id: usize, scale: glam::Vec2) {
+        //Draw the sprite
+        canvas.draw(self.draw_comp[ent_id].sprite(),
+            graphics::DrawParam::new()
+                .dest(self.draw_comp[ent_id].screen_pos())
+                .scale(scale)
+        );
+    }
 
 
     //Function creates a new planet into the ECS system

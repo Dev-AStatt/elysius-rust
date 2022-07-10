@@ -1,4 +1,6 @@
 use ggez::{graphics, Context};
+use crate::main_state::event_system;
+
 use super::color_palette;
 use super::button;
 use super::super::ui_comp;
@@ -11,6 +13,7 @@ pub struct ListMenu {
     positions: Vec<glam::Vec2>,
     bttn_gap: f32,
     size: disp_item::BoxSize,
+    linked_ent: usize,
 
 }
 
@@ -23,7 +26,7 @@ impl ListMenu {
     pub fn size(&self) -> glam::Vec2 {return self.hw;}
     
 
-    pub fn new(m_type: ui_comp::MenuType, ctx: &Context, title_str: String) -> Self {
+    pub fn new(m_type: ui_comp::MenuType, ctx: &Context, title_str: String, linked_ent: usize) -> Self {
         let buttons: Vec<button::Button> = Vec::new();
         let mut positions = Vec::new();
         //add the title position to it
@@ -44,6 +47,7 @@ impl ListMenu {
             positions,
             bttn_gap: 15.0,
             size: disp_item::BoxSize::Large,
+            linked_ent,
         };
         if m_type == ui_comp::MenuType::ShipOptions {
             l.build_ship_menu(ctx);
@@ -72,12 +76,20 @@ impl ListMenu {
         ctx: &Context, 
         text: String, 
         ) {
-        //get next position
+        //check if the positions vector is not empty
         if let Some(last) = self.positions.last() {
+            //get next position
             let next_pos = glam::Vec2::new(
                 last.x,
-                last.y + self.size.get_hight() + self.bttn_gap);
+                last.y + self.size.get_hight() + self.bttn_gap
+            );
             self.positions.push(next_pos);
+            //Make generic event
+            let linked_event = event_system::Event::new(
+                event_system::EventType::InitShipTransfer, 
+                Some(self.linked_ent), None);
+
+            //create button
             self.buttons.push(
               button::Button::new(
                 self.size,
@@ -85,6 +97,7 @@ impl ListMenu {
                 ctx,
                 text,
                 None,
+                linked_event,
               )  
             );
         } 

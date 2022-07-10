@@ -10,7 +10,7 @@ use super::super::ui;
 use super::super::entities;
 use super::super::user;
 use super::game_state;
-use super::event_system;     
+use super::event_system::{EventType, EventSystem};     
 
 //MAIN GAME STRUCT
 pub struct ElysiusMainState {
@@ -23,6 +23,7 @@ pub struct ElysiusMainState {
     pub state: game_state::GameState,
     //Menu Items
     pub menus: Vec<ui::ui_comp::UIComponent> ,
+    pub events : EventSystem,
 }
 
 impl ElysiusMainState {
@@ -36,6 +37,7 @@ impl ElysiusMainState {
             player:         user::Player::new(),
             menus:          Vec::new(),
             state:          game_state::GameState::new(), 
+            events:         EventSystem::new(),
         })
     }
 }
@@ -44,21 +46,19 @@ impl ElysiusMainState {
 impl event::EventHandler<ggez::GameError> for ElysiusMainState {
     
     //Update events go in this function
-    fn update(&mut self, _ctx: &mut Context) -> GameResult {
+    fn update(&mut self, ctx: &mut Context) -> GameResult {
         //Create Inital test scene
         if self.state.first_time() {
-            self.gen_new_system(_ctx); 
+            self.gen_new_system(ctx); 
         }
         //0----------------------GAME UPDATES----------------------------------0
-        //Reset the mouse focus
-        self.update_menus();
         self.update_mouse();
-        self.entities.update(&self.entities_id, &self.state);
-        
+        self.update_menus(ctx);
+        self.entities.update(&self.entities_id, &self.state, &mut self.events);
+
+        self.events.clear_events();         //Make sure to clear events last
         Ok(())
     }
-
-
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         let mut canvas = graphics::Canvas::from_frame(
@@ -66,12 +66,8 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             graphics::CanvasLoadOp::Clear([0.1, 0.1, 0.1, 1.0].into()),
         );
 
-        //Draw ECS Ent
-        for i in 0..self.entities_id.len() {
-            if self.entities.position_comp[i].is_in_system(self.state.active_solar_system()) {
-                self.draw_solar_object_ecs(&mut canvas, i); 
-            }
-        }
+        //Draw Entities
+        self.entities.draw_objects(&mut canvas, &self.entities_id, &self.state);
         //Draw any menus on screen
         for i in 0..self.menus.len() {
             self.menus[i].draw_ui_comp(&mut canvas, &self.entities); 
@@ -99,45 +95,12 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
     //by ggez as an update function. no need to call it yourself. 
     fn mouse_button_down_event(
         &mut self,
-        ctx: &mut Context,
+        _ctx: &mut Context,
         _button: MouseButton,
         _x: f32,
         _y: f32,
     ) -> GameResult {
-        self.mouse.set_click_down(true);
-        //Match what the mose is focused on
-        match self.mouse.get_focus() {
-            io::MouseFocus::Body(id) => {
-                if self.entities.ent_type[id] == entities::ObjectType::Ship {
-                    let p = glam::Vec2::new(self.state.screen_size().x - 400.0 ,50.0);
-                    self.menus.push(
-                        ui::ui_comp::UIComponent::new_ship_menu(
-                            ctx, p, &self.entities, id)
-                    );
-
-
-                } else {
-                    //add menu to menu stack
-                    let p = glam::Vec2::new(50.0,50.0);
-                    self.menus.push(
-                        ui::ui_comp::UIComponent::new_menu_orbit_body_info(
-                            &ctx,
-                            p,
-                            &self.entities,
-                            id,
-                        )
-                    );
-                }
-            }
-            io::MouseFocus::Background => {
-                for i in 0..self.menus.len() {
-                    if self.menus[i].menu_removeable() {
-                        self.menus[i].transition_out();    
-                    }
-                } 
-            }
-            io::MouseFocus::Menu => {}
-        }
+        self.events.new_event_ez(EventType::LeftMouseDown); 
         Ok(())
     }
     //This gets the mouse position
@@ -153,18 +116,11 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         self.mouse.set_pos_f32((x,y));
         //this is all for a check to see if the background is dragged to move things
         if self.mouse.get_click_down() {
-            match self.mouse.get_focus() {
-                io::MouseFocus::Background => {
-                    //self.current_mouse_pos = (x,y);
-                    let n_rel = glam::Vec2::new(xrel,yrel);
-                    self.state.set_player_screen_offset_pos(
-                        self.state.player_screen_offset_pos() + n_rel
-                    );
-                }
-                io::MouseFocus::Menu => {}
-                io::MouseFocus::Body(_id) => {}
-            }
-        }
+            if self.mouse.get_focus() == io::MouseFocus::Background {
+                let n_rel = glam::Vec2::new(xrel,yrel);
+                self.state.adj_player_screen_offset_pos(n_rel);
+           }
+       }
         Ok(()) 
     }
     

@@ -17,6 +17,7 @@ pub struct OrbMenu {
 }
 
 impl OrbMenu {
+    pub fn size(&self) -> glam::Vec2 {return glam::Vec2::new(self.bkgr_w,self.bkgr_h)}
     pub fn new() -> Self {
         //Here is all the variable locations for Maps 
         let bkgr_pos = (0.0,0.0);
