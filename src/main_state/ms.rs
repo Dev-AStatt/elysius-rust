@@ -10,7 +10,7 @@ use super::super::ui;
 use super::super::entities;
 use super::super::user;
 use super::game_state;
-use super::event_system;     
+use super::event_system::{ElysiusEventType, Event, EventSystem};     
 
 //MAIN GAME STRUCT
 pub struct ElysiusMainState {
@@ -23,7 +23,7 @@ pub struct ElysiusMainState {
     pub state: game_state::GameState,
     //Menu Items
     pub menus: Vec<ui::ui_comp::UIComponent> ,
-    pub events : event_system::EventSystem,
+    pub events : EventSystem,
 }
 
 impl ElysiusMainState {
@@ -37,7 +37,7 @@ impl ElysiusMainState {
             player:         user::Player::new(),
             menus:          Vec::new(),
             state:          game_state::GameState::new(), 
-            events:         event_system::EventSystem::new(),
+            events:         EventSystem::new(),
         })
     }
 }
@@ -52,11 +52,12 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
             self.gen_new_system(_ctx); 
         }
         //0----------------------GAME UPDATES----------------------------------0
-        self.events.clear_events(); 
         self.update_menus();
-        self.update_mouse();
+        self.update_mouse(_ctx);
         self.entities.update(&self.entities_id, &self.state);
-        
+       
+
+        self.events.clear_events();         //Make sure to clear events last
         Ok(())
     }
 
@@ -101,45 +102,13 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
     //by ggez as an update function. no need to call it yourself. 
     fn mouse_button_down_event(
         &mut self,
-        ctx: &mut Context,
+        _ctx: &mut Context,
         _button: MouseButton,
         _x: f32,
         _y: f32,
     ) -> GameResult {
         self.mouse.set_click_down(true);
-        //Match what the mose is focused on
-        match self.mouse.get_focus() {
-            io::MouseFocus::Body(id) => {
-                if self.entities.ent_type[id] == entities::ObjectType::Ship {
-                    let p = glam::Vec2::new(self.state.screen_size().x - 400.0 ,50.0);
-                    self.menus.push(
-                        ui::ui_comp::UIComponent::new_ship_menu(
-                            ctx, p, &self.entities, id)
-                    );
-
-
-                } else {
-                    //add menu to menu stack
-                    let p = glam::Vec2::new(50.0,50.0);
-                    self.menus.push(
-                        ui::ui_comp::UIComponent::new_menu_orbit_body_info(
-                            &ctx,
-                            p,
-                            &self.entities,
-                            id,
-                        )
-                    );
-                }
-            }
-            io::MouseFocus::Background => {
-                for i in 0..self.menus.len() {
-                    if self.menus[i].menu_removeable() {
-                        self.menus[i].transition_out();    
-                    }
-                } 
-            }
-            io::MouseFocus::Menu => {}
-        }
+        self.events.new_event_ez(ElysiusEventType::LeftMouseDown); 
         Ok(())
     }
     //This gets the mouse position
