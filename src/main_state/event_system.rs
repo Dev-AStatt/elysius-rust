@@ -5,6 +5,7 @@ pub enum ElysiusEventType {
     TestEvent,
     LeftMouseDown,
     RightMouseDown,
+    NewMenu,
 }
 //Comment to push
 #[derive(Copy, Clone)]
