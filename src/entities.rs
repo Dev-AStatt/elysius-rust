@@ -112,45 +112,6 @@ impl Entities {
     }
 
 
-    fn draw_circle(&self, canvas: &mut graphics::Canvas ,ent_id: usize, state: &game_state::GameState) {
-        //if there is some orb component, then 
-        if let Some(ref orb) = &self.orbit_comp[ent_id] {
-            //get the final position of the circle
-            let circle_pos = (
-                //self.entities.solar_pos_comp[orb.orb_ent_id()]
-                self.position_comp[orb.orb_ent_id()].solar_pos()
-                * state.scale()
-                ) + state.player_screen_offset_pos();
-            
-            if self.position_comp[ent_id].in_transfer() {
-                //Draw the circle
-                canvas.draw(orb.orbit_circle(), 
-                    graphics::DrawParam::new()
-                        .scale(state.scale())
-                        .dest(circle_pos)
-                        .color(graphics::Color::GREEN)
-                ); 
-         
-            } else {
-                //Draw the circle
-                canvas.draw(orb.orbit_circle(), 
-                    graphics::DrawParam::new()
-                        .scale(state.scale())
-                        .dest(circle_pos)
-                ); 
-            }
-        }
-    }
-
-    fn draw_sprite(&self, canvas: &mut graphics::Canvas ,ent_id: usize, scale: glam::Vec2) {
-        //Draw the sprite
-        canvas.draw(self.draw_comp[ent_id].sprite(),
-            graphics::DrawParam::new()
-                .dest(self.draw_comp[ent_id].screen_pos())
-                .scale(scale)
-        );
-    }
-
 
 // 0-------------------------MAKE THINGS---------------------------------------0    
 
@@ -237,6 +198,45 @@ impl Entities {
 
 
     //PRIVATE FUNCTIONS
+
+    fn draw_circle(&self, canvas: &mut graphics::Canvas ,ent_id: usize, state: &game_state::GameState) {
+        //if there is some orb component, then 
+        if let Some(ref orb) = &self.orbit_comp[ent_id] {
+            //get the final position of the circle
+            let circle_pos = (
+                //self.entities.solar_pos_comp[orb.orb_ent_id()]
+                self.position_comp[orb.orb_ent_id()].solar_pos()
+                * state.scale()
+                ) + state.player_screen_offset_pos();
+            
+            if self.position_comp[ent_id].in_transfer() {
+                //Draw the circle
+                canvas.draw(orb.orbit_circle(), 
+                    graphics::DrawParam::new()
+                        .scale(state.scale())
+                        .dest(circle_pos)
+                        .color(graphics::Color::GREEN)
+                ); 
+         
+            } else {
+                //Draw the circle
+                canvas.draw(orb.orbit_circle(), 
+                    graphics::DrawParam::new()
+                        .scale(state.scale())
+                        .dest(circle_pos)
+                ); 
+            }
+        }
+    }
+
+    fn draw_sprite(&self, canvas: &mut graphics::Canvas ,ent_id: usize, scale: glam::Vec2) {
+        //Draw the sprite
+        canvas.draw(self.draw_comp[ent_id].sprite(),
+            graphics::DrawParam::new()
+                .dest(self.draw_comp[ent_id].screen_pos())
+                .scale(scale)
+        );
+    }
 
 
     //Function creates a new planet into the ECS system
