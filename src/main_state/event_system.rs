@@ -3,6 +3,8 @@
 pub enum ElysiusEventType {
     InitShipTransfer,     
     TestEvent,
+    LeftMouseDown,
+    RightMouseDown,
 }
 //Comment to push
 #[derive(Copy, Clone)]
@@ -46,6 +48,11 @@ impl EventSystem {
         //Make a new event and push it to event system
         self.events.push(Event::new(event_type, gen_by, target));
     }
+    //add a new event if it is only the enum, everyhting else will be filled none
+    pub fn new_event_ez(self: &mut Self, event_type: ElysiusEventType) {
+        self.events.push(Event::new(event_type,None,None));
+    }
+    //Create a new event from an already created event struct
     pub fn new_event_from(self: &mut Self, event: Event) {
         self.events.push(event);
     }
@@ -58,6 +65,11 @@ impl EventSystem {
             .collect::<Vec<Event>>();
         return new_events; 
     }
+    //function will return true if any of the events match the given event
+    pub fn check_event(&self, event_type: ElysiusEventType) -> bool {
+        if self.events.iter().any(|&e| e.is_event(event_type)) {return true;}
+        else {return false;}
+    } 
 }
 
 
