@@ -80,19 +80,42 @@ impl Entities {
             self.draw_comp[i].update(state, &self.position_comp[i]);
         }
         //handle Events
-        let new_events: Vec<event_system::Event> = events.get_events(event_system::EventType::InitShipTransfer);
-        //for each event that is initiate ship transfer 
-        new_events.into_iter().for_each(|e| {
-            if let Some(ent_id) = e.generated_by() { //get ent_id from event
-                //Do the event
-                self.position_comp[ent_id].set_in_transfer(true)
-            }
-        });
+        self.update_ent_events(events);        
 
         if state.if_state_is(game_state::StateType::Running) {
             self.inc_orbital_body_pos();
         }
     }
+    
+    fn update_ent_events(
+        self: &mut Self, 
+        events: &mut event_system::EventSystem,
+    ) {
+        let new_events: Vec<event_system::Event> = events.get_events(event_system::EventType::InitShipTransfer);
+        //for each event that is initiate ship transfer 
+        new_events.into_iter().for_each(|e| {
+            if let Some(ent_id) = e.generated_by() { //get ent_id from event
+                //Do the event
+                self.position_comp[ent_id].set_in_transfer(true);
+                //if there is a target for the transfer
+                if let Some(dest_id) = e.target() {
+                    self.transfer_ship(ent_id, dest_id, events);
+                }
+            }
+            
+        });
+    }
+    
+    fn transfer_ship(self: &mut Self, ent_id: usize, dest_id: usize, events: &mut event_system::EventSystem) {
+        //need to handle the Option on ship OrbitalComponent
+        if let Some(orb_comp) = &mut self.orbit_comp[ent_id] {
+            //set new orbiting entity
+            orb_comp.set_orbiting(dest_id);
+            events.new_event_ez(event_system::EventType::ShipTransferComplete);
+            self.position_comp[ent_id].set_in_transfer(false);
+        }
+    }
+   
 
     pub fn draw_objects(
         &self, 
@@ -111,7 +134,7 @@ impl Entities {
         });
     }
 
-
+    
 
 // 0-------------------------MAKE THINGS---------------------------------------0    
 
