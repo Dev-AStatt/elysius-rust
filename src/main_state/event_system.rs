@@ -7,6 +7,16 @@ pub enum EventType {
     RightMouseDown,
     NewMenu,
 }
+
+impl EventType {
+    pub fn is_persistant(&self) -> bool {
+        match self {
+            EventType::InitShipTransfer => {return true;}
+            _ => {return false;}
+        }
+    }
+}
+
 //Comment to push
 #[derive(Copy, Clone)]
 pub struct Event {
@@ -26,14 +36,12 @@ impl Event {
         if event_type == self.event_type {return true;} 
         else {return false;}
     }
-    
+    pub fn is_persistant(&self) -> bool {return self.event_type.is_persistant();}
 }
-
 
 pub struct EventSystem {
     events: Vec<Event>,
 }
-
 
 impl EventSystem {
     pub fn new() -> Self {
@@ -57,7 +65,10 @@ impl EventSystem {
     pub fn new_event_from(self: &mut Self, event: Event) {
         self.events.push(event);
     }
-    pub fn clear_events(self: &mut Self) {self.events.clear();}
+    //Will clear all events that are not persistant
+    pub fn clear_events(self: &mut Self) {
+        self.events.retain(|e| e.is_persistant());
+    }
     
     pub fn get_events(&self, e_type: EventType) -> Vec<Event> {
         //fnction should collect all of the events that match event_type given
@@ -71,6 +82,7 @@ impl EventSystem {
         if self.events.iter().any(|&e| e.is_event(event_type)) {return true;}
         else {return false;}
     } 
+    fn num_of_events(&self) -> usize {return self.events.len();}
 }
 
 
@@ -101,7 +113,19 @@ mod tests {
         assert_eq!(v.len(), 2);
     }
 
-
+    #[test]
+    fn test_persistance() {
+        let e1 = Event::new(EventType::InitShipTransfer, Some(2), Some(3));
+        let e3 = Event::new(EventType::TestEvent, None, None);
+        let mut event_system = EventSystem::new();
+        event_system.new_event_from(e1);
+        event_system.new_event_from(e1);
+        event_system.new_event_from(e3);
+        event_system.new_event_from(e3);
+        event_system.clear_events();
+        //Vector.len() returns the intager length not a i-1 length
+        assert_eq!(event_system.num_of_events(), 2);
+    }
 }
 
 
