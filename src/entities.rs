@@ -87,41 +87,7 @@ impl Entities {
         }
     }
     
-    fn update_ent_events(
-        self: &mut Self, 
-        events: &mut event_system::EventSystem,
-        ids: &Vec<EntityIndex>,
-    ) {
-        let new_events: Vec<event_system::Event> = events.get_events(event_system::EventType::InitShipTransfer);
-        if new_events.len() == 0 {
-            for i in 0..ids.len() {
-                self.position_comp[i].set_in_transfer(false);
-            } 
-        }
-         //for each event that is initiate ship transfer 
-        new_events.into_iter().for_each(|e| {
-            if let Some(ent_id) = e.generated_by() { //get ent_id from event
-                //Do the event
-                self.position_comp[ent_id].set_in_transfer(true);
-                //if there is a target for the transfer
-                if let Some(dest_id) = e.target() {
-                    self.transfer_ship(ent_id, dest_id, events);
-                }
-            }
-        });
-   }
-    
-    fn transfer_ship(self: &mut Self, ent_id: usize, dest_id: usize, events: &mut event_system::EventSystem) {
-        if ent_id == dest_id {return;}    //if dest is ent then cancel
-        //need to handle the Option on ship OrbitalComponent
-        if let Some(orb_comp) = &mut self.orbit_comp[ent_id] {
-            //set new orbiting entity
-            orb_comp.set_orbiting(dest_id);
-            events.new_event_ez(event_system::EventType::ShipTransferComplete);
-            self.position_comp[ent_id].set_in_transfer(false);
-        }
-    }
-   
+  
 
     pub fn draw_objects(
         &self, 
@@ -227,7 +193,41 @@ impl Entities {
 
 
     //PRIVATE FUNCTIONS
+    fn update_ent_events(
+        self: &mut Self, 
+        events: &mut event_system::EventSystem,
+        ids: &Vec<EntityIndex>,
+    ) {
+        let new_events: Vec<event_system::Event> = events.get_events(event_system::EventType::InitShipTransfer);
+        if new_events.len() == 0 {
+            for i in 0..ids.len() {
+                self.position_comp[i].set_in_transfer(false);
+            } 
+        }
+         //for each event that is initiate ship transfer 
+        new_events.into_iter().for_each(|e| {
+            if let Some(ent_id) = e.generated_by() { //get ent_id from event
+                //Do the event
+                self.position_comp[ent_id].set_in_transfer(true);
+                //if there is a target for the transfer
+                if let Some(dest_id) = e.target() {
+                    self.transfer_ship(ent_id, dest_id, events);
+                }
+            }
+        });
+   }
 
+    fn transfer_ship(self: &mut Self, ent_id: usize, dest_id: usize, events: &mut event_system::EventSystem) {
+        if ent_id == dest_id {return;}    //if dest is ent then cancel
+        //need to handle the Option on ship OrbitalComponent
+        if let Some(orb_comp) = &mut self.orbit_comp[ent_id] {
+            //set new orbiting entity
+            orb_comp.set_orbiting(dest_id);
+            events.new_event_ez(event_system::EventType::ShipTransferComplete);
+            self.position_comp[ent_id].set_in_transfer(false);
+        }
+    }
+ 
     fn draw_circle(&self, canvas: &mut graphics::Canvas ,ent_id: usize, state: &game_state::GameState) {
         //if there is some orb component, then 
         if let Some(ref orb) = &self.orbit_comp[ent_id] {
