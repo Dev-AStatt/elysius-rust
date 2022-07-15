@@ -144,6 +144,16 @@ impl ElysiusMainState {
             0,                                     
             300                                         
         );
+ 
+        //Second Planet
+        self.entities.make_new_planet(
+            &mut self.entities_id,
+            utilities::sprite_get(_ctx, "/Sprite-Planet_01.png"),
+            self.state.active_solar_system(),                   
+            &_ctx,
+            0,                                     
+            600                                         
+        );
 
         //First Ship
         self.entities.make_new_ship(
