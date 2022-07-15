@@ -46,7 +46,8 @@ impl OrbitalComponent {
 
     pub fn pos_adj(self: &mut Self) -> glam::Vec2 {
         //increment angle
-        let adjustment = 0.1;   //This is what to mess around with to slow down
+        let mut adjustment = 20.0;   //This is what to mess around with to slow down
+        adjustment = adjustment / self.rad() as f32;
         let mut new_angle = self.angle + adjustment;
         if new_angle > 360.0 {new_angle = new_angle - 360.0;}
         self.angle = new_angle;
@@ -57,14 +58,8 @@ impl OrbitalComponent {
         let x = unitx * self.radius as f32;
         let y = unity * self.radius as f32;
         return glam::Vec2::new(x,y);
-        
     }
-
 }
-
-
-
-
 
 
 // We may get rid of this if we can
