@@ -5,6 +5,7 @@ pub struct PosComponent {
     solar_pos: glam::Vec2,
     solar_system: i32,
     in_transfer: bool,
+    sol_pos_history: Vec<glam::Vec2>,
 }
 
 impl PosComponent {
@@ -13,6 +14,8 @@ impl PosComponent {
             solar_pos,
             solar_system,
             in_transfer: false,
+            sol_pos_history: Vec::new(),
+
         }
     }
 
@@ -22,12 +25,18 @@ impl PosComponent {
 
     pub fn set_solar_pos(self: &mut Self, pos: glam::Vec2) {self.solar_pos = pos;}
     pub fn set_in_transfer(self: &mut Self, b: bool) {self.in_transfer = b;}
-    pub fn inc_solar_pos(self: &mut Self, inc: glam::Vec2) {self.solar_pos += inc;}
-    pub fn inc_solar_pos_x(self: &mut Self, inc: f32) {
-        self.solar_pos.x += inc;
+    //Inc solar pos will add the current position to history, then increase postiion. 
+    pub fn inc_solar_pos(self: &mut Self, inc: glam::Vec2) {
+        self.sol_pos_history.push(self.solar_pos());
+        self.solar_pos += inc;
     }
+    //Inc x will just call inc_solar_pos with {inc, 0.0}
+    pub fn inc_solar_pos_x(self: &mut Self, inc: f32) {
+        self.inc_solar_pos(glam::Vec2::new(inc,0.0));
+    }
+    //Inc y will just call inc_solar_pos with {0.0, inc}
     pub fn inc_solar_pos_y(self: &mut Self, inc: f32) {
-        self.solar_pos.y += inc;
+        self.inc_solar_pos(glam::Vec2::new(0.0,inc));
     }
    
     pub fn is_in_system(&self, system: i32) -> bool {
