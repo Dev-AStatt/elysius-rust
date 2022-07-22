@@ -8,7 +8,7 @@ pub struct PosComponent {
     screen_pos: glam::Vec2,
     solar_system: i32,
     in_transfer: bool,
-    screen_pos_history: Vec<glam::Vec2>,
+    solar_pos_history: Vec<glam::Vec2>,
     history_count: i32,
 }
 
@@ -19,7 +19,7 @@ impl PosComponent {
             screen_pos: glam::Vec2::new(0.0,0.0),
             solar_system,
             in_transfer: false,
-            screen_pos_history: Vec::new(),
+            solar_pos_history: Vec::new(),
             history_count: 0,
 
         }
@@ -28,8 +28,7 @@ impl PosComponent {
     pub fn solar_pos(&self) -> glam::Vec2 {return self.solar_pos;}
     pub fn solar_system(&self) -> i32 {return self.solar_system;}
     pub fn in_transfer(&self) -> bool {return self.in_transfer;}
-    pub fn sol_pos_history(&self) -> Vec<glam::Vec2> {return self.screen_pos_history.clone();}
-    pub fn screen_pos(&self) -> glam::Vec2 {return self.screen_pos;}
+   pub fn screen_pos(&self) -> glam::Vec2 {return self.screen_pos;}
 
     pub fn set_solar_pos(self: &mut Self, pos: glam::Vec2) {self.solar_pos = pos;}
     pub fn set_in_transfer(self: &mut Self, b: bool) {self.in_transfer = b;}
@@ -41,11 +40,17 @@ impl PosComponent {
     pub fn inc_solar_pos_x(self: &mut Self, inc: f32) {self.inc_solar_pos(glam::Vec2::new(inc,0.0));}
     //Inc y will just call inc_solar_pos with {0.0, inc}
     pub fn inc_solar_pos_y(self: &mut Self, inc: f32) {self.inc_solar_pos(glam::Vec2::new(0.0,inc));}
-    pub fn set_screen_pos(self: &mut Self, pos: glam::Vec2) {
-        self.add_to_history();
-        self.screen_pos = pos;
+    pub fn set_screen_pos(self: &mut Self, pos: glam::Vec2) {self.screen_pos = pos;}
+    
+    //returns a clone of the position history, be careful
+    pub fn sol_pos_history(&self, orb_pos: glam::Vec2) -> Vec<glam::Vec2> {
+        let mut v: Vec<glam::Vec2> = Vec::new();
+        for i in 0..self.solar_pos_history.len() {
+            v.push(orb_pos + self.solar_pos_history[i]);
+        }
+        return v;
     }
-
+ 
     pub fn is_in_system(&self, system: i32) -> bool {
         if self.solar_system == system {return true;}
         else {return false;}
@@ -55,7 +60,11 @@ impl PosComponent {
         self: &mut Self,
         state: &game_state::GameState,
         sprite_offset: glam::Vec2,
+        orb_center_pos: Option<glam::Vec2>,
     ) {
+        if let Some(pos) = orb_center_pos {
+           self.add_to_history(pos);
+        }
        self.set_screen_pos(
             self.get_orbit_final_pos(
                 state.scale(), 
@@ -64,10 +73,10 @@ impl PosComponent {
             )
         ) 
     }
-    fn add_to_history(self: &mut Self) {
+    fn add_to_history(self: &mut Self, orb_center_pos: glam::Vec2) {
         self.history_count += 1;
         if self.history_count > 99 {
-            self.screen_pos_history.push(self.screen_pos);
+            self.solar_pos_history.push(orb_center_pos - self.solar_pos);
             self.history_count = 0;
         }
     }

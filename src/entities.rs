@@ -77,7 +77,17 @@ impl Entities {
     ) {
         //For everything in vect
         for i in 0..ids.len() {
-            self.position_comp[i].update(state, self.draw_comp[i].sprite_offset());
+            //get orbiting component 
+            let orb_pos: Option<glam::Vec2>;
+            match self.orbit_comp[i] {
+                Some(ref orb) => {orb_pos = Some(self.position_comp[orb.orb_ent_id()].solar_pos())}
+                None => {orb_pos = None}
+            }
+            self.position_comp[i].update(
+                state, 
+                self.draw_comp[i].sprite_offset(),
+                orb_pos,
+            );
         }
         //handle Events
         self.update_ent_events(events, ids);        
@@ -104,7 +114,10 @@ impl Entities {
                 //Then Draw 
                 self.draw_sprite(canvas, i, state.scale());
                 //Grab tails while were in here
-                all_tails.append(&mut self.position_comp[i].sol_pos_history());
+                if let Some(ref orb) = self.orbit_comp[i] {
+                    let orb_pos = self.position_comp[orb.orb_ent_id()].solar_pos();
+                    all_tails.append(&mut self.position_comp[i].sol_pos_history(orb_pos));
+                }
             }
         });
         //Draw Tails
@@ -242,12 +255,15 @@ impl Entities {
                 graphics::DrawMode::fill(), 
                 i, 
                 10.0, 
-                1.0, 
+                1.0,   
                 graphics::Color::WHITE
             ).expect("Error in making tails");
         });
         let mesh = graphics::Mesh::from_data(ctx, mb.build());
-    canvas.draw(&mesh, graphics::DrawParam::new());
+        canvas.draw(
+            &mesh, 
+            graphics::DrawParam::new()
+        );
          
 
     }
