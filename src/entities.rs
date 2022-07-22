@@ -92,18 +92,23 @@ impl Entities {
     pub fn draw_objects(
         &self, 
         canvas: &mut graphics::Canvas,
+        ctx: &Context,
         ids: &Vec<EntityIndex>,
         state: &game_state::GameState,
     ) {
+        let mut all_tails: Vec<glam::Vec2> = Vec::new();
         //for each entity id in vect ent_ids
         ids.iter().for_each(|ref_ent| {
             let i = ref_ent.clone();  //Had to get id as a usize not a &usize 
             if self.position_comp[i].is_in_system(state.active_solar_system()) {
                 //Then Draw 
-                self.draw_circle(canvas, i, &state);
                 self.draw_sprite(canvas, i, state.scale());
+                //Grab tails while were in here
+                all_tails.append(&mut self.position_comp[i].sol_pos_history());
             }
         });
+        //Draw Tails
+        self.draw_orbit_tails(canvas, ctx, &state, all_tails);
     }
 
     
@@ -145,12 +150,10 @@ impl Entities {
         entities_id: &mut Vec<EntityIndex>,
         n_sprite: graphics::Image,
         n_sol_sys_id: i32,
-        ctx: &Context,
         n_orbiting_ent_id: usize,
         n_orb_rad: i32,
     ) {
         let orb_comp = orbit::OrbitalComponent::new(
-            ctx,
             n_orb_rad,
             n_orbiting_ent_id,
         );
@@ -168,12 +171,10 @@ impl Entities {
         entities_id: &mut Vec<EntityIndex>,
         n_sprite: graphics::Image,
         n_sol_sys_id: i32,
-        ctx: &Context,
         n_orbiting_ent_id: usize,
         n_orb_rad: i32,
     ) {
         let orb_comp = orbit::OrbitalComponent::new(
-            ctx,
             n_orb_rad,
             n_orbiting_ent_id,
         );
@@ -228,34 +229,27 @@ impl Entities {
         }
     }
  
-    fn draw_circle(&self, canvas: &mut graphics::Canvas ,ent_id: usize, state: &game_state::GameState) {
-        //if there is some orb component, then 
-        if let Some(ref orb) = &self.orbit_comp[ent_id] {
-            //get the final position of the circle
-            let circle_pos = (
-                //self.entities.solar_pos_comp[orb.orb_ent_id()]
-                self.position_comp[orb.orb_ent_id()].solar_pos()
-                * state.scale()
-                ) + state.player_screen_offset_pos();
-            
-            if self.position_comp[ent_id].in_transfer() {
-                //Draw the circle
-                canvas.draw(orb.orbit_circle(), 
-                    graphics::DrawParam::new()
-                        .scale(state.scale())
-                        .dest(circle_pos)
-                        .color(graphics::Color::GREEN)
-                ); 
+    fn draw_orbit_tails(
+        &self, 
+        canvas: &mut graphics::Canvas, 
+        ctx: &Context,
+        state: &game_state::GameState,
+        tails: Vec<glam::Vec2>,
+    ) {
+        let mb = &mut graphics::MeshBuilder::new();
+        tails.into_iter().for_each(|i| {
+            mb.circle(
+                graphics::DrawMode::fill(), 
+                i, 
+                10.0, 
+                1.0, 
+                graphics::Color::WHITE
+            ).expect("Error in making tails");
+        });
+        let mesh = graphics::Mesh::from_data(ctx, mb.build());
+    canvas.draw(&mesh, graphics::DrawParam::new());
          
-            } else {
-                //Draw the circle
-                canvas.draw(orb.orbit_circle(), 
-                    graphics::DrawParam::new()
-                        .scale(state.scale())
-                        .dest(circle_pos)
-                ); 
-            }
-        }
+
     }
 
     fn draw_sprite(&self, canvas: &mut graphics::Canvas ,ent_id: usize, scale: glam::Vec2) {
@@ -293,7 +287,6 @@ impl Entities {
         self: &mut Self, 
         solar_system: i32,
         orb_comp: &Option<OrbitalComponent>,
-        
     ) {
         let mut pos = glam::Vec2::new(0.0,0.0);
         //if there is some orbital component, that means the ent is orbiting
@@ -333,7 +326,6 @@ impl Entities {
             (sprite_width,sprite_height),
             glam::Vec2::new(sprite_width as f32 / 2.0, sprite_height as f32 / 2.0),
         );
-
         self.draw_comp.push(new_draw_comp);
 
     }

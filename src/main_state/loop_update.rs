@@ -140,7 +140,6 @@ impl ElysiusMainState {
             &mut self.entities_id,
             utilities::sprite_get(_ctx, "/Sprite-Planet_01.png"),
             self.state.active_solar_system(),                   
-            &_ctx,
             0,                                     
             300                                         
         );
@@ -150,7 +149,6 @@ impl ElysiusMainState {
             &mut self.entities_id,
             utilities::sprite_get(_ctx, "/Sprite-Planet_01.png"),
             self.state.active_solar_system(),                   
-            &_ctx,
             0,                                     
             600                                         
         );
@@ -160,7 +158,6 @@ impl ElysiusMainState {
             &mut self.entities_id,
             utilities::sprite_get(_ctx, "/Sprite-Ship_01.png"),
             self.state.active_solar_system(),                   
-            &_ctx,
             1,                                     
             75                                         
         );

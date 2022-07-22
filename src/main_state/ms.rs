@@ -67,7 +67,7 @@ impl event::EventHandler<ggez::GameError> for ElysiusMainState {
         );
 
         //Draw Entities
-        self.entities.draw_objects(&mut canvas, &self.entities_id, &self.state);
+        self.entities.draw_objects(&mut canvas, &ctx, &self.entities_id, &self.state);
         //Draw any menus on screen
         for i in 0..self.menus.len() {
             self.menus[i].draw_ui_comp(&mut canvas, &self.entities); 
