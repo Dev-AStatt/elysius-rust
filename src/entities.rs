@@ -1,7 +1,7 @@
 use rand::Rng;
 
 use ggez::{
-    graphics::{self},
+    graphics,
     Context,
 };
 
@@ -77,7 +77,7 @@ impl Entities {
     ) {
         //For everything in vect
         for i in 0..ids.len() {
-            self.draw_comp[i].update(state, &self.position_comp[i]);
+            self.position_comp[i].update(state, self.draw_comp[i].sprite_offset());
         }
         //handle Events
         self.update_ent_events(events, ids);        
@@ -262,7 +262,7 @@ impl Entities {
         //Draw the sprite
         canvas.draw(self.draw_comp[ent_id].sprite(),
             graphics::DrawParam::new()
-                .dest(self.draw_comp[ent_id].screen_pos())
+                .dest(self.position_comp[ent_id].screen_pos())
                 .scale(scale)
         );
     }
@@ -293,6 +293,7 @@ impl Entities {
         self: &mut Self, 
         solar_system: i32,
         orb_comp: &Option<OrbitalComponent>,
+        
     ) {
         let mut pos = glam::Vec2::new(0.0,0.0);
         //if there is some orbital component, that means the ent is orbiting
@@ -331,7 +332,6 @@ impl Entities {
             sprite,
             (sprite_width,sprite_height),
             glam::Vec2::new(sprite_width as f32 / 2.0, sprite_height as f32 / 2.0),
-            glam::Vec2::new(0.0,0.0),
         );
 
         self.draw_comp.push(new_draw_comp);

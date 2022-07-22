@@ -114,7 +114,7 @@ impl ElysiusMainState {
     fn mouse_over_ent(&self, ent: usize) -> bool {
         let sprite_offset_scaled = self.entities.draw_comp[ent].sprite_offset() * self.state.scale();
         //This is the screen position of the entity adjusted for the scale and position on screen
-        let final_pos =    self.entities.draw_comp[ent].screen_pos() + sprite_offset_scaled;
+        let final_pos =    self.entities.position_comp[ent].screen_pos() + sprite_offset_scaled;
 
         let new_rad = self.entities.draw_comp[ent].sprite_offset().x * self.state.scale().x;
         if utilities::point_in_circle_vec2(
