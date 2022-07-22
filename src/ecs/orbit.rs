@@ -1,6 +1,4 @@
-use ggez::{graphics,
-    Context,
-};
+use ggez::Context;
 
 pub struct OrbitalComponent {
     orb_ent_id: usize,

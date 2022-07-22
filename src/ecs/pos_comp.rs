@@ -1,6 +1,6 @@
 use crate::main_state::game_state;
 
-
+use super::tail::Tail;
 
 
 pub struct PosComponent {
@@ -8,7 +8,7 @@ pub struct PosComponent {
     screen_pos: glam::Vec2,
     solar_system: i32,
     in_transfer: bool,
-    solar_pos_history: Vec<glam::Vec2>,
+    tails: Vec<Tail>,
     history_count: i32,
 }
 
@@ -19,7 +19,7 @@ impl PosComponent {
             screen_pos: glam::Vec2::new(0.0,0.0),
             solar_system,
             in_transfer: false,
-            solar_pos_history: Vec::new(),
+            tails: Vec::new(),
             history_count: 0,
 
         }
@@ -28,7 +28,8 @@ impl PosComponent {
     pub fn solar_pos(&self) -> glam::Vec2 {return self.solar_pos;}
     pub fn solar_system(&self) -> i32 {return self.solar_system;}
     pub fn in_transfer(&self) -> bool {return self.in_transfer;}
-   pub fn screen_pos(&self) -> glam::Vec2 {return self.screen_pos;}
+    pub fn screen_pos(&self) -> glam::Vec2 {return self.screen_pos;}
+    pub fn tails(&self) -> Vec<Tail> {return self.tails.clone();}
 
     pub fn set_solar_pos(self: &mut Self, pos: glam::Vec2) {self.solar_pos = pos;}
     pub fn set_in_transfer(self: &mut Self, b: bool) {self.in_transfer = b;}
@@ -41,24 +42,9 @@ impl PosComponent {
     //Inc y will just call inc_solar_pos with {0.0, inc}
     pub fn inc_solar_pos_y(self: &mut Self, inc: f32) {self.inc_solar_pos(glam::Vec2::new(0.0,inc));}
     pub fn set_screen_pos(self: &mut Self, pos: glam::Vec2) {self.screen_pos = pos;}
+
     
-    //returns a clone of the position history, be careful
-    pub fn tail_pos(
-        &self, 
-        orb_pos: glam::Vec2, 
-        state: &game_state::GameState
-    ) -> Vec<glam::Vec2> {
-        let mut v: Vec<glam::Vec2> = Vec::new();
-        for i in 0..self.solar_pos_history.len() {
-            let final_pos = calc_final_tail_pos(
-                orb_pos - self.solar_pos_history[i],
-                state,
-            ); 
-            v.push(final_pos);
-        }
-        return v;
-    }
-    pub fn is_in_system(&self, system: i32) -> bool {
+   pub fn is_in_system(&self, system: i32) -> bool {
         if self.solar_system == system {return true;}
         else {return false;}
     }
@@ -68,9 +54,10 @@ impl PosComponent {
         state: &game_state::GameState,
         sprite_offset: glam::Vec2,
         orb_center_pos: Option<glam::Vec2>,
+        orbit_id: usize,
     ) {
         if let Some(pos) = orb_center_pos {
-           self.add_to_history(pos);
+           self.add_to_history(pos, orbit_id);
         }
        self.set_screen_pos(
             self.get_orbit_final_pos(
@@ -80,10 +67,14 @@ impl PosComponent {
             )
         ) 
     }
-    fn add_to_history(self: &mut Self, orb_center_pos: glam::Vec2) {
+    fn add_to_history(self: &mut Self, orb_center_pos: glam::Vec2, orbit_id: usize) {
         self.history_count += 1;
         if self.history_count > 99 {
-            self.solar_pos_history.push(orb_center_pos - self.solar_pos);
+            let new_tail = Tail::new(
+                orb_center_pos - self.solar_pos,
+                orbit_id,
+            );
+            self.tails.push(new_tail);
             self.history_count = 0;
         }
     }
@@ -99,14 +90,6 @@ impl PosComponent {
         return sprite_pos - disp_adj + player_offset; 
     }
 }
-
-fn calc_final_tail_pos(
-        sol_pos: glam::Vec2,
-        state: &game_state::GameState,
-    ) -> glam::Vec2 {
-        let scaled_pos = sol_pos * state.scale();
-        return scaled_pos + state.player_screen_offset_pos();
-    }
  
 
 
