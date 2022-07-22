@@ -116,7 +116,7 @@ impl Entities {
                 //Grab tails while were in here
                 if let Some(ref orb) = self.orbit_comp[i] {
                     let orb_pos = self.position_comp[orb.orb_ent_id()].solar_pos();
-                    all_tails.append(&mut self.position_comp[i].sol_pos_history(orb_pos));
+                    all_tails.append(&mut self.position_comp[i].tail_pos(orb_pos, state));
                 }
             }
         });
@@ -254,7 +254,7 @@ impl Entities {
             mb.circle(
                 graphics::DrawMode::fill(), 
                 i, 
-                10.0, 
+                1.0, 
                 1.0,   
                 graphics::Color::WHITE
             ).expect("Error in making tails");

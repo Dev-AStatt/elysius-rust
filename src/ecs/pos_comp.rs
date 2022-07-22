@@ -43,14 +43,21 @@ impl PosComponent {
     pub fn set_screen_pos(self: &mut Self, pos: glam::Vec2) {self.screen_pos = pos;}
     
     //returns a clone of the position history, be careful
-    pub fn sol_pos_history(&self, orb_pos: glam::Vec2) -> Vec<glam::Vec2> {
+    pub fn tail_pos(
+        &self, 
+        orb_pos: glam::Vec2, 
+        state: &game_state::GameState
+    ) -> Vec<glam::Vec2> {
         let mut v: Vec<glam::Vec2> = Vec::new();
         for i in 0..self.solar_pos_history.len() {
-            v.push(orb_pos + self.solar_pos_history[i]);
+            let final_pos = calc_final_tail_pos(
+                orb_pos - self.solar_pos_history[i],
+                state,
+            ); 
+            v.push(final_pos);
         }
         return v;
     }
- 
     pub fn is_in_system(&self, system: i32) -> bool {
         if self.solar_system == system {return true;}
         else {return false;}
@@ -93,5 +100,13 @@ impl PosComponent {
     }
 }
 
+fn calc_final_tail_pos(
+        sol_pos: glam::Vec2,
+        state: &game_state::GameState,
+    ) -> glam::Vec2 {
+        let scaled_pos = sol_pos * state.scale();
+        return scaled_pos + state.player_screen_offset_pos();
+    }
+ 
 
 
