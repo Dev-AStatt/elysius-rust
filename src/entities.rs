@@ -1,7 +1,7 @@
 use rand::Rng;
 
 use ggez::{
-    graphics::{self},
+    graphics,
     Context,
 };
 
@@ -13,6 +13,7 @@ use crate::{
 use super::ecs::orbit;
 use super::ecs::draw_comp::DrawingComponent;
 use super::ecs::pos_comp::PosComponent;
+use super::ecs::tail::Tail;
 
 
 #[derive(PartialEq, Clone, Copy)]
@@ -77,7 +78,22 @@ impl Entities {
     ) {
         //For everything in vect
         for i in 0..ids.len() {
-            self.draw_comp[i].update(state, &self.position_comp[i]);
+            //get orbiting component 
+            let orb_pos: Option<glam::Vec2>;
+            let mut orb_ent_id: usize = 0;
+            match self.orbit_comp[i] {
+                Some(ref orb) => {
+                    orb_pos = Some(self.position_comp[orb.orb_ent_id()].solar_pos());
+                    orb_ent_id = orb.orb_ent_id();
+                }
+                None => {orb_pos = None}
+            }
+            self.position_comp[i].update(
+                state, 
+                self.draw_comp[i].sprite_offset(),
+                orb_pos,
+                orb_ent_id,
+            );
         }
         //handle Events
         self.update_ent_events(events, ids);        
@@ -92,21 +108,15 @@ impl Entities {
     pub fn draw_objects(
         &self, 
         canvas: &mut graphics::Canvas,
+        ctx: &Context,
         ids: &Vec<EntityIndex>,
         state: &game_state::GameState,
     ) {
-        //for each entity id in vect ent_ids
-        ids.iter().for_each(|ref_ent| {
-            let i = ref_ent.clone();  //Had to get id as a usize not a &usize 
-            if self.position_comp[i].is_in_system(state.active_solar_system()) {
-                //Then Draw 
-                self.draw_circle(canvas, i, &state);
-                self.draw_sprite(canvas, i, state.scale());
-            }
-        });
-    }
+        self.draw_tails(canvas, ctx, ids, state);
+        self.draw_sprites(canvas, ids, state);
+   }
 
-    
+
 
 // 0-------------------------MAKE THINGS---------------------------------------0    
 
@@ -145,12 +155,10 @@ impl Entities {
         entities_id: &mut Vec<EntityIndex>,
         n_sprite: graphics::Image,
         n_sol_sys_id: i32,
-        ctx: &Context,
         n_orbiting_ent_id: usize,
         n_orb_rad: i32,
     ) {
         let orb_comp = orbit::OrbitalComponent::new(
-            ctx,
             n_orb_rad,
             n_orbiting_ent_id,
         );
@@ -168,12 +176,10 @@ impl Entities {
         entities_id: &mut Vec<EntityIndex>,
         n_sprite: graphics::Image,
         n_sol_sys_id: i32,
-        ctx: &Context,
         n_orbiting_ent_id: usize,
         n_orb_rad: i32,
     ) {
         let orb_comp = orbit::OrbitalComponent::new(
-            ctx,
             n_orb_rad,
             n_orbiting_ent_id,
         );
@@ -186,11 +192,6 @@ impl Entities {
             Some(orb_comp)
         );
     }
-
-
-
-
-
 
     //PRIVATE FUNCTIONS
     fn update_ent_events(
@@ -228,41 +229,79 @@ impl Entities {
         }
     }
  
-    fn draw_circle(&self, canvas: &mut graphics::Canvas ,ent_id: usize, state: &game_state::GameState) {
-        //if there is some orb component, then 
-        if let Some(ref orb) = &self.orbit_comp[ent_id] {
-            //get the final position of the circle
-            let circle_pos = (
-                //self.entities.solar_pos_comp[orb.orb_ent_id()]
-                self.position_comp[orb.orb_ent_id()].solar_pos()
-                * state.scale()
-                ) + state.player_screen_offset_pos();
-            
-            if self.position_comp[ent_id].in_transfer() {
-                //Draw the circle
-                canvas.draw(orb.orbit_circle(), 
-                    graphics::DrawParam::new()
-                        .scale(state.scale())
-                        .dest(circle_pos)
-                        .color(graphics::Color::GREEN)
-                ); 
-         
-            } else {
-                //Draw the circle
-                canvas.draw(orb.orbit_circle(), 
-                    graphics::DrawParam::new()
-                        .scale(state.scale())
-                        .dest(circle_pos)
-                ); 
-            }
-        }
+    fn draw_tails(
+        &self, 
+        canvas: &mut graphics::Canvas,
+        ctx: &Context,
+        ids: &Vec<EntityIndex>,
+        state: &game_state::GameState,
+    ) {
+        let mut all_tails: Vec<Tail> = Vec::new();
+        //for each entity id in vect ent_ids
+        ids.iter().for_each(|ref_ent| {
+            let i = ref_ent.clone();  //Had to get id as a usize not a &usize 
+            if self.position_comp[i].is_in_system(state.active_solar_system()) {
+                    all_tails.append(&mut self.position_comp[i].tails());
+                }
+        });
+        //Draw Tails
+        let mesh = self.build_tail_mesh(ctx, state, all_tails);
+        canvas.draw(
+            &mesh, 
+            graphics::DrawParam::new()
+        );
+
     }
 
-    fn draw_sprite(&self, canvas: &mut graphics::Canvas ,ent_id: usize, scale: glam::Vec2) {
+
+
+    fn build_tail_mesh(
+        &self, 
+        ctx: &Context,
+        state: &game_state::GameState,
+        tails: Vec<Tail>,
+    ) -> graphics::Mesh {
+        let mb = &mut graphics::MeshBuilder::new();
+        //Loop for each tail
+        tails.into_iter().for_each(|t| {
+            //get position of orbiting entity
+            let orbit_pos = self.position_comp[t.orbit_id()].solar_pos();
+            let mut color = graphics::Color::WHITE;
+            if t.hilighted() {color = graphics::Color::GREEN;}
+            //Make the circle mesh
+            mb.circle(
+                graphics::DrawMode::fill(), 
+                t.calc_final_tail_pos(state, orbit_pos), 
+                3.0, 
+                1.0,   
+                color
+            ).expect("Error in making tails");
+        });
+        //mash all the circles together
+        return graphics::Mesh::from_data(ctx, mb.build());
+    }
+
+    fn draw_sprites(
+        &self,
+        canvas: &mut graphics::Canvas,
+        ids: &Vec<EntityIndex>,
+        state: &game_state::GameState,
+    ) {        
+        //for each entity id in vect ent_ids
+        ids.iter().for_each(|ref_ent| {
+            let i = ref_ent.clone();  //Had to get id as a usize not a &usize 
+            if self.position_comp[i].is_in_system(state.active_solar_system()) {
+                //Then Draw 
+                self.draw_single_sprite(canvas, i, state.scale());
+            }
+        });
+    }  
+
+    fn draw_single_sprite(&self, canvas: &mut graphics::Canvas ,ent_id: usize, scale: glam::Vec2) {
         //Draw the sprite
         canvas.draw(self.draw_comp[ent_id].sprite(),
             graphics::DrawParam::new()
-                .dest(self.draw_comp[ent_id].screen_pos())
+                .dest(self.position_comp[ent_id].screen_pos())
                 .scale(scale)
         );
     }
@@ -331,14 +370,12 @@ impl Entities {
             sprite,
             (sprite_width,sprite_height),
             glam::Vec2::new(sprite_width as f32 / 2.0, sprite_height as f32 / 2.0),
-            glam::Vec2::new(0.0,0.0),
         );
-
         self.draw_comp.push(new_draw_comp);
 
     }
 
-     fn get_new_name(&self) -> String {
+    fn get_new_name(&self) -> String {
         let mut rng = rand::thread_rng();
         let names = vec![
             "Lodania Minor",
@@ -355,9 +392,6 @@ impl Entities {
         let i = rng.gen_range(0..names.len());
         return names[i].to_string();
     }
-
-
-
 }
 
 
