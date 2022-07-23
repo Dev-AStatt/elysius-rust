@@ -266,13 +266,15 @@ impl Entities {
         tails.into_iter().for_each(|t| {
             //get position of orbiting entity
             let orbit_pos = self.position_comp[t.orbit_id()].solar_pos();
+            let mut color = graphics::Color::WHITE;
+            if t.hilighted() {color = graphics::Color::GREEN;}
             //Make the circle mesh
             mb.circle(
                 graphics::DrawMode::fill(), 
                 t.calc_final_tail_pos(state, orbit_pos), 
-                5.0, 
+                3.0, 
                 1.0,   
-                graphics::Color::WHITE
+                color
             ).expect("Error in making tails");
         });
         //mash all the circles together
