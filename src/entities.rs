@@ -1,4 +1,3 @@
-use rand::Rng;
 
 use ggez::{
     graphics,
@@ -6,15 +5,14 @@ use ggez::{
 };
 
 use crate::{
-    ecs::orbit::OrbitalComponent,
     main_state::{game_state, event_system}
 };
 
-use super::ecs::orbit;
+use super::ecs::orbit::OrbitalComponent;
 use super::ecs::draw_comp::DrawingComponent;
 use super::ecs::pos_comp::PosComponent;
 use super::ecs::tail::Tail;
-
+use super::ecs::energy_comp::EnergyComponent;
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum ObjectType {
@@ -27,33 +25,13 @@ pub enum ObjectType {
 // 0------------------Start of ECS Sstem---------------------------------------0
 pub type EntityIndex = usize;
 
-pub struct EnergyComponent {
-    //units of energy
-    pub fossil: i32,
-    pub radioactive: i32,
-}
-
-impl EnergyComponent {
-    pub fn new() -> Self {
-        let fossil = 100;
-        let radioactive = 50;
-        EnergyComponent {
-            fossil,
-            radioactive, 
-        }
-    }
-}
-
 pub struct Entities {
-    pub orbit_comp: Vec<Option<orbit::OrbitalComponent>>,
-    pub draw_comp: Vec<DrawingComponent>,
-    pub energy_comp: Vec<Option<EnergyComponent>>,
-    //pub solar_pos_comp: Vec<glam::Vec2>,
-    //pub solar_system_id: Vec<i32>,
-    pub position_comp: Vec<PosComponent>,
-    pub ent_name: Vec<String>,
-    pub ent_type: Vec<ObjectType>,
-
+    pub orbit_comp:     Vec<Option<OrbitalComponent>>,
+    pub draw_comp:      Vec<DrawingComponent>,
+    pub energy_comp:    Vec<Option<EnergyComponent>>,
+    pub position_comp:  Vec<PosComponent>,
+    pub ent_name:       Vec<String>,
+    pub ent_type:       Vec<ObjectType>,
   }
 
 impl Entities {
@@ -69,6 +47,10 @@ impl Entities {
         }
     }
 
+
+//  0---------------------------------------------------0
+//  |                   UIPDATE FUNCTIONS               |
+//  0---------------------------------------------------0
 
     pub fn update(
         self: &mut Self, 
@@ -102,23 +84,6 @@ impl Entities {
             self.inc_orbital_body_pos();
         }
     }
-    
-  
-
-    pub fn draw_objects(
-        &self, 
-        canvas: &mut graphics::Canvas,
-        ctx: &Context,
-        ids: &Vec<EntityIndex>,
-        state: &game_state::GameState,
-    ) {
-        self.draw_tails(canvas, ctx, ids, state);
-        self.draw_sprites(canvas, ids, state);
-   }
-
-
-
-// 0-------------------------MAKE THINGS---------------------------------------0    
 
     //Function will itterate through the active entities in solar system
     //and update position
@@ -132,65 +97,6 @@ impl Entities {
                 self.position_comp[i].set_solar_pos(or + pos_orb_ent );
             }
         }
-    }
-
-    pub fn make_new_sun(
-        self: &mut Self,
-        entities_id: &mut Vec<EntityIndex>,
-        n_sprite: graphics::Image,
-        n_sol_sys_id: i32,
-       
-    ) {
-        self.make_new_orbiting_body(
-            ObjectType::Sun,
-            entities_id,
-            n_sprite,
-            n_sol_sys_id,
-            None
-        );
-    }
-
-    pub fn make_new_planet(
-        self: &mut Self,
-        entities_id: &mut Vec<EntityIndex>,
-        n_sprite: graphics::Image,
-        n_sol_sys_id: i32,
-        n_orbiting_ent_id: usize,
-        n_orb_rad: i32,
-    ) {
-        let orb_comp = orbit::OrbitalComponent::new(
-            n_orb_rad,
-            n_orbiting_ent_id,
-        );
-        self.make_new_orbiting_body(
-            ObjectType::Planet,
-            entities_id,
-            n_sprite,
-            n_sol_sys_id,
-            Some(orb_comp)
-        );
-    }
-
-    pub fn make_new_ship(
-        self: &mut Self,
-        entities_id: &mut Vec<EntityIndex>,
-        n_sprite: graphics::Image,
-        n_sol_sys_id: i32,
-        n_orbiting_ent_id: usize,
-        n_orb_rad: i32,
-    ) {
-        let orb_comp = orbit::OrbitalComponent::new(
-            n_orb_rad,
-            n_orbiting_ent_id,
-        );
-
-        self.make_new_orbiting_body(
-            ObjectType::Ship,
-            entities_id,
-            n_sprite,
-            n_sol_sys_id,
-            Some(orb_comp)
-        );
     }
 
     //PRIVATE FUNCTIONS
@@ -229,6 +135,22 @@ impl Entities {
         }
     }
  
+
+
+//  0---------------------------------------------------0
+//  |                   DRAW FUNCTIONS                  |
+//  0---------------------------------------------------0
+    pub fn draw_objects(
+        &self, 
+        canvas: &mut graphics::Canvas,
+        ctx: &Context,
+        ids: &Vec<EntityIndex>,
+        state: &game_state::GameState,
+    ) {
+        self.draw_tails(canvas, ctx, ids, state);
+        self.draw_sprites(canvas, ids, state);
+   }
+
     fn draw_tails(
         &self, 
         canvas: &mut graphics::Canvas,
@@ -252,8 +174,6 @@ impl Entities {
         );
 
     }
-
-
 
     fn build_tail_mesh(
         &self, 
@@ -304,93 +224,6 @@ impl Entities {
                 .dest(self.position_comp[ent_id].screen_pos())
                 .scale(scale)
         );
-    }
-
-
-    //Function creates a new planet into the ECS system
-    fn make_new_orbiting_body(
-        self: &mut Self,
-        b_type: ObjectType,
-        entities_id: &mut Vec<EntityIndex>,
-        sprite: graphics::Image,
-        solar_system: i32,
-        orbit_comp: Option<orbit::OrbitalComponent>,
-        ) {
-        self.add_new_draw_comp(sprite);
-        self.add_new_energy_comp(b_type);
-        self.ent_type.push(b_type);
-        self.add_new_pos_comp(solar_system, &orbit_comp);
-        self.orbit_comp.push(orbit_comp);
-        self.ent_name.push(self.get_new_name());
-        //Create a new entity ID
-        entities_id.push(entities_id.len());    
-    }
-
-    //Function will check if there is an orbital component, and then add
-    //the position vector to ents
-    fn add_new_pos_comp(
-        self: &mut Self, 
-        solar_system: i32,
-        orb_comp: &Option<OrbitalComponent>,
-    ) {
-        let mut pos = glam::Vec2::new(0.0,0.0);
-        //if there is some orbital component, that means the ent is orbiting
-        //another body. Get that body position and offset it by the radius
-        if let Some(orb) = orb_comp {
-            pos = self.position_comp[orb.orb_ent_id()].solar_pos();
-            pos.y += orb.rad() as f32; 
-        } 
-        self.position_comp.push(PosComponent::new(pos,solar_system));
-    }
-
-    //Function will add to the Vector energy component in the ECS system
-    fn add_new_energy_comp(self: &mut Self, obj_type: ObjectType) {
-        match obj_type {
-            ObjectType::Sun => {
-                self.energy_comp.push(Some(EnergyComponent::new()));
-            } 
-            ObjectType::Planet => {
-                self.energy_comp.push(Some(EnergyComponent::new()));
-            }
-            ObjectType::Moon => {
-                self.energy_comp.push(Some(EnergyComponent::new()));
-            }
-            ObjectType::Ship => {
-                self.energy_comp.push(None);
-            }
-        }
-    }
-
-    fn add_new_draw_comp(self: &mut Self, sprite: graphics::Image) {
-        //STEP 1 DRAWING COMPONENT 
-        let sprite_width = sprite.width().try_into().unwrap();
-        let sprite_height = sprite.height().try_into().unwrap();
-        //Drawing
-        let new_draw_comp = DrawingComponent::new(
-            sprite,
-            (sprite_width,sprite_height),
-            glam::Vec2::new(sprite_width as f32 / 2.0, sprite_height as f32 / 2.0),
-        );
-        self.draw_comp.push(new_draw_comp);
-
-    }
-
-    fn get_new_name(&self) -> String {
-        let mut rng = rand::thread_rng();
-        let names = vec![
-            "Lodania Minor",
-            "Paumi",
-            "Padikar 230",
-            "Roshar",
-            "Dune",
-            "Arrakis",
-            "Helios",
-            "Dimos",
-            "Perseus",
-            "Ares",
-        ];
-        let i = rng.gen_range(0..names.len());
-        return names[i].to_string();
     }
 }
 
