@@ -1,6 +1,6 @@
 use crate::main_state::game_state;
 
-use super::tail::Tail;
+use super::{tail::Tail, orbit::OrbitalComponent};
 
 
 pub struct PosComponent {
@@ -24,17 +24,17 @@ impl PosComponent {
 
         }
     }
- 
+
     pub fn update(
         self: &mut Self,
         state: &game_state::GameState,
         sprite_offset: glam::Vec2,
         orb_center_pos: Option<glam::Vec2>,
         orbit_id: usize,
-        new_pos: Option<glam::Vec2>,
+        new_pos: glam::Vec2,
     ) {
+        self.set_solar_pos(new_pos);
         self.update_tails(orb_center_pos,orbit_id);        
-
         self.set_screen_pos(
             self.get_orbit_final_pos(
                 state.scale(), 
@@ -42,10 +42,8 @@ impl PosComponent {
                 sprite_offset,
             )
         );
-        if let Some(p) = new_pos {
-            self.set_solar_pos(p);
-        }
     }
+
     fn update_tails(self: &mut Self, orb_center_pos: Option<glam::Vec2>, orbit_id: usize) {
         //Add to tails if we should
         if let Some(pos) = orb_center_pos {

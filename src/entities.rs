@@ -59,7 +59,6 @@ impl Entities {
         events: &mut event_system::EventSystem,
     ) {
         self.update_ent_events(events, ids);        
-
         if state.if_state_is(game_state::StateType::Running) {
             self.update_positions(ids, state);
         }
@@ -75,19 +74,15 @@ impl Entities {
             //get orbiting component 
             let orb_pos: Option<glam::Vec2>;
             let mut orb_ent_id: usize = 0;
-            let new_pos: Option<glam::Vec2>; 
+            let mut new_pos: glam::Vec2 = glam::Vec2::new(0.0,0.0); 
             match self.orbit_comp[i] {
                 Some(ref mut orb) => {
                     let temp_orb_pos = self.position_comp[orb.orb_ent_id()].solar_pos();
                     orb_ent_id = orb.orb_ent_id();
-                    new_pos =  Some(orb.pos_adj() + temp_orb_pos);
+                    new_pos =  orb.pos_adj() + temp_orb_pos;
                     orb_pos = Some(temp_orb_pos);
-
                 }
-                None => {
-                    orb_pos = None;
-                    new_pos = None;
-                }
+                None => {orb_pos = None;}
             }
             self.position_comp[i].update(
                 state, 
@@ -97,7 +92,6 @@ impl Entities {
                 new_pos,
             );
         }
-
     }
 
     fn update_ent_events(
