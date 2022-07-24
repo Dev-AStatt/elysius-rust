@@ -1,10 +1,8 @@
-/*
-*
-* This file is to hold all the functions associated with
-* The entity component system building functions, make make and 
-* other support functions to add items into the ECS systesm. 
-*
-*/
+// *
+// * This file is to hold all the functions associated with
+// * The entity component system building functions, make make and 
+// * other support functions to add items into the ECS systesm. 
+// *
 use ggez::graphics;
 use rand::Rng;
 use crate::entities::{
@@ -12,10 +10,12 @@ use crate::entities::{
     EntityIndex, 
     ObjectType,
 };
-use super::orbit::OrbitalComponent;
-use super::draw_comp::DrawingComponent;
-use super::pos_comp::PosComponent;
-use super::energy_comp::EnergyComponent;
+use super::{
+    draw_comp::DrawingComponent,
+    pos_comp::PosComponent, 
+    energy_comp::EnergyComponent, 
+    orbit::OrbitalComponent
+};
 
 impl Entities {
 
