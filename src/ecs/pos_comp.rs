@@ -31,6 +31,7 @@ impl PosComponent {
         sprite_offset: glam::Vec2,
         orb_center_pos: Option<glam::Vec2>,
         orbit_id: usize,
+        new_pos: Option<glam::Vec2>,
     ) {
         self.update_tails(orb_center_pos,orbit_id);        
 
@@ -40,7 +41,10 @@ impl PosComponent {
                 state.player_screen_offset_pos(), 
                 sprite_offset,
             )
-        ) 
+        );
+        if let Some(p) = new_pos {
+            self.set_solar_pos(p);
+        }
     }
     fn update_tails(self: &mut Self, orb_center_pos: Option<glam::Vec2>, orbit_id: usize) {
         //Add to tails if we should

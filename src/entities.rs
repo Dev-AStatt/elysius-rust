@@ -58,48 +58,48 @@ impl Entities {
         state: &game_state::GameState,
         events: &mut event_system::EventSystem,
     ) {
+        self.update_ent_events(events, ids);        
+
+        if state.if_state_is(game_state::StateType::Running) {
+            self.update_positions(ids, state);
+        }
+    }
+
+    fn update_positions(
+        self: &mut Self, 
+        ids: &Vec<EntityIndex>,
+        state: &game_state::GameState,
+    ) {
         //For everything in vect
         for i in 0..ids.len() {
             //get orbiting component 
             let orb_pos: Option<glam::Vec2>;
             let mut orb_ent_id: usize = 0;
+            let new_pos: Option<glam::Vec2>; 
             match self.orbit_comp[i] {
-                Some(ref orb) => {
-                    orb_pos = Some(self.position_comp[orb.orb_ent_id()].solar_pos());
+                Some(ref mut orb) => {
+                    let temp_orb_pos = self.position_comp[orb.orb_ent_id()].solar_pos();
                     orb_ent_id = orb.orb_ent_id();
+                    new_pos =  Some(orb.pos_adj() + temp_orb_pos);
+                    orb_pos = Some(temp_orb_pos);
+
                 }
-                None => {orb_pos = None}
+                None => {
+                    orb_pos = None;
+                    new_pos = None;
+                }
             }
             self.position_comp[i].update(
                 state, 
                 self.draw_comp[i].sprite_offset(),
                 orb_pos,
                 orb_ent_id,
+                new_pos,
             );
         }
-        //handle Events
-        self.update_ent_events(events, ids);        
 
-        if state.if_state_is(game_state::StateType::Running) {
-            self.inc_orbital_body_pos();
-        }
     }
 
-    //Function will itterate through the active entities in solar system
-    //and update position
-    fn inc_orbital_body_pos(
-        self: &mut Self,
-    ) {
-        for i in 0..self.position_comp.len() {
-            if let Some(ref mut orb) = self.orbit_comp[i] {
-                let pos_orb_ent = self.position_comp[orb.orb_ent_id()].solar_pos();
-                let or = orb.pos_adj();
-                self.position_comp[i].set_solar_pos(or + pos_orb_ent );
-            }
-        }
-    }
-
-    //PRIVATE FUNCTIONS
     fn update_ent_events(
         self: &mut Self, 
         events: &mut event_system::EventSystem,
