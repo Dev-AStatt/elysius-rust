@@ -1,6 +1,6 @@
 use crate::main_state::game_state;
 
-use super::{tail::Tail, orbit::OrbitalComponent};
+use super::{tail::Tail};
 
 
 pub struct PosComponent {

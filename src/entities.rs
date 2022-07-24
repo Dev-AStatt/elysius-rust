@@ -70,7 +70,7 @@ impl Entities {
         state: &game_state::GameState,
     ) {
         //For everything in vect
-        for i in 0..ids.len() {
+        (0..ids.len()).for_each(|i| {
             //get orbiting component 
             let orb_pos: Option<glam::Vec2>;
             let mut orb_ent_id: usize = 0;
@@ -91,7 +91,7 @@ impl Entities {
                 orb_ent_id,
                 new_pos,
             );
-        }
+        });
     }
 
     fn update_ent_events(
