@@ -4,15 +4,15 @@ use ggez::{
     Context,
 };
 
-use crate::{
-    main_state::{game_state, event_system}
-};
+use crate::main_state::{game_state, event_system};
 
-use super::ecs::orbit::OrbitalComponent;
-use super::ecs::draw_comp::DrawingComponent;
-use super::ecs::pos_comp::PosComponent;
-use super::ecs::tail::Tail;
-use super::ecs::energy_comp::EnergyComponent;
+use super::ecs::{
+    orbit::OrbitalComponent,
+    draw_comp::DrawingComponent,
+    pos_comp::PosComponent,
+    tail::Tail,
+    energy_comp::EnergyComponent,
+};
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum ObjectType {
@@ -57,6 +57,7 @@ impl Entities {
         ids: &Vec<EntityIndex>,
         state: &game_state::GameState,
         events: &mut event_system::EventSystem,
+        
     ) {
         self.update_ent_events(events, ids);        
         if state.if_state_is(game_state::StateType::Running) {
@@ -99,13 +100,10 @@ impl Entities {
         events: &mut event_system::EventSystem,
         ids: &Vec<EntityIndex>,
     ) {
-        let new_events: Vec<event_system::Event> = events.get_events(event_system::EventType::InitShipTransfer);
-        if new_events.len() == 0 {
-            for i in 0..ids.len() {
-                self.position_comp[i].set_in_transfer(false);
-            } 
-        }
-         //for each event that is initiate ship transfer 
+        //Get events
+        let new_events: Vec<event_system::Event> = 
+            events.get_events(event_system::EventType::InitShipTransfer);
+        //for each event that is initiate ship transfer 
         new_events.into_iter().for_each(|e| {
             if let Some(ent_id) = e.generated_by() { //get ent_id from event
                 //Do the event
@@ -118,7 +116,12 @@ impl Entities {
         });
    }
 
-    fn transfer_ship(self: &mut Self, ent_id: usize, dest_id: usize, events: &mut event_system::EventSystem) {
+    fn transfer_ship(
+        self: &mut Self, 
+        ent_id: usize, 
+        dest_id: usize, 
+        events: &mut event_system::EventSystem
+    ) {
         if ent_id == dest_id {return;}    //if dest is ent then cancel
         //need to handle the Option on ship OrbitalComponent
         if let Some(orb_comp) = &mut self.orbit_comp[ent_id] {

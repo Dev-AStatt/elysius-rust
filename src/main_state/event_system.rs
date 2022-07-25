@@ -3,6 +3,7 @@
 pub enum EventType {
     InitShipTransfer,     
     ShipTransferComplete,
+    ShipInTransfer,
     MoveShip,
     TestEvent,
     LeftMouseDown,
